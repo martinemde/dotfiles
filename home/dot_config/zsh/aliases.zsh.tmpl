@@ -31,6 +31,11 @@ alias tree='eza --icons --tree'
 alias vi='nvim'
 alias vim='nvim'
 
+# AI-assisted git/jj commands
+alias gca='EDITOR=git-commit-ai git commit'
+alias gcaa='EDITOR=git-commit-ai git commit -a'
+alias jca='EDITOR=git-commit-ai jj commit'
+
 # 1Password-authenticated commands
 {{- if and (lookPath "op") (lookPath "codex") }}
 alias codex='OPENAI_API_KEY=$(op read "op://Personal/openai-codex/credential") command codex'

@@ -64,6 +64,27 @@ GIT_USER_NAME="CI User" GIT_USER_EMAIL="ci@example.com" ./install.sh
 
 For a complete list of options, run `./install.sh --help`.
 
+## Key Features
+
+### AI-Powered Tools
+
+- **[git-commit-ai](docs/git-commit-ai.md)**: AI-powered commit message generator for git and jj using Claude Code CLI. Automatically generates well-formatted, contextual commit messages following Conventional Commits format.
+
+### Shell Utilities
+
+See the `home/dot_local/bin/` directory for additional utilities including project management scripts, tmux helpers, and more.
+
+## Documentation
+
+Additional documentation can be found in the [docs/](docs/) directory:
+
+- [git-commit-ai](docs/git-commit-ai.md) - AI-powered commit message generation
+- [neovim](docs/neovim.md) - Neovim configuration
+- [zsh](docs/zsh.md) - Zsh configuration
+- [tmux](docs/tmux.md) - Tmux configuration
+- [bat](docs/bat.md) - Bat configuration
+- [renovate](docs/renovate.md) - Renovate configuration
+
 ## License
 
 This project is open source under the [ISC License](LICENSE.md), credited to Ivy Evans.

@@ -1,0 +1,313 @@
+#!/usr/bin/env bash
+
+# git-commit-ai — AI-powered commit message editor for git and jj
+#
+# This script acts as an EDITOR for git/jj commits, using Claude Code CLI
+# to generate commit messages based on the staged changes.
+#
+# Usage:
+#   # Temporary override
+#   EDITOR=git-commit-ai git commit
+#   EDITOR=git-commit-ai jj commit
+#
+#   # Or configure as default editor
+#   git config core.editor git-commit-ai
+#   jj config set --user ui.editor git-commit-ai
+#
+# Configuration:
+#   # Customize the prompt via git config
+#   git config ai.commitPrompt "Generate a concise commit message following..."
+#
+#   # Or via jj config
+#   jj config set --user ai.commitPrompt "Generate a concise commit message..."
+#
+#   # Use LLM-optimized git config (no colors, no pager)
+#   git config ai.useLlmConfig true
+#
+# Environment variables:
+#   AI_COMMIT_DEBUG         Enable debug output
+#   AI_COMMIT_PROMPT        Override config prompt
+#   AI_COMMIT_MAX_DIFF      Max diff lines to include (default: 500)
+#   AI_COMMIT_SHOW_PROMPT   Show the prompt being used and exit
+
+set -o errexit -o nounset -o pipefail
+
+# Configuration
+readonly COMMIT_MSG_FILE="${1:-}"
+readonly DEBUG="${AI_COMMIT_DEBUG:-0}"
+readonly MAX_DIFF_LINES="${AI_COMMIT_MAX_DIFF:-500}"
+readonly SHOW_PROMPT="${AI_COMMIT_SHOW_PROMPT:-0}"
+
+# Default prompt template
+readonly DEFAULT_PROMPT='Generate a commit message following these guidelines:
+
+1. Use Conventional Commits format: <type>: <subject>
+2. Types: feat, fix, docs, style, refactor, perf, test, chore
+3. Subject: imperative mood, no period, max 50 chars
+4. Body (optional): explain what and why (not how), wrap at 72 chars
+5. Footer (optional): breaking changes, issue references
+
+Analyze the diff and recent commits to understand context and style.
+Be concise but descriptive. Do not include comments.
+
+Generate ONLY the commit message, nothing else.'
+
+# Debug logging
+debug() {
+    if [[ "$DEBUG" == "1" ]]; then
+        echo "[DEBUG] $*" >&2
+    fi
+}
+
+# Error handling
+error() {
+    echo "Error: $*" >&2
+    exit 1
+}
+
+# Check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Detect VCS type (git or jj)
+detect_vcs() {
+    if [[ -d .git ]] || git rev-parse --git-dir >/dev/null 2>&1; then
+        echo "git"
+    elif [[ -d .jj ]] || jj root >/dev/null 2>&1; then
+        echo "jj"
+    else
+        error "Not in a git or jj repository"
+    fi
+}
+
+# Get config value based on VCS
+get_config() {
+    local key="$1"
+    local vcs="$2"
+    local value=""
+
+    case "$vcs" in
+        git)
+            # Try ai.* namespace first, then commit.*
+            value=$(git config --get "ai.$key" 2>/dev/null || true)
+            if [[ -z "$value" ]]; then
+                value=$(git config --get "commit.ai${key^}" 2>/dev/null || true)
+            fi
+            ;;
+        jj)
+            # jj config uses TOML format
+            value=$(jj config get "ai.$key" 2>/dev/null || true)
+            ;;
+    esac
+
+    echo "$value"
+}
+
+# Get the diff based on VCS
+get_diff() {
+    local vcs="$1"
+    local use_llm_config="$2"
+    local diff=""
+
+    case "$vcs" in
+        git)
+            if [[ "$use_llm_config" == "true" ]]; then
+                # Use LLM-friendly config (no colors, no pager)
+                diff=$(GIT_CONFIG_GLOBAL="$HOME/.config/git/config-llm" git diff --staged 2>/dev/null || true)
+            else
+                diff=$(git -c color.ui=false diff --staged 2>/dev/null || true)
+            fi
+
+            # If no staged changes, get all changes
+            if [[ -z "$diff" ]]; then
+                debug "No staged changes, getting all changes"
+                if [[ "$use_llm_config" == "true" ]]; then
+                    diff=$(GIT_CONFIG_GLOBAL="$HOME/.config/git/config-llm" git diff 2>/dev/null || true)
+                else
+                    diff=$(git -c color.ui=false diff 2>/dev/null || true)
+                fi
+            fi
+            ;;
+        jj)
+            diff=$(jj diff --color=never 2>/dev/null || true)
+            ;;
+    esac
+
+    # Truncate if too long
+    if [[ $(echo "$diff" | wc -l) -gt "$MAX_DIFF_LINES" ]]; then
+        debug "Truncating diff from $(echo "$diff" | wc -l) to $MAX_DIFF_LINES lines"
+        diff=$(echo "$diff" | head -n "$MAX_DIFF_LINES")
+        diff="$diff
+
+... (diff truncated to $MAX_DIFF_LINES lines)"
+    fi
+
+    echo "$diff"
+}
+
+# Get recent commit messages for context
+get_recent_commits() {
+    local vcs="$1"
+    local commits=""
+
+    case "$vcs" in
+        git)
+            commits=$(git -c color.ui=false log --oneline -10 2>/dev/null || true)
+            ;;
+        jj)
+            commits=$(jj log --color=never -r 'trunk()..@ | trunk()' --no-graph -T 'change_id.short() ++ " " ++ description_title ++ "\n"' 2>/dev/null | head -10 || true)
+            ;;
+    esac
+
+    echo "$commits"
+}
+
+# Build the prompt for Claude
+build_prompt() {
+    local vcs="$1"
+    local diff="$2"
+    local recent_commits="$3"
+    local custom_prompt="$4"
+
+    local prompt="${custom_prompt:-$DEFAULT_PROMPT}"
+
+    local full_prompt="$prompt
+
+## Context
+
+Recent commits:
+\`\`\`
+$recent_commits
+\`\`\`
+
+## Changes to commit
+
+\`\`\`diff
+$diff
+\`\`\`
+
+Generate the commit message now:"
+
+    echo "$full_prompt"
+}
+
+# Call Claude Code CLI to generate commit message
+generate_commit_message() {
+    local prompt="$1"
+
+    if ! command_exists claude; then
+        error "Claude Code CLI not found. Please install it first."
+    fi
+
+    debug "Calling Claude Code CLI..."
+
+    # Use a temporary file for the prompt
+    local prompt_file
+    prompt_file=$(mktemp)
+    echo "$prompt" > "$prompt_file"
+
+    # Call Claude in non-interactive mode
+    local response
+    if response=$(claude -c "$(cat "$prompt_file")" 2>&1); then
+        debug "Claude response received"
+        rm -f "$prompt_file"
+        echo "$response"
+    else
+        rm -f "$prompt_file"
+        error "Failed to get response from Claude: $response"
+    fi
+}
+
+# Clean up the generated commit message
+clean_commit_message() {
+    local message="$1"
+
+    # Remove markdown code fences if present
+    message=$(echo "$message" | sed 's/^```.*$//' | sed '/^$/d')
+
+    # Remove any "Here's the commit message:" type preamble
+    message=$(echo "$message" | sed '/^Here/d' | sed '/^The commit/d')
+
+    # Trim leading/trailing whitespace
+    message=$(echo "$message" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+    echo "$message"
+}
+
+# Main function
+main() {
+    debug "Starting git-commit-ai"
+    debug "Commit message file: $COMMIT_MSG_FILE"
+
+    # Validate arguments
+    if [[ -z "$COMMIT_MSG_FILE" ]]; then
+        error "Usage: $0 <commit-message-file>"
+    fi
+
+    if [[ ! -f "$COMMIT_MSG_FILE" ]]; then
+        error "Commit message file not found: $COMMIT_MSG_FILE"
+    fi
+
+    # Detect VCS
+    local vcs
+    vcs=$(detect_vcs)
+    debug "Detected VCS: $vcs"
+
+    # Get configuration
+    local custom_prompt="${AI_COMMIT_PROMPT:-}"
+    if [[ -z "$custom_prompt" ]]; then
+        custom_prompt=$(get_config "commitPrompt" "$vcs")
+    fi
+    debug "Custom prompt: ${custom_prompt:-(none)}"
+
+    local use_llm_config
+    use_llm_config=$(get_config "useLlmConfig" "$vcs")
+    use_llm_config="${use_llm_config:-false}"
+    debug "Use LLM config: $use_llm_config"
+
+    # Get diff and context
+    debug "Getting diff..."
+    local diff
+    diff=$(get_diff "$vcs" "$use_llm_config")
+
+    if [[ -z "$diff" ]]; then
+        error "No changes to commit"
+    fi
+
+    debug "Getting recent commits..."
+    local recent_commits
+    recent_commits=$(get_recent_commits "$vcs")
+
+    # Build prompt
+    debug "Building prompt..."
+    local prompt
+    prompt=$(build_prompt "$vcs" "$diff" "$recent_commits" "$custom_prompt")
+
+    # Show prompt if requested
+    if [[ "$SHOW_PROMPT" == "1" ]]; then
+        echo "$prompt"
+        exit 0
+    fi
+
+    # Generate commit message
+    debug "Generating commit message..."
+    local commit_message
+    commit_message=$(generate_commit_message "$prompt")
+
+    # Clean up the message
+    commit_message=$(clean_commit_message "$commit_message")
+
+    if [[ -z "$commit_message" ]]; then
+        error "Failed to generate commit message"
+    fi
+
+    # Write to commit message file
+    debug "Writing commit message to $COMMIT_MSG_FILE"
+    echo "$commit_message" > "$COMMIT_MSG_FILE"
+
+    debug "Done!"
+}
+
+# Run main function
+main "$@"
