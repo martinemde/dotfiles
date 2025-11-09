@@ -79,6 +79,7 @@ See the `home/dot_local/bin/` directory for additional utilities including proje
 Additional documentation can be found in the [docs/](docs/) directory:
 
 - [git-commit-ai](docs/git-commit-ai.md) - AI-powered commit message generation
+- [git-editor-mechanism](docs/git-editor-mechanism.md) - How Git's editor mechanism works
 - [neovim](docs/neovim.md) - Neovim configuration
 - [zsh](docs/zsh.md) - Zsh configuration
 - [tmux](docs/tmux.md) - Tmux configuration

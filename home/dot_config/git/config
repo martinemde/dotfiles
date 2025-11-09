@@ -114,6 +114,14 @@ current = branch --show-current
 # Hotfix workflow
 hotfix = "!git flow hotfix start `date '+%Y%m%d-%H%M'`"
 
+# AI commit message helpers (see docs/git-commit-ai.md)
+ai-commit-enable = "!git config --global include.path '~/.config/git/config-ai-commit' && echo 'AI commit messages enabled'"
+ai-commit-disable = "!git config --global --unset include.path '~/.config/git/config-ai-commit' && echo 'AI commit messages disabled'"
+ai-commit-status = "!if git config --get include.path | grep -q config-ai-commit 2>/dev/null; then echo 'AI commit messages: ENABLED'; else echo 'AI commit messages: DISABLED'; fi"
+cia = "!EDITOR=git-commit-ai git commit"        # Commit with AI
+ciaa = "!EDITOR=git-commit-ai git commit -a"    # Commit all with AI
+cin = "!EDITOR=nvim git commit"                 # Commit normally (no AI)
+
 [branch]
 sort = -committerdate
 
@@ -210,5 +218,7 @@ root = ~/p
 [include]
 path = ~/.config/git/config.local
 path = ~/.config/git/delta.gitconfig
+# Optional: Enable AI commit messages by running: git ai-commit-enable
+# path = ~/.config/git/config-ai-commit
 
 # vim: ft=gitconfig

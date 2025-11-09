@@ -26,11 +26,52 @@ Ensure `~/.local/bin` is in your `PATH`:
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
+After installation, chezmoi will apply the git configuration that includes helper aliases. The AI editor is **disabled by default** - you need to explicitly enable it or use the provided aliases.
+
 ## Usage
 
-### One-time usage
+There are three main ways to use `git-commit-ai`:
 
-Use the script as a temporary editor override:
+### Recommended: Use Git Aliases (Opt-in per commit)
+
+The configuration includes convenient git aliases for using AI when you want it:
+
+```bash
+# Commit with AI-generated message
+git cia          # Commit with AI
+git ciaa         # Commit all with AI
+
+# Or use the shell aliases (after applying dotfiles)
+gca              # git commit with AI
+gcaa             # git commit all with AI
+
+# Normal commits still use your regular editor
+git commit       # Uses nvim (or your configured editor)
+git cin          # Explicit: commit normally (no AI)
+```
+
+**This is the recommended approach** - you get AI assistance when you want it, and fast normal commits otherwise.
+
+### Enable AI as Default Editor
+
+Make AI the default for all git commits:
+
+```bash
+# Enable AI editor globally
+git ai-commit-enable
+
+# Check status
+git ai-commit-status
+
+# Disable when needed
+git ai-commit-disable
+```
+
+Once enabled, all `git commit` commands will use AI by default.
+
+### One-time Override
+
+Use the script as a temporary editor override without any configuration:
 
 ```bash
 # For git
@@ -40,29 +81,19 @@ EDITOR=git-commit-ai git commit
 EDITOR=git-commit-ai jj commit
 ```
 
-### Configure as default editor
+## How It Works
 
-Set it as your default editor in git or jj config:
+For a detailed explanation of how git-commit-ai integrates with Git's editor mechanism, see [Git Editor Mechanism Documentation](git-editor-mechanism.md).
 
-```bash
-# For git
-git config --global core.editor git-commit-ai
-
-# For jj
-jj config set --user ui.editor git-commit-ai
-```
-
-### Shell aliases
-
-Add convenient aliases to your shell config:
-
-```bash
-# Zsh/Bash
-alias gca='EDITOR=git-commit-ai git commit'
-alias jca='EDITOR=git-commit-ai jj commit'
-```
+**Quick summary**: The script acts as a Git editor that intercepts the commit message file, generates an AI message based on your changes, writes it to the file, and exits - making Git think you manually wrote the message.
 
 ## Configuration
+
+The dotfiles include pre-configured git settings for AI commit messages:
+
+- `~/.config/git/config` - Main git config with helper aliases
+- `~/.config/git/config-ai-commit` - AI-specific configuration (enabled via toggle)
+- `~/.config/git/config-llm` - LLM-optimized git settings (no colors, no pager)
 
 ### Custom prompts
 
@@ -135,18 +166,6 @@ git config --global ai.commitPrompt "Follow our team conventions:
 - Keep under 72 characters total"
 ```
 
-## How it works
-
-1. Script is invoked as the EDITOR by git/jj with the commit message file path
-2. Detects whether you're using git or jj
-3. Retrieves staged changes (diff) and recent commit history
-4. Reads custom prompt from config if available
-5. Constructs a comprehensive prompt with context
-6. Calls Claude Code CLI to generate the commit message
-7. Cleans up the response (removes markdown artifacts)
-8. Writes the generated message to the commit message file
-9. Returns control to git/jj as if you manually edited the file
-
 ## Default prompt
 
 The default prompt generates messages following Conventional Commits:
@@ -166,7 +185,7 @@ Be concise but descriptive. Do not include comments.
 
 ## Examples
 
-### Basic git workflow
+### Basic git workflow (using aliases)
 
 ```bash
 # Make some changes
@@ -175,10 +194,29 @@ echo "export NEW_VAR=value" >> ~/.zshrc
 # Stage changes
 git add ~/.zshrc
 
-# Commit with AI-generated message
-EDITOR=git-commit-ai git commit
+# Commit with AI-generated message using alias
+git cia
+# or use shell alias: gca
 
 # Result: "feat: add NEW_VAR environment variable"
+```
+
+### Using AI as default editor
+
+```bash
+# Enable AI globally
+git ai-commit-enable
+
+# Now all commits use AI
+git commit
+# Result: AI-generated message
+
+# Check if enabled
+git ai-commit-status
+# Output: "AI commit messages: ENABLED"
+
+# Disable when done
+git ai-commit-disable
 ```
 
 ### JJ workflow
@@ -187,7 +225,10 @@ EDITOR=git-commit-ai git commit
 # Make changes
 nvim config.toml
 
-# Commit with AI-generated message
+# Commit with AI-generated message using shell alias
+jca
+
+# Or explicit
 EDITOR=git-commit-ai jj commit
 
 # Result: "chore: update configuration settings"
@@ -197,7 +238,7 @@ EDITOR=git-commit-ai jj commit
 
 ```bash
 # See what prompt is being sent to Claude
-AI_COMMIT_DEBUG=1 EDITOR=git-commit-ai git commit
+AI_COMMIT_DEBUG=1 git cia
 
 # View the full prompt without committing
 AI_COMMIT_SHOW_PROMPT=1 git-commit-ai .git/COMMIT_EDITMSG

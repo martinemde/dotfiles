@@ -1,0 +1,40 @@
+# Git AI Commit Configuration
+# This file configures git to use git-commit-ai as the editor for commit messages
+#
+# To enable:
+#   git config --global include.path ~/.config/git/config-ai-commit
+#
+# To disable:
+#   git config --global --unset include.path ~/.config/git/config-ai-commit
+#
+# Or use the helper commands:
+#   git ai-commit-enable
+#   git ai-commit-disable
+#   git ai-commit-status
+
+[core]
+# Use git-commit-ai as the editor for commit messages
+editor = git-commit-ai
+
+[ai]
+# Use the LLM-optimized git config for cleaner diffs
+useLlmConfig = true
+
+# Default commit prompt (can be overridden)
+# commitPrompt = "Generate a concise commit message following Conventional Commits format"
+
+# Maximum diff lines to send to Claude (default: 500)
+# maxDiff = 500
+
+[alias]
+# Helper commands to enable/disable AI commit messages
+ai-commit-enable = "!git config --global include.path '~/.config/git/config-ai-commit' && echo 'AI commit messages enabled'"
+ai-commit-disable = "!git config --global --unset include.path '~/.config/git/config-ai-commit' && echo 'AI commit messages disabled'"
+ai-commit-status = "!if git config --get include.path | grep -q config-ai-commit 2>/dev/null; then echo 'AI commit messages: ENABLED'; else echo 'AI commit messages: DISABLED'; fi"
+
+# Commit commands that explicitly use or avoid AI
+cia = "!EDITOR=git-commit-ai git commit"        # Commit with AI
+ciaa = "!EDITOR=git-commit-ai git commit -a"    # Commit all with AI
+cin = "!EDITOR=nvim git commit"                 # Commit normally (no AI)
+
+# vim: ft=gitconfig
