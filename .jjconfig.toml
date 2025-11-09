@@ -1,0 +1,22 @@
+# Repository-specific Jujutsu configuration for dotfiles
+# Configures `jj fix` to automatically format code before committing
+
+[fix.tools.shfmt]
+command = ["shfmt", "-i", "2", "-bn", "-ci", "-sr", "-s"]
+patterns = ["glob:'**/*.sh'", "glob:'**/*.bash'"]
+
+[fix.tools.prettier-toml]
+command = ["bun", "run", "prettier", "--write", "--parser", "toml", "$path"]
+patterns = ["glob:'**/*.toml'"]
+
+[fix.tools.prettier-markdown]
+command = ["bun", "run", "prettier", "--write", "--parser", "markdown", "$path"]
+patterns = ["glob:'**/*.md'"]
+
+[fix.tools.prettier-json]
+command = ["bun", "run", "prettier", "--write", "--parser", "json", "$path"]
+patterns = ["glob:'**/*.json'"]
+
+[fix.tools.stylua]
+command = ["stylua", "-"]
+patterns = ["glob:'**/*.lua'"]

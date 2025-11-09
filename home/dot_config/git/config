@@ -22,22 +22,6 @@ autocrlf = input
 [apply]
 whitespace = fix
 
-[pull]
-rebase = true
-
-[push]
-default = simple
-autoSetupRemote = true
-
-[rebase]
-autoStash = true
-
-[status]
-showUntrackedFiles = all
-
-[log]
-date = relative
-
 [alias]
 # Basic shortcuts
 ec      = config --global -e

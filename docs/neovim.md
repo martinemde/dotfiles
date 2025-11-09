@@ -7,8 +7,13 @@ This dotfiles repository includes a complete Neovim configuration based on [Lazy
 - **Base Framework**: LazyVim - provides sensible defaults and plugin management
 - **Plugin Manager**: lazy.nvim - fast and modern plugin manager
 - **Configuration Location**: `home/dot_config/nvim/`
-- **Colorscheme**: Tokyo Night (with Habamax fallback)
-- **Features**: LSP, treesitter, telescope, which-key, and more out of the box
+- **Colorscheme**: Catppuccin
+- **Picker**: fzf-lua (replaces telescope for faster fuzzy finding)
+- **Features**: LSP, treesitter, completion, which-key, and more out of the box
+
+## Philosophy
+
+This configuration prioritizes **LazyVim defaults** with minimal customization. The goal is to leverage LazyVim's well-tested configuration while adding only essential tweaks. Most functionality comes from LazyVim itself - see the [LazyVim documentation](https://lazyvim.org/) for available features and keybindings.
 
 ## Directory Structure
 
@@ -22,7 +27,12 @@ home/dot_config/nvim/
 │   │   ├── lazy.lua           # Lazy.nvim bootstrap and configuration
 │   │   └── options.lua        # Neovim options and settings
 │   └── plugins/
-│       ├── example.lua        # Example plugin configuration (remove if not needed)
+│       ├── autopairs.lua      # Auto-close brackets, quotes, etc.
+│       ├── catppuccin.lua     # Catppuccin colorscheme with LazyVim integrations
+│       ├── completion.lua     # Completion settings (disabled in markdown)
+│       ├── example.lua        # Example plugin spec (mostly commented out)
+│       ├── fzf.lua            # fzf-lua for faster fuzzy finding
+│       ├── neo-tree.lua       # File explorer customization
 │       └── tmux-navigator.lua # Tmux integration for seamless pane navigation
 ```
 
@@ -37,20 +47,45 @@ home/dot_config/nvim/
 - Telescope fuzzy finding
 - Which-key for discoverable keybindings
 
-### Custom Plugins
+### Custom Plugins & Overrides
+
+#### Catppuccin Colorscheme
+**Plugin**: `catppuccin/nvim`
+**Location**: `lua/plugins/catppuccin.lua`
+
+Catppuccin is configured with comprehensive LazyVim integrations for consistent theming across all plugins (bufferline, telescope, neo-tree, lsp, etc.).
+
+#### fzf-lua Picker
+**Plugin**: `ibhagwan/fzf-lua`
+**Location**: `lua/plugins/fzf.lua`
+
+Replaces the default Telescope picker with fzf-lua for faster fuzzy finding. LazyVim automatically detects and uses this as the picker.
+
+#### Completion Configuration
+**Location**: `lua/plugins/completion.lua`
+
+Disables auto-completion in markdown files for better writing experience. Supports both blink.cmp (LazyVim default) and nvim-cmp.
+
+#### Auto Pairs
+**Location**: `lua/plugins/autopairs.lua`
+
+Automatically closes brackets, quotes, parentheses, etc.
 
 #### Tmux Navigator
-
 **Plugin**: `christoomey/vim-tmux-navigator`
 **Location**: `lua/plugins/tmux-navigator.lua`
 
-Enables seamless navigation between Neovim splits and tmux panes using:
-
+Seamless navigation between Neovim splits and tmux panes:
 - `Ctrl+h` - Move left
 - `Ctrl+j` - Move down
 - `Ctrl+k` - Move up
 - `Ctrl+l` - Move right
 - `Ctrl+\` - Move to previous pane/split
+
+#### Neo-tree File Explorer
+**Location**: `lua/plugins/neo-tree.lua`
+
+Customizations for LazyVim's file explorer (if any specific overrides are configured).
 
 ## Configuration Files
 

@@ -2,4 +2,5 @@
 # Development tools for shell scripting and testing
 
 [tools]
+"cargo:stylua" = "0.20.0"
 shfmt = "v3.12.0"
