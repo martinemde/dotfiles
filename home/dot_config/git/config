@@ -140,9 +140,6 @@ added = green
 changed = yellow
 untracked = cyan
 
-[interactive]
-diffFilter = delta --color-only
-
 [merge]
 tool = vimdiff
 summary = true
