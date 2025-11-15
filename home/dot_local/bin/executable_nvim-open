@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# nvim-open - Open files in existing nvim instance or start new one
+#
+# Handles file:// URIs and regular paths with optional line numbers
+# Supports formats:
+#   - file:///path/to/file
+#   - file:///path/to/file:123
+#   - /path/to/file
+#   - /path/to/file:123
+#   - path/to/file:123
+
+set -o errexit -o nounset -o pipefail
+
+# Parse input - handle file:// URIs and line numbers
+parse_file_uri() {
+  local input="$1"
+  local file=""
+  local line=""
+
+  # Remove file:// prefix if present
+  input="${input#file://}"
+
+  # Check if there's a line number (format: path:123)
+  if [[ "$input" =~ ^(.+):([0-9]+)$ ]]; then
+    file="${BASH_REMATCH[1]}"
+    line="${BASH_REMATCH[2]}"
+  else
+    file="$input"
+  fi
+
+  # Make path absolute if it isn't already
+  if [[ ! "$file" =~ ^/ ]]; then
+    file="$(pwd)/$file"
+  fi
+
+  echo "$file"
+  echo "$line"
+}
+
+# Find or start nvim server
+get_nvim_server() {
+  local server_addr="/tmp/nvimsocket"
+
+  # Check if server is running
+  if [[ -S "$server_addr" ]] && nvim --server "$server_addr" --remote-expr "1" &>/dev/null; then
+    echo "$server_addr"
+    return 0
+  fi
+
+  # Try to find a running nvim instance
+  if [[ -n "${NVIM:-}" ]]; then
+    # We're inside a nvim terminal
+    echo "$NVIM"
+    return 0
+  fi
+
+  # No server found, caller should start one
+  return 1
+}
+
+main() {
+  if [[ $# -eq 0 ]]; then
+    echo "Usage: nvim-open <file|file://uri> [+line]" >&2
+    exit 1
+  fi
+
+  local input="$1"
+  local file line server
+
+  # Parse the file and line number
+  read -r file < <(parse_file_uri "$input" | head -n1)
+  read -r line < <(parse_file_uri "$input" | tail -n1)
+
+  # Check if file exists
+  if [[ ! -e "$file" ]]; then
+    echo "Error: File not found: $file" >&2
+    exit 1
+  fi
+
+  # Try to find existing server
+  if server=$(get_nvim_server); then
+    # Open in existing instance
+    if [[ -n "$line" ]]; then
+      nvim --server "$server" --remote-send "<Esc>:edit +${line} ${file}<CR>"
+    else
+      nvim --server "$server" --remote "$file"
+    fi
+  else
+    # Start new nvim instance
+    if [[ -n "$line" ]]; then
+      nvim "+${line}" "$file"
+    else
+      nvim "$file"
+    fi
+  fi
+}
+
+main "$@"

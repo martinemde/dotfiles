@@ -72,9 +72,31 @@ require("config.lazy")
 ### lua/config/ Files
 
 - **keymaps.lua**: Add custom keybindings here
-- **options.lua**: Override Neovim options
+- **options.lua**: Override Neovim options and server configuration
 - **autocmds.lua**: Custom autocommands
 - All files are automatically loaded by LazyVim
+
+#### Remote Server for Hyperlinks
+
+**Location**: `lua/config/options.lua:14-22`
+
+Neovim automatically starts a server at `/tmp/nvimsocket` to enable opening files from terminal hyperlinks. This allows:
+
+- Clicking OSC 8 hyperlinks in the terminal to open files in existing nvim instance
+- Using the `nvim-open` script to open files with line numbers
+- Integration with tools that emit file:// URIs
+
+**How it works**:
+
+1. First nvim instance creates server socket at `/tmp/nvimsocket`
+2. Terminal hyperlinks use `nvim-open` script to connect to server
+3. Files open in existing instance instead of spawning new nvim
+
+**Why this approach**:
+
+- Reduces overhead of starting new nvim instances
+- Maintains single editing session for better workflow
+- Integrates with OSC 8 hyperlinks from modern tools (delta, custom wrappers)
 
 ### lua/plugins/ Files
 

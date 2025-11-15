@@ -1,0 +1,34 @@
+# Ghostty Hyperlink Configuration for File Opening
+#
+# NOTE: The 'link' configuration option is not yet implemented in ghostty.
+# This configuration is prepared for when the feature becomes available.
+#
+# Current status: https://github.com/ghostty-org/ghostty/issues/1972
+#
+# When implemented, this will make file paths clickable and open them
+# in the existing nvim instance via nvim-open script.
+
+# Enable URL detection (already works)
+link-url = true
+
+# TODO: Uncomment when ghostty implements the 'link' configuration option
+# File paths with optional line numbers: /path/to/file or /path/to/file:123
+# link = regex:^(/[^:]+)(:\d+)?$,action:exec:~/.local/bin/nvim-open
+#
+# File URIs: file:///path/to/file or file:///path/to/file:123
+# link = regex:^file://(/[^:]+)(:\d+)?$,action:exec:~/.local/bin/nvim-open
+#
+# Relative paths from common tools (ripgrep, grep output): path/to/file:line:
+# link = regex:^([a-zA-Z0-9_\-\.\/]+):(\d+):,action:exec:~/.local/bin/nvim-open
+
+# For now, use OSC 8 hyperlinks which ARE supported
+# Tools that emit OSC 8 hyperlinks will work immediately:
+# - git delta (already configured in home/dot_config/git/delta.gitconfig)
+# - ls --hyperlink=always (use hls wrapper from osc8-hyperlinks.sh)
+# - Custom functions: hgrep, hrg, flink (from osc8-hyperlinks.sh)
+
+# Link preview settings
+# Only show previews for OSC 8 hyperlinks (where text can differ from URL)
+link-previews = osc8
+
+# vim: ft=toml

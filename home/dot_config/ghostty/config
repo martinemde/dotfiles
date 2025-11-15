@@ -55,4 +55,7 @@ unfocused-split-opacity = 0.85
 # load keybinds
 config-file = config-keybind
 
+# load hyperlink configuration
+config-file = config-hyperlinks
+
 # vim: ft=toml

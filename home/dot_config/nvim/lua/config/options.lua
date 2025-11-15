@@ -10,3 +10,13 @@ vim.opt.listchars = {
   trail = "⋅",
   nbsp = "⋅",
 }
+
+-- Start server for remote file opening via hyperlinks
+-- This allows terminal hyperlinks to open files in existing nvim instance
+if vim.fn.has("nvim") == 1 and vim.fn.serverstart then
+  local server_addr = "/tmp/nvimsocket"
+  -- Only start server if not already running and not in nested nvim
+  if vim.fn.serverlist() == {} and not vim.env.NVIM then
+    vim.fn.serverstart(server_addr)
+  end
+end

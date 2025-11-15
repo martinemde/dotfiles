@@ -115,6 +115,11 @@ setopt HIST_VERIFY
 source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
 
 # ----------------------------------------------------------------------------
+# OSC 8 Hyperlinks Support
+# ----------------------------------------------------------------------------
+source "$XDG_CONFIG_HOME/shell/osc8-hyperlinks.sh"
+
+# ----------------------------------------------------------------------------
 # Zsh Syntax Highlighting (MUST BE LOADED LAST)
 # ----------------------------------------------------------------------------
 # Skip syntax highlighting if in LLM agent mode
