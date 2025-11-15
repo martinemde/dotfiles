@@ -19,25 +19,6 @@ whitespace = trailing-space,space-before-tab
 editor = "nvim -f"
 autocrlf = input
 
-[apply]
-whitespace = fix
-
-[pull]
-rebase = true
-
-[push]
-default = simple
-autoSetupRemote = true
-
-[rebase]
-autoStash = true
-
-[status]
-showUntrackedFiles = all
-
-[log]
-date = relative
-
 [alias]
 # Basic shortcuts
 ec      = config --global -e
@@ -139,6 +120,9 @@ new = green
 added = green
 changed = yellow
 untracked = cyan
+
+[apply]
+whitespace = fix
 
 [merge]
 tool = vimdiff
