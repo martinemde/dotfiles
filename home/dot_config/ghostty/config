@@ -21,6 +21,25 @@ mouse-hide-while-typing = true
 window-save-state = always
 quit-after-last-window-closed-delay = 3y 14w 15h 92m 65s 358ms 979µs 323ns
 
+# macos-icon = official
+# macos-icon = blueprint
+# macos-icon = chalkboard
+# macos-icon = microchip
+# macos-icon = glass
+# macos-icon = holographic
+# macos-icon = paper
+# macos-icon = retro
+# macos-icon = xray
+macos-icon = custom-style
+
+# macos-icon-frame = beige
+macos-icon-frame = plastic
+# macos-icon-frame = chrome
+# macos-icon-frame = aluminum
+
+macos-icon-ghost-color = "#585b70"
+macos-icon-screen-color = "#181824"
+
 # Cursor
 cursor-invert-fg-bg = true
 cursor-style-blink = false
