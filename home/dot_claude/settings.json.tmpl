@@ -15,6 +15,15 @@
     "command": "~/.local/bin/claude_statusline"
   },
   "hooks": {
-    "UserPromptSubmit": "jj || true"
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jj || true"
+          }
+        ]
+      }
+    ]
   }
 }
