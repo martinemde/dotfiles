@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# ghostty config hash: {{ include "dot_config/ghostty/config" | sha256sum }}
+# ghostty keybind hash: {{ include "dot_config/ghostty/config-keybind" | sha256sum }}
+
+[ -n "${DEBUG:-}" ] && set -o xtrace
+set -o errexit
+set -o nounset
+
+# Only run if ghostty is available
+if ! command -v ghostty >/dev/null 2>&1; then
+    exit 0
+fi
+
+# Validate source files before they're applied
+# Workaround: ghostty +validate-config --config-file doesn't work (exits 1 silently)
+# Instead, override XDG_CONFIG_HOME to point to source directory
+XDG_CONFIG_HOME="{{ .chezmoi.sourceDir }}/dot_config" \
+  ghostty +validate-config
+
