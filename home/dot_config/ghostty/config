@@ -46,8 +46,8 @@ cursor-style-blink = false
 
 # Theme
 # Having both keeps flashing light mode color on new tabs
-# theme = dark:Catppuccin Mocha,light:Catppuccin Latte
-theme = Catppuccin Mocha
+theme = dark:Catppuccin Mocha,light:Catppuccin Latte
+# theme = Catppuccin Mocha
 split-divider-color = "#585b70"
 unfocused-split-fill = "#181824"
 unfocused-split-opacity = 0.85
