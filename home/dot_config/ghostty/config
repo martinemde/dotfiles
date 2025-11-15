@@ -18,6 +18,7 @@ shell-integration-features = cursor,sudo,title
 
 # OS
 mouse-hide-while-typing = true
+window-save-state = always
 
 # Cursor
 cursor-invert-fg-bg = true
