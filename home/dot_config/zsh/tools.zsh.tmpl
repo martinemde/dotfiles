@@ -26,14 +26,6 @@ znap eval starship 'starship init zsh'
 znap eval zoxide 'zoxide init zsh'
 {{- end }}
 
-# trufflehog - secrets scanner (daily background scan)
-{{- if lookPath "trufflehog" }}
-# Load and run daily scan function
-if [ -f "$XDG_CONFIG_HOME/zsh/functions/trufflehog-daily-scan" ]; then
-    source "$XDG_CONFIG_HOME/zsh/functions/trufflehog-daily-scan"
-fi
-{{- end }}
-
 if [ -f "$XDG_CONFIG_HOME/op/plugins.sh" ]; then
   source "$XDG_CONFIG_HOME/op/plugins.sh"
 fi
