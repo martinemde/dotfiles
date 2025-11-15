@@ -19,6 +19,7 @@ shell-integration-features = cursor,sudo,title
 # OS
 mouse-hide-while-typing = true
 window-save-state = always
+quit-after-last-window-closed-delay = 3y 14w 15h 92m 65s 358ms 979µs 323ns
 
 # Cursor
 cursor-invert-fg-bg = true
