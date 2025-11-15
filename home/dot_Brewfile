@@ -101,6 +101,7 @@ cask "ghostty" # terminal emulator
 cask "keymapp" # key mapper
 cask "loopback" # audio router
 cask "meld" # diff tool
+cask "maccy" # clipboard
 cask "ngrok" # tunneling tool
 cask "obsidian" # notetaker
 cask "slack" # messaging
