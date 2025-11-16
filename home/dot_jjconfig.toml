@@ -1,0 +1,31 @@
+# Jujutsu configuration
+# See: https://jj-vcs.github.io/jj/latest/config/
+
+# jj fix configuration - automatically format files
+# Tools read from stdin and write to stdout
+[fix.tools.prettier]
+command = ["bun", "prettier", "--stdin-filepath=$path"]
+patterns = [
+  # JavaScript/TypeScript
+  "glob:'**/*.js'",
+  "glob:'**/*.jsx'",
+  "glob:'**/*.ts'",
+  "glob:'**/*.tsx'",
+  "glob:'**/*.mjs'",
+  "glob:'**/*.cjs'",
+  # JSON
+  "glob:'**/*.json'",
+  "glob:'**/*.jsonc'",
+  # Markdown
+  "glob:'**/*.md'",
+  "glob:'**/*.markdown'",
+  # YAML
+  "glob:'**/*.yml'",
+  "glob:'**/*.yaml'",
+  # TOML (non-Chezmoi files)
+  "glob:'*.toml'",
+  "glob:'*/*.toml'",
+  "glob:'home/**/*.toml'",
+  # Python
+  "glob:'**/*.py'",
+]
