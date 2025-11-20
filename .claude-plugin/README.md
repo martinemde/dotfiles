@@ -69,6 +69,13 @@ Fetch and contextualize GitHub repositories for future reference, generating str
 
 **Keywords**: command, github, repository, documentation
 
+#### tdd
+Guide implementation using Test-Driven Development red-green-refactor cycle. Enforces writing failing tests first, minimal implementation, and continuous refactoring.
+
+**Usage**: `/tdd <feature-description>`
+
+**Keywords**: command, tdd, testing, red-green-refactor, test-driven-development
+
 ## Plugin Structure
 
 Each plugin is organized in its own directory:
@@ -80,7 +87,8 @@ home/dot_claude/
 │   ├── reviewer/
 │   └── shell-wizard/
 ├── commands/
-│   └── gitingest/
+│   ├── gitingest/
+│   └── tdd/
 └── skills/
     ├── skill-creator/
     └── use-jj-not-git/
