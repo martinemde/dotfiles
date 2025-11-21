@@ -28,6 +28,7 @@ brew "fd" # find replacement
 brew "ffmpeg" # media converter
 brew "flac" # audio codec
 brew "flock" # file locking
+brew "flyctl" # fly.io CLI
 brew "fzf" # fuzzy finder
 brew "gh" # GitHub CLI
 brew "ghostscript" # PostScript interpreter
