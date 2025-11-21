@@ -1,0 +1,31 @@
+# Gitleaks configuration for dotfiles repository
+title = ".config gitleaks config"
+
+[extend]
+# useDefault will extend the default gitleaks config built in to the binary
+# the latest version is located at:
+# https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
+useDefault = true
+disableRules = ["sourcegraph-access-token"]
+
+[[allowlists]]
+paths = [
+  '''.bun/install''',
+  '''.cache''',
+  '''.config/colima''',
+  '''.cursor/extensions/''',
+  '''go/pkg''',
+  '''.local''',
+  '''.mitmproxy''',
+  '''.nvm''',
+  '''.rubies/''',
+  '''.rustup/''',
+  '''.vscode/''',
+  '''Applications/''',
+  '''Documents/''',
+  '''Library/''',
+  '''Pictures/''',
+  '''p/''',
+  '''src/''',
+]
+description = "global allow list"
