@@ -15,9 +15,9 @@ defaults write -g KeyRepeat -int 1
 defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
 defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
 
-# Set up bottom-left corner to sleep display
-defaults write com.apple.dock wvous-bl-corner -int 10
-defaults write com.apple.dock wvous-bl-modifier -int 0
+# Set up bottom-right corner to sleep display
+defaults write com.apple.dock wvous-br-corner -int 10
+defaults write com.apple.dock wvous-br-modifier -int 0
 
 # restart on power failure
 systemsetup -setrestartpowerfailure on &>/dev/null
