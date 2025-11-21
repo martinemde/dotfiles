@@ -17,9 +17,7 @@ autoload -Uz compinit
 compinit
 
 # Load dynamic tool completions
-{{- if lookPath "jj" }}
-# jj - version control
 source <(jj util completion zsh)
-{{- end }}
+znap fpath _rv 'rv shell completions zsh'
 
 # vi: ft=zsh

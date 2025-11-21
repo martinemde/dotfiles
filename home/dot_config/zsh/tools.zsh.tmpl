@@ -2,32 +2,12 @@
 # Tool Integrations
 # ============================================================================
 
-# mise - version manager for languages and tools
-{{- if lookPath "mise" }}
 # mise manages its own hooks, run directly (don't cache)
 eval "$(mise activate zsh)"
-{{- end }}
 
-# atuin - magical shell history
-{{- if lookPath "atuin" }}
-# atuin can be cached for faster startup
-znap eval atuin 'atuin init zsh'
-{{- end }}
-
-# starship - cross-shell prompt
-{{- if lookPath "starship" }}
-# starship can be cached for faster startup
-znap eval starship 'starship init zsh'
-{{- end }}
-
-# zoxide - smarter cd command
-{{- if lookPath "zoxide" }}
-# zoxide can be cached for faster startup
-znap eval zoxide 'zoxide init zsh'
-{{- end }}
-
-if [ -f "$XDG_CONFIG_HOME/op/plugins.sh" ]; then
-  source "$XDG_CONFIG_HOME/op/plugins.sh"
-fi
+znap eval atuin 'atuin init zsh' # atuin - magical shell history
+znap eval rv 'rv shell init zsh' # rv - ruby manager
+znap eval starship 'starship init zsh' # starship - cross-shell prompt
+znap eval zoxide 'zoxide init zsh' # zoxide - smarter cd command
 
 # vi: ft=zsh
