@@ -32,13 +32,13 @@ quit-after-last-window-closed-delay = 3y 14w 15h 92m 65s 358ms 979µs 323ns
 # macos-icon = xray
 macos-icon = custom-style
 
-# macos-icon-frame = beige
-macos-icon-frame = plastic
+macos-icon-frame = beige
+# macos-icon-frame = plastic
 # macos-icon-frame = chrome
 # macos-icon-frame = aluminum
 
-macos-icon-ghost-color = "#585b70"
-macos-icon-screen-color = "#181824"
+macos-icon-ghost-color = "#ea76cb"
+macos-icon-screen-color = "#04a5e5"
 
 # Cursor
 cursor-invert-fg-bg = true
