@@ -42,6 +42,11 @@ paginate = "auto"
 show-cryptographic-signatures = true
 diff-editor = ":builtin"
 
+[[--scope]]
+--when.commands = ["status"]
+[--scope.ui]
+paginate = "never"
+
 [aliases]
 # Convenient shorthands.
 fb = ["fuzzy_bookmark"]
