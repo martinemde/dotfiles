@@ -9,6 +9,7 @@ vim.opt.list = true
 vim.opt.listchars = {
   trail = "⋅",
   nbsp = "⋅",
+  tab = "› ",
 }
 
 -- Start server for remote file opening via hyperlinks
