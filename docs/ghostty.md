@@ -90,13 +90,14 @@ nvim-open file:///path/to/file.txt:42
 When ghostty implements the `link` configuration option, uncomment these patterns to make arbitrary file paths clickable:
 
 ```toml
+# File paths: /path/to/file or /path/to/file:123
 link = regex:^(/[^:]+)(:\d+)?$,action:exec:~/.local/bin/nvim-open
 
+# File URIs: file:///path/to/file:123
 link = regex:^file://(/[^:]+)(:\d+)?$,action:exec:~/.local/bin/nvim-open
 
-link = regex:^([a-zA-Z0-9_\-\.\/]+):(\d+):,action:exec:~/.local/bin/nvim-open# File paths: /path/to/file or /path/to/file:123
-# File URIs: file:///path/to/file:123
 # Relative paths from tool output: src/file.rs:42:
+link = regex:^([a-zA-Z0-9_\-\.\/]+):(\d+):,action:exec:~/.local/bin/nvim-open
 ```
 
 **Why not implemented yet**: Automatically detecting file paths via regex is difficult to get right without false positives. Ghostty recommends using OSC 8 hyperlinks instead.
