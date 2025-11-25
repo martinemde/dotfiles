@@ -121,7 +121,4 @@ flink() {
   echo
 }
 
-# Export functions for use in subshells
-export -f _osc8_supported osc8_link file_link flink 2>/dev/null || true
-
 # vim: ft=bash
