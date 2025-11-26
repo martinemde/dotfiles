@@ -105,6 +105,7 @@ cask "loopback" # audio router
 cask "meld" # diff tool
 cask "maccy" # clipboard
 cask "ngrok" # tunneling tool
+cask "notunes" # Override Apple Music
 cask "obsidian" # notetaker
 cask "slack" # messaging
 cask "spotify" # music
