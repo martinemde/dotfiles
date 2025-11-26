@@ -31,11 +31,13 @@ Split Catppuccin Mocha into separate included file for clarity and potential reu
 ## Trade-offs
 
 **Excluded**:
+
 - Quick terminal (no kitty equivalent)
 - Tab overview (fundamentally different model)
 - Ghostty's hyperlink regex patterns (not yet implemented in ghostty anyway; both support OSC 8)
 
 **Kept**:
+
 - All tmux-style keybindings
 - Font configuration with OpenType features
 - Shell integration
