@@ -7,10 +7,11 @@
 # on Ghostty's website, at https://ghostty.org/docs/config.
 
 # Font Configuration
-font-family = MonoLisa Nerd Font
+font-family = MonoLisa Nerd Font SemiBold
 font-size = 10
 font-feature = +calt,+liga,+dlig,+zero,+ss02,+ss10,+ss11,+ss12,+ss13,+ss14,+ss15,+ss16
 font-synthetic-style = false
+# font-thicken = true
 
 # Shell Integration
 shell-integration = zsh
