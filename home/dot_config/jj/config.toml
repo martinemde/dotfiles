@@ -18,7 +18,6 @@ key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBUOchTXDNe34jfmbmvuPuK4Vi8ClJkbmwkKr
 [git]
 abandon-unreachable-commits = true
 colocate = true
-push-new-bookmarks = true
 sign-on-push = true
 subprocess = true
 write-change-id-header = true
@@ -28,6 +27,9 @@ write-change-id-header = true
 hunk-level = "line"
 # When multiple commits make the same change, accept it automatically
 same-change = "accept"
+
+[remotes.origin]
+auto-track-bookmarks = "exact:'main' | exact:'master' | glob:'martinemde/*'"
 
 [ui]
 bookmark-list-sort-keys = ["committer-date-"]
@@ -120,12 +122,7 @@ fi
   "",
 ]
 
-# colocate with git and track origin's branches
-init = ["util", "exec", "--", "bash", "-c", """
-jj git init --colocate
-# only track origin branches, not upstream or others
-jj bookmark track 'glob:*@origin'
-"""]
+init = ["git", "init", "--colocate"]
 
 # track the remote branch and new on top of it
 checkout = ["util", "exec", "--", "bash", "-c", """
@@ -241,6 +238,8 @@ gh pr create --head "$branch" --title "$title" --body "$body" && gh pr merge $br
 "node normal" = { bold = false }
 
 [templates]
+git_push_bookmark = '"martinemde/push-" ++ change_id.short()'
+
 # I like this symbol ◉ for @, but it's hard to see
 log_node = '''
 label("node",
