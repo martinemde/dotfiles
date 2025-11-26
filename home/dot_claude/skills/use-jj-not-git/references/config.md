@@ -1301,7 +1301,7 @@ patterns = ["glob:'**/*.rs'"]
 Then to use the tool in a specific repository, set the `enabled` config:
 
 ```shell
-$ jj config set --repo fix.tools.rustfmt.enabled true
+jj config set --repo fix.tools.rustfmt.enabled true
 ```
 
 ## Commit Signing

@@ -7,54 +7,54 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
-	"base_keymap": "VSCode",
-	"vim_mode": true,
+  "base_keymap": "VSCode",
+  "vim_mode": true,
 
-	// Formatting
-	"ensure_final_newline_on_save": true,
-	"hard_tabs": true,
-	"tab_size": 2,
+  // Formatting
+  "ensure_final_newline_on_save": true,
+  "hard_tabs": true,
+  "tab_size": 2,
 
-	// Editor
-	"autosave": "on_window_change",
-	"show_completions_on_input": false,
-	"show_whitespaces": "none",
-	"show_edit_predictions": true,
+  // Editor
+  "autosave": "on_window_change",
+  "show_completions_on_input": false,
+  "show_whitespaces": "none",
+  "show_edit_predictions": true,
 
-	// Font
-	"ui_font_family": "Helvetica Neue",
-	"ui_font_size": 12.0,
+  // Font
+  "ui_font_family": "Helvetica Neue",
+  "ui_font_size": 12.0,
 
-	"agent_buffer_font_size": 10.0,
-	"agent_ui_font_size": 12.0,
+  "agent_buffer_font_size": 10.0,
+  "agent_ui_font_size": 12.0,
 
-	"buffer_font_family": "MonoLisa Nerd Font",
-	"buffer_font_size": 10.0,
-	"buffer_font_weight": 400.0,
-	"buffer_line_height": "standard",
+  "buffer_font_family": "MonoLisa Nerd Font",
+  "buffer_font_size": 10.0,
+  "buffer_font_weight": 400.0,
+  "buffer_line_height": "standard",
 
-	"terminal": {
-		"font_size": 10.0,
-		"copy_on_select": true,
-		"max_scroll_history_lines": 10000
-	},
+  "terminal": {
+    "font_size": 10.0,
+    "copy_on_select": true,
+    "max_scroll_history_lines": 10000
+  },
 
-	// Theme
-	"cursor_blink": false,
-	"theme": {
-		"mode": "dark",
-		"light": "Catppuccin Latte",
-		"dark": "Catppuccin Mocha"
-	},
-	"icon_theme": {
-		"mode": "dark",
-		"light": "Catppuccin Latte",
-		"dark": "Catppuccin Mocha"
-	},
-	"minimum_contrast_for_highlights": 45.0,
+  // Theme
+  "cursor_blink": false,
+  "theme": {
+    "mode": "dark",
+    "light": "Catppuccin Latte",
+    "dark": "Catppuccin Mocha"
+  },
+  "icon_theme": {
+    "mode": "dark",
+    "light": "Catppuccin Latte",
+    "dark": "Catppuccin Mocha"
+  },
+  "minimum_contrast_for_highlights": 45.0,
 
-	// Window
-	"tabs": {
-		"close_position": "left"
-	}
+  // Window
+  "tabs": {
+    "close_position": "left"
+  }
 }

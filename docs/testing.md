@@ -115,6 +115,7 @@ To add validation for new configs:
 
 1. Identify the tool and its validation command
 2. Add a test using the pattern:
+
    ```bash
    @test "config description" {
      if ! command -v tool >/dev/null 2>&1; then

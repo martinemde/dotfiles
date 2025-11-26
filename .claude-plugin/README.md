@@ -29,16 +29,19 @@ Or using a direct URL:
 ### Agents
 
 #### PR Feedback Reviewer
+
 Analyzes pull request feedback and comments, validates their validity, and provides prioritized recommendations for addressing concerns.
 
 **Keywords**: agent, pr, review, feedback, github
 
 #### Code Reviewer
+
 Senior-engineer level code and document reviewer that enforces modern patterns, scope boundaries, and code quality standards. Review-only mode writes reports to `scratch/` folder.
 
 **Keywords**: agent, review, code-quality, documentation
 
 #### Shell Wizard
+
 Writes production-quality shell scripts following best practices with safety headers, error handling, and modern patterns.
 
 **Keywords**: agent, shell, bash, scripting
@@ -46,16 +49,19 @@ Writes production-quality shell scripts following best practices with safety hea
 ### Skills
 
 #### Jujutsu Skill
+
 Comprehensive guidance for using Jujutsu (jj) version control system instead of Git, including concepts, commands, and GitHub integration. Includes extensive reference documentation.
 
 **Keywords**: skill, jujutsu, jj, vcs, version-control
 
 #### Skill Creator
+
 Guide for creating new skills that extend Claude's capabilities with progressive disclosure design and bundled resources. Includes helper scripts for skill initialization and packaging.
 
 **Keywords**: skill, meta, creation, extension
 
 #### Chezmoi Package Manager
+
 Manages packages and external dependencies in chezmoi dotfiles across Homebrew, mise, Python, Docker, and chezmoi externals with version pinning and Renovate integration.
 
 **Keywords**: skill, chezmoi, package-management, renovate
@@ -63,6 +69,7 @@ Manages packages and external dependencies in chezmoi dotfiles across Homebrew, 
 ### Commands
 
 #### gitingest
+
 Fetch and contextualize GitHub repositories for future reference, generating structured documentation in `docs/reference/`.
 
 **Usage**: `/gitingest <repo-url|user/repo|repo-name>`
@@ -70,6 +77,7 @@ Fetch and contextualize GitHub repositories for future reference, generating str
 **Keywords**: command, github, repository, documentation
 
 #### tdd
+
 Guide implementation using Test-Driven Development red-green-refactor cycle. Enforces writing failing tests first, minimal implementation, and continuous refactoring.
 
 **Usage**: `/tdd <feature-description>`
@@ -95,6 +103,7 @@ home/dot_claude/
 ```
 
 Root-level plugins:
+
 ```
 .claude/
 └── skills/
@@ -106,13 +115,14 @@ Root-level plugins:
 ### Adding New Plugins
 
 1. Create plugin directory in appropriate category (`agents/`, `skills/`, or `commands/`)
-2. Add plugin files (agents/*.md, skills/SKILL.md, commands/*.md)
+2. Add plugin files (agents/_.md, skills/SKILL.md, commands/_.md)
 3. Update `.claude-plugin/marketplace.json` with plugin entry
 4. Run chezmoi apply to sync changes
 
 ### Plugin Format
 
 Plugins use Claude Code's standard format:
+
 - **Agents**: Single markdown file with agent instructions
 - **Skills**: SKILL.md with optional bundled reference files
 - **Commands**: Single markdown file with command expansion prompt
