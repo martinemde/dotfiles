@@ -12,7 +12,6 @@
 # These must be set early to ensure proper sourcing of config files
 set-environment -g TMUX_CONF "$HOME/.config/tmux/tmux.conf"
 set-environment -g TMUX_CONF_LOCAL "$HOME/.config/tmux/tmux.conf.local"
-set-environment -g TMUX_PLUGIN_MANAGER_PATH "$HOME/.config/tmux/plugins"
 
 
 # -- bindings ------------------------------------------------------------------
@@ -93,24 +92,49 @@ tmux_conf_24b_colour=auto
 #   - tmux_conf_theme_synchronized
 tmux_conf_theme=enabled
 
-# Catppuccin Mocha theme
-tmux_conf_theme_colour_1="#181926"    # crust (darkest background)
-tmux_conf_theme_colour_2="#1e2030"    # mantle (dark background)
-tmux_conf_theme_colour_3="#313244"    # surface0 (medium background)
-tmux_conf_theme_colour_4="#89b4fa"    # blue (accent)
-tmux_conf_theme_colour_5="#f9e2af"    # yellow (warning/highlight)
-tmux_conf_theme_colour_6="#181926"    # crust (consistent dark)
+# Catppuccin Mocha + Espresso theme for tmux
+
+# === Background Colors (darkest to lightest) ===
+tmux_conf_theme_colour_1="#05050c"    # espresso crust (deepest bg)
+tmux_conf_theme_colour_2="#0a0a13"    # espresso mantle (deep bg)
+tmux_conf_theme_colour_6="#0f0f19"    # espresso base (dark bg)
+tmux_conf_theme_colour_8="#11111b"    # mocha crust (standard dark bg)
+tmux_conf_theme_colour_14="#181825"   # mocha mantle (medium dark bg)
+tmux_conf_theme_colour_15="#1e1e2e"   # mocha base (lighter bg)
+tmux_conf_theme_colour_3="#313244"    # surface0 (raised surface)
+
+# === Foreground/Text Colors ===
 tmux_conf_theme_colour_7="#cdd6f4"    # text (primary foreground)
-tmux_conf_theme_colour_8="#181926"    # crust (dark background)
-tmux_conf_theme_colour_9="#f9e2af"    # yellow (active highlight)
+tmux_conf_theme_colour_13="#cdd6f4"   # text (emphasis)
+tmux_conf_theme_colour_17="#bac2de"   # subtext1 (secondary text)
+tmux_conf_theme_colour_12="#9399b2"   # overlay2 (muted text)
+
+# === Accent Colors (semantic) ===
+tmux_conf_theme_colour_4="#89b4fa"    # blue (primary accent/focus)
 tmux_conf_theme_colour_10="#cba6f7"   # mauve (secondary accent)
 tmux_conf_theme_colour_11="#a6e3a1"   # green (success/active)
-tmux_conf_theme_colour_12="#585b70"   # surface2 (muted text)
-tmux_conf_theme_colour_13="#cdd6f4"   # text (primary foreground)
-tmux_conf_theme_colour_14="#181926"   # crust (dark background)
-tmux_conf_theme_colour_15="#11111b"   # base (deepest background)
+tmux_conf_theme_colour_5="#f9e2af"    # yellow (warning/highlight)
+tmux_conf_theme_colour_9="#fab387"    # peach (attention)
 tmux_conf_theme_colour_16="#f38ba8"   # red (error/critical)
-tmux_conf_theme_colour_17="#cdd6f4"   # text (foreground)
+
+# default theme (ansi)
+#tmux_conf_theme_colour_1="colour0"
+#tmux_conf_theme_colour_2="colour8"
+#tmux_conf_theme_colour_3="colour8"
+#tmux_conf_theme_colour_4="colour14"
+#tmux_conf_theme_colour_5="colour11"
+#tmux_conf_theme_colour_6="colour0"
+#tmux_conf_theme_colour_7="colour15"
+#tmux_conf_theme_colour_8="colour0"
+#tmux_conf_theme_colour_9="colour11"
+#tmux_conf_theme_colour_10="colour13"
+#tmux_conf_theme_colour_11="colour10"
+#tmux_conf_theme_colour_12="colour8"
+#tmux_conf_theme_colour_13="colour15"
+#tmux_conf_theme_colour_14="colour0"
+#tmux_conf_theme_colour_15="colour0"
+#tmux_conf_theme_colour_16="colour1"
+#tmux_conf_theme_colour_17="colour15"
 
 # window style
 tmux_conf_theme_window_fg="default"
@@ -170,7 +194,7 @@ tmux_conf_theme_status_attr="none"
 #     - #{hostname_full_ssh}
 #     - #{username}
 #     - #{username_ssh}
-tmux_conf_theme_terminal_title="#{b:pane_current_path} ❐ #S ● #I #W"
+tmux_conf_theme_terminal_title="#h ❐ #S ● #I #W"
 
 # window status style
 #   - built-in variables are:
@@ -359,7 +383,7 @@ tmux_conf_theme_clock_style="24"
 #   - false (default)
 #   - disabled
 # on Linux, this requires xsel, xclip or wl-copy
-tmux_conf_copy_to_os_clipboard=true
+tmux_conf_copy_to_os_clipboard=false
 
 
 # -- urlscan -------------------------------------------------------------------
@@ -380,8 +404,8 @@ tmux_conf_urlscan_options="--compact --dedupe"
 
 # force Vi mode
 #   really you should export VISUAL or EDITOR environment variable, see manual
-set -g status-keys vi
-set -g mode-keys vi
+#set -g status-keys vi
+#set -g mode-keys vi
 
 # replace C-b by C-a instead of using both prefixes
 # set -gu prefix2
@@ -437,22 +461,9 @@ tmux_conf_uninstall_plugins_on_reload=true
 # visit https://github.com/tmux-plugins for available plugins
 #set -g @plugin 'tmux-plugins/tmux-copycat'
 #set -g @plugin 'tmux-plugins/tmux-cpu'
-
-# Session persistence with resurrect and continuum
-set -g @plugin 'tmux-plugins/tmux-resurrect'
-set -g @plugin 'tmux-plugins/tmux-continuum'
-
-# Auto-restore sessions on tmux start
-set -g @continuum-restore 'on'
-
-# Save interval in minutes (default: 15)
-set -g @continuum-save-interval '15'
-
-# XDG-compliant data directory for session saves
-set -g @resurrect-dir '~/.local/share/tmux/resurrect'
-
-# Restore additional programs (~ prefix means restore with exact command)
-set -g @resurrect-processes 'ssh ~nvim ~vim'
+#set -g @plugin 'tmux-plugins/tmux-resurrect'
+#set -g @plugin 'tmux-plugins/tmux-continuum'
+#set -g @continuum-restore 'on'
 
 
 # -- custom variables ----------------------------------------------------------
@@ -535,7 +546,7 @@ bind-key -T copy-mode-vi C-l select-pane -R #!important
 bind-key -T copy-mode-vi C-\\ select-pane -l #!important
 
 # Pane resizing: prefix + H/J/K/L resize by 5 cells
-bind-key -r H resize-pane -L 5 #!important
+bind-key -r H resize-pane -L 5 #!importajnt
 bind-key -r J resize-pane -D 5 #!important
 bind-key -r K resize-pane -U 5 #!important
 bind-key -r L resize-pane -R 5 #!important

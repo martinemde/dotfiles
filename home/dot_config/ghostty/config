@@ -52,6 +52,8 @@ theme = dark:Catppuccin Mocha,light:Catppuccin Latte
 split-divider-color = "#585b70"
 unfocused-split-fill = "#181824"
 unfocused-split-opacity = 0.85
+# Override default Catppuccin with a darker background
+background = "#11111b"
 
 # load keybinds
 config-file = config-keybind
