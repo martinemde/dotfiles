@@ -61,6 +61,7 @@ brew "mise" # tool version manager
 brew "mkcert" # cert generator
 brew "mupdf" # PDF viewer
 brew "neovim" # text editor
+brew "neovide" # GUI neovim
 brew "node" # Node.js runtime
 brew "nvm" # Node version manager
 brew "openssl@3" # crypto library
