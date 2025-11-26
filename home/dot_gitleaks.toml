@@ -12,6 +12,7 @@ disableRules = ["sourcegraph-access-token"]
 paths = [
   '''.bun/install''',
   '''.cache''',
+  '''.claude/ide''',
   '''.config/colima''',
   '''.config/zsh/plugins''',
   '''.cursor/extensions''',
