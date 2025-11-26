@@ -55,6 +55,10 @@ unfocused-split-opacity = 0.85
 # Override default Catppuccin with a darker background
 background = "#11111b"
 
+# Shaders
+custom-shader = "shaders/public/shaders/cursor_smear_fade.glsl"
+# custom-shader = "shaders/public/shaders/shake.glsl"
+
 # load keybinds
 config-file = config-keybind
 
