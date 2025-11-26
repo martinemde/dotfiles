@@ -107,13 +107,13 @@ fzf --preview 'bat --color=always --style=numbers --line-range :500 {}'
 
 `bat` reads its configuration from:
 
-```
+```sh
 ~/.config/bat/config
 ```
 
-and stores syntax definitions and themes in:
+`bat` stores syntax definitions and themes in:
 
-```
+```sh
 ~/.config/bat/syntaxes/
 ~/.config/bat/themes/
 ```
