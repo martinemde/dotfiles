@@ -17,6 +17,19 @@ jobs:
           shellcheck bin/setup
           shellcheck bin/test
 
+  config-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Install validation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y vim tmux python3 yq
+          npm install -g bats
+      - name: Run configuration validation tests
+        run: |
+          bats test/config-validation.bats
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -29,6 +42,11 @@ jobs:
       - name: Install chezmoi
         run: |
           GIT_USER_NAME="CI Test User" GIT_USER_EMAIL="ci@example.com" AWS_PROFILE="" ./install.sh
+      - name: Install config validation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y vim tmux python3 python3-pip yq
+          npm install -g bats
       - name: Install test dependencies
         run: |
           ./bin/setup
