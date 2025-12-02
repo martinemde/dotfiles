@@ -28,7 +28,7 @@ jobs:
         uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
       - name: Install chezmoi
         run: |
-          GIT_USER_NAME="CI Test User" GIT_USER_EMAIL="ci@example.com" ./install.sh
+          GIT_USER_NAME="CI Test User" GIT_USER_EMAIL="ci@example.com" AWS_PROFILE="" ./install.sh
       - name: Install test dependencies
         run: |
           ./bin/setup
