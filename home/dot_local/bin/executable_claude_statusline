@@ -1,18 +1,79 @@
 #!/usr/bin/env bash
-
 set -o errexit -o nounset -o pipefail
 
-# Read JSON input and extract current directory
-input=$(cat)
-cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd')
-dir_name=$(basename "$cwd")
+payload="$(cat || true)"
 
-# Get starship-jj prompt for the directory
-if command -v starship-jj >/dev/null 2>&1; then
-  cd "$cwd"
-  jj_prompt=$(starship-jj --ignore-working-copy starship prompt 2>/dev/null)
-  printf "%s %s" "$dir_name" "$jj_prompt"
-else
-  # Fallback if starship-jj not available
-  printf "%s" "$dir_name"
+if command -v jq >/dev/null 2>&1 && [ -n "$payload" ]; then
+  #
+  # 1) cd into the workspace dir (current_dir > project_dir > cwd)
+  #
+  dir="$(
+    printf '%s' "$payload" |
+      jq -r '.workspace.current_dir // .workspace.project_dir // .cwd // empty'
+  )"
+  if [ -n "$dir" ] && [ -d "$dir" ]; then
+    cd "$dir"
+  fi
+
+  #
+  # 2) Short model name: haiku / sonnet / opus
+  #
+  raw_model="$(
+    printf '%s' "$payload" |
+      jq -r '.model.display_name // .model.id // empty'
+  )"
+
+  if [ -n "$raw_model" ]; then
+    lower_model="$(printf '%s' "$raw_model" | tr '[:upper:]' '[:lower:]')"
+
+    case "$lower_model" in
+    *haiku*) short_model="haiku" ;;
+    *sonnet*) short_model="sonnet" ;;
+    *opus*) short_model="opus" ;;
+    *) short_model="$raw_model" ;;
+    esac
+
+    export CLAUDE_MODEL="$short_model"
+  fi
+
+  #
+  # 3) Cost: .cost.total_cost_usd → CLAUDE_COST (already formatted)
+  #
+  raw_cost="$(
+    printf '%s' "$payload" |
+      jq -r '.cost.total_cost_usd // empty'
+  )"
+
+  if [ -n "$raw_cost" ] && [ "$raw_cost" != "null" ]; then
+    # Format like $0.03 / < $0.01
+    formatted_cost="$(
+      awk -v v="$raw_cost" '
+        BEGIN {
+          if (v == "" || v == "null") exit 1
+          if (v < 0.01 && v > 0) { print "< $0.01"; exit 0 }
+          printf "$%.2f", v
+        }
+      '
+    )" || true
+
+    if [ -n "$formatted_cost" ]; then
+      export CLAUDE_COST="$formatted_cost"
+    fi
+  fi
+
+  #
+  # 4) Session id if you ever want it in Starship later
+  #
+  session_id="$(
+    printf '%s' "$payload" |
+      jq -r '.session_id // empty'
+  )"
+  if [ -n "$session_id" ]; then
+    export CLAUDE_SESSION_ID="$session_id"
+  fi
 fi
+
+# Force non-zsh-style output so we don't get %{%} markers
+STARSHIP_CONFIG="$HOME/.config/starship/claude.toml" \
+  STARSHIP_SHELL=sh \
+  starship prompt

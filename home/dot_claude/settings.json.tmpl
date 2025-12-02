@@ -1,6 +1,7 @@
 {{- /* Include work settings if AWS profile was configured during init */ -}}
 {
 {{- if .aws.profile }}
+  "awsAuthRefresh": "aws sso login --profile $AWS_PROFILE",
   "env": {
     "CLAUDE_CODE_USE_BEDROCK": "true",
     "ANTHROPIC_SMALL_FAST_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
@@ -10,16 +11,9 @@
     "AWS_PROFILE": {{ .aws.profile | quote }},
     "AWS_REGION": "us-west-2"
   },
-  "awsAuthRefresh": "aws sso login --profile $AWS_PROFILE",
 {{- end }}
   "includeCoAuthoredBy": false,
   "model": "global.anthropic.claude-opus-4-5-20251101-v1:0",
-  "alwaysThinkingEnabled": true,
-  "gitAttribution": false,
-  "statusLine": {
-    "type": "command",
-    "command": "~/.local/bin/claude_statusline"
-  },
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -31,5 +25,11 @@
         ]
       }
     ]
-  }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.local/bin/claude_statusline"
+  },
+  "alwaysThinkingEnabled": true,
+  "gitAttribution": false
 }

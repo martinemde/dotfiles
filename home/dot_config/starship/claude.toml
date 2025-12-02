@@ -1,0 +1,36 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+command_timeout = 1500
+add_newline = false
+
+# dir | (jj) | model | cost
+format = """
+$directory\
+${custom.jj}\
+${env_var.CLAUDE_MODEL}\
+${env_var.CLAUDE_COST}\
+"""
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+style = "bold cyan"
+format = "[$path]($style) "
+
+# Optional: starship-jj between dir and model; drop this block + ${custom.jj}
+# from `format` if it's too noisy
+[custom.jj]
+command = "starship-jj --ignore-working-copy starship prompt 2>/dev/null"
+when = ''' command -v starship-jj >/dev/null 2>&1 '''
+format = " [$output]($style)"
+style = "bold green"
+
+[env_var.CLAUDE_MODEL]
+variable = "CLAUDE_MODEL"
+format = " [$env_value]($style) "
+style = "bold purple"
+
+[env_var.CLAUDE_COST]
+variable = "CLAUDE_COST"
+format = " [$env_value]($style)"
+style = "bold blue"
