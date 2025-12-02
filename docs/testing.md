@@ -92,12 +92,13 @@ chezmoi apply
 
 ### CI Integration
 
-Add to GitHub Actions or other CI:
+The repository includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that runs configuration validation tests on every push and pull request. The `config-validation` job:
 
-```yaml
-- name: Validate configurations
-  run: bats test/config-validation.bats
-```
+1. Installs necessary validation tools (vim, tmux, python3, yq, bats)
+2. Runs `bats test/config-validation.bats`
+3. Reports results in the GitHub Actions UI
+
+This ensures all configuration changes are validated before merge, catching errors early in the development process.
 
 ### Pre-commit Hook
 
