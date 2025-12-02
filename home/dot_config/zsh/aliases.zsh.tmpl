@@ -40,8 +40,4 @@ alias codex='OPENAI_API_KEY=$(op read "op://Personal/openai-codex/credential") c
 alias claude-api='ANTHROPIC_API_KEY=$(op read "op://Personal/claude-code/credential") command claude'
 {{- end }}
 
-if [ -f "$XDG_CONFIG_HOME/op/plugins.sh" ]; then
-  source "$XDG_CONFIG_HOME/op/plugins.sh"
-fi
-
 # vi: ft=zsh
