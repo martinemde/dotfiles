@@ -13,6 +13,7 @@ paths = [
   '''.bun/install''',
   '''.cache''',
   '''.claude/ide''',
+  '''.colima''',
   '''.config/colima''',
   '''.config/zsh/plugins''',
   '''.cursor/extensions''',
