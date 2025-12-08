@@ -2,11 +2,6 @@
 ; This allows highlighting of the underlying file format (JSON, YAML, etc.)
 ; while also highlighting the Go template syntax
 
-; Generic injection for all text content
-; The actual language is determined by the compound filetype (e.g., json.gotmpl)
-((text) @injection.content
- (#set! injection.combined))
-
 ; Specific injections for common patterns
 ((text) @injection.content
  (#set! injection.language "bash")
