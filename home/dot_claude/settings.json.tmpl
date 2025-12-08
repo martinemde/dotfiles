@@ -1,13 +1,19 @@
 {{- /* Include work settings if AWS profile was configured during init */ -}}
 {
 {{- if .aws.profile }}
-  "awsAuthRefresh": "aws sso login --profile $AWS_PROFILE",
   "env": {
+    "CLAUDE_CODE_USE_BEDROCK": "true",
+    "ANTHROPIC_SMALL_FAST_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "global.anthropic.claude-opus-4-5-20251101-v1:0",
     "AWS_PROFILE": {{ .aws.profile | quote }},
-    "CLAUDE_CODE_USE_BEDROCK": "1"
+    "AWS_REGION": "us-west-2"
   },
+  "awsAuthRefresh": "aws sso login --profile $AWS_PROFILE",
 {{- end }}
   "includeCoAuthoredBy": false,
+  "model": "global.anthropic.claude-opus-4-5-20251101-v1:0",
   "alwaysThinkingEnabled": true,
   "gitAttribution": false,
   "statusLine": {
