@@ -2,6 +2,9 @@
 # Tool Integrations
 # ============================================================================
 
+# Homebrew - ensure brew binaries come before system binaries
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
 # 1Password CLI plugins (aliases like gh to use op)
 [[ -f "$XDG_CONFIG_HOME/op/plugins.sh" ]] && source "$XDG_CONFIG_HOME/op/plugins.sh"
 
