@@ -17,6 +17,7 @@ paths = [
   '''.config/colima''',
   '''.config/zsh/plugins''',
   '''.cursor/extensions''',
+  '''esdata''',
   '''.local''',
   '''.mitmproxy''',
   '''.nvm''',
