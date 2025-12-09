@@ -1,255 +1,198 @@
 # Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
 
+# Catppuccin Mocha with Tokyo Night-style approach:
+# Dark surface backgrounds with colored text foregrounds for a cohesive, subtle look
+
 format = """
-$username\
-$hostname\
-$localip\
-$shlvl\
-$singularity\
-$kubernetes\
+[](base)\
+$os\
+$user\
 $directory\
-$vcsh\
-$fossil_branch\
+[ ](fg:surface0 bg:base)\
 ${custom.jj}\
-$hg_branch\
-$pijul_channel\
-$docker_context\
-$package\
+[](bg:surface1 fg:surface0)\
 $c\
-$cmake\
-$cobol\
-$daml\
-$dart\
-$deno\
-$dotnet\
-$elixir\
-$elm\
-$erlang\
-$fennel\
-$golang\
-$guix_shell\
-$haskell\
-$haxe\
-$helm\
-$java\
-$julia\
-$kotlin\
-$gradle\
-$lua\
-$nim\
-$nodejs\
-$ocaml\
-$opa\
-$perl\
-$php\
-$pulumi\
-$purescript\
-$python\
-$raku\
-$rlang\
-$red\
-$ruby\
 $rust\
-$scala\
-$solidity\
-$swift\
-$terraform\
-$typst\
-$vlang\
-$vagrant\
-$zig\
-$buf\
-$nix_shell\
+$ruby\
+$golang\
+$nodejs\
+$php\
+$java\
+$kotlin\
+$haskell\
+$python\
+[ ](bg:surface1 fg:surface2)\
+$docker_context\
 $conda\
-$meson\
-$spack\
-$memory_usage\
-$aws\
-$gcloud\
-$openstack\
-$azure\
-$direnv\
-$env_var\
-$crystal\
-$custom\
-$sudo\
+[ ](bg:surface2 fg:overlay0)\
+$time\
+[ ](fg:overlay0)\
 $cmd_duration\
 $line_break\
-$jobs\
-$battery\
-$time\
-$status\
-$os\
-$container\
-$shell\
 $character"""
 
-#
-# Custom jj (Jujutsu) module
+palette = 'catppuccin_mocha'
+
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo = "#f2cdcd"
+pink = "#f5c2e7"
+mauve = "#cba6f7"
+red = "#f38ba8"
+maroon = "#eba0ac"
+peach = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+teal = "#94e2d5"
+sky = "#89dceb"
+sapphire = "#74c7ec"
+blue = "#89b4fa"
+lavender = "#b4befe"
+text = "#cdd6f4"
+subtext1 = "#bac2de"
+subtext0 = "#a6adc8"
+overlay2 = "#9399b2"
+overlay1 = "#7f849c"
+overlay0 = "#6c7086"
+surface2 = "#585b70"
+surface1 = "#45475a"
+surface0 = "#313244"
+base = "#1e1e2e"
+mantle = "#181825"
+crust = "#11111b"
+
+[os]
+disabled = false
+style = "bg:base fg:mauve"
+
+[os.symbols]
+Windows = ""
+Ubuntu = "󰕈"
+SUSE = ""
+Raspbian = "󰐿"
+Mint = "󰣭"
+Macos = "󰀵"
+Manjaro = ""
+Linux = "󰌽"
+Gentoo = "󰣨"
+Fedora = "󰣛"
+Alpine = ""
+Amazon = ""
+Android = ""
+AOSC = ""
+Arch = "󰣇"
+Artix = "󰣇"
+CentOS = ""
+Debian = "󰣚"
+Redhat = "󱄛"
+RedHatEnterprise = "󱄛"
+
+[username]
+show_always = true
+style_user = "bg:base fg:mauve"
+style_root = "bg:base fg:red"
+format = '[ $user]($style)'
+
+[directory]
+style = "bg:base fg:sky"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = "󰝚 "
+"Pictures" = " "
+"src" = ""
+"dotfiles" = "󰇙"
+
+# Custom jj (Jujutsu) module - replaces git_branch/git_status
 [custom.jj]
 command = "prompt"
-format = "$output"
+format = "[ $output](fg:sapphire bg:surface0)"
+style = "bg:surface0"
 ignore_timeout = true
 shell = ["starship-jj", "--ignore-working-copy", "starship"]
 use_stdin = false
 when = true
 
-[bun]
-format = "via [$symbol]($style)"
-
-[buf]
-format = "with [$symbol]($style)"
-
 [c]
-format = "via [$symbol($name)]($style)"
-
-[cmake]
-format = "via [$symbol]($style)"
-
-[cobol]
-format = "via [$symbol]($style)"
-
-[cpp]
-format = "via [$symbol($name)]($style)"
-
-[crystal]
-format = "via [$symbol]($style)"
-
-[daml]
-format = "via [$symbol]($style)"
-
-[dart]
-format = "via [$symbol]($style)"
-
-[deno]
-format = "via [$symbol]($style)"
-
-[dotnet]
-format = "[$symbol(🎯 $tfm )]($style)"
-
-[elixir]
-format = 'via [$symbol]($style)'
-
-[elm]
-format = 'via [$symbol]($style)'
-
-[erlang]
-format = 'via [$symbol]($style)'
-
-[fennel]
-format = 'via [$symbol]($style)'
-
-[fortran]
-format = 'via [$symbol]($style)'
-
-[gleam]
-format = 'via [$symbol]($style)'
-
-[golang]
-format = 'via [$symbol]($style)'
-
-[gradle]
-format = 'via [$symbol]($style)'
-
-[haskell]
-format = 'via [$symbol]($style)'
-
-[haxe]
-format = 'via [$symbol]($style)'
-
-[helm]
-format = 'via [$symbol]($style)'
-
-[java]
-format = 'via [$symbol]($style)'
-
-[julia]
-format = 'via [$symbol]($style)'
-
-[kotlin]
-format = 'via [$symbol]($style)'
-
-[lua]
-format = 'via [$symbol]($style)'
-
-[meson]
-format = 'via [$symbol]($style)'
-
-[mojo]
-format = 'with [$symbol]($style)'
-
-[nim]
-format = 'via [$symbol]($style)'
-
-[nodejs]
-format = 'via [$symbol]($style)'
-
-[ocaml]
-format = 'via [$symbol(\($switch_indicator$switch_name\) )]($style)'
-
-[odin]
-format = 'via [$symbol]($style)'
-
-[opa]
-format = 'via [$symbol]($style)'
-
-[perl]
-format = 'via [$symbol]($style)'
-
-[php]
-format = 'via [$symbol]($style)'
-
-[pixi]
-format = 'via [$symbol($environment )]($style)'
-
-[pulumi]
-format = 'via [$symbol$stack]($style)'
-
-[purescript]
-format = 'via [$symbol]($style)'
-
-[python]
-format = 'via [$symbol]($style)'
-
-[quarto]
-format = 'via [$symbol]($style)'
-
-[raku]
-format = 'via [$symbol]($style)'
-
-[red]
-format = 'via [$symbol]($style)'
-
-[rlang]
-format = 'via [$symbol]($style)'
-
-[ruby]
-format = 'via [$symbol]($style)'
+symbol = " "
+style = "fg:green bg:surface1"
+format = '[ $symbol($version)]($style)'
 
 [rust]
-format = 'via [$symbol]($style)'
+symbol = " "
+style = "fg:peach bg:surface1"
+format = '[ $symbol($version)]($style)'
 
-[scala]
-format = 'via [$symbol]($style)'
+[ruby]
+symbol = " "
+style = "fg:red bg:surface1"
+format = '[ $symbol($version)]($style)'
 
-[solidity]
-format = 'via [$symbol]($style)'
+[golang]
+symbol = " "
+style = "fg:sky bg:surface1"
+format = '[ $symbol($version)]($style)'
 
-[swift]
-format = 'via [$symbol]($style)'
+[nodejs]
+symbol = " "
+format = '[ $symbol($version)](fg:green bg:surface1)'
 
-[typst]
-format = 'via [$symbol]($style)'
+[php]
+symbol = " "
+style = "fg:lavender bg:surface1"
+format = '[ $symbol($version)]($style)'
 
-[vagrant]
-format = 'via [$symbol]($style)'
+[java]
+symbol = " "
+style = "fg:red bg:surface1"
+format = '[ $symbol($version)]($style)'
 
-[vlang]
-format = 'via [$symbol]($style)'
+[kotlin]
+symbol = " "
+style = "fg:mauve bg:surface1"
+format = '[ $symbol($version)]($style)'
 
-[xmake]
-format = "via [$symbol]($style)"
+[haskell]
+symbol = " "
+style = "fg:lavender bg:surface1"
+format = '[ $symbol($version)]($style)'
 
-[zig]
-format = 'via [$symbol]($style)'
+[python]
+symbol = " "
+style = "fg:green bg:surface1"
+format = '[ $symbol($version)(\(#$virtualenv\))]($style)'
+
+[docker_context]
+symbol = " "
+style = "fg:sapphire bg:surface2"
+format = '[ $symbol($context) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "fg:crust bg:overlay0"
+format = '[ $time]($style)'
+
+[line_break]
+disabled = false
+
+[character]
+disabled = false
+success_symbol = '[❯](bold fg:green)'
+error_symbol = '[❯](bold fg:red)'
+vimcmd_symbol = '[❮](bold fg:green)'
+vimcmd_replace_one_symbol = '[❮](bold fg:lavender)'
+vimcmd_replace_symbol = '[❮](bold fg:lavender)'
+vimcmd_visual_symbol = '[❮](bold fg:yellow)'
+
+[cmd_duration]
+show_milliseconds = false
+format = "[ $duration](fg:yellow) "
+disabled = false
+show_notifications = true
+min_time_to_notify = 45000

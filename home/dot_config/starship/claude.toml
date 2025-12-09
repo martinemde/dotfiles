@@ -1,36 +1,82 @@
 "$schema" = "https://starship.rs/config-schema.json"
 
-command_timeout = 1500
 add_newline = false
 
 # dir | (jj) | model | cost
 format = """
+[](base)\
 $directory\
+[ ](fg:surface0 bg:base)\
 ${custom.jj}\
+[](bg:surface1 fg:surface0)\
 ${env_var.CLAUDE_MODEL}\
+[ ](bg:surface1 fg:surface2)\
 ${env_var.CLAUDE_COST}\
+[ ](bg:surface2 fg:overlay0)\
+$time\
+[ ](fg:overlay0)\
+$cmd_duration\
 """
 
-[directory]
-truncation_length = 3
-truncate_to_repo = true
-style = "bold cyan"
-format = "[$path]($style) "
+palette = 'catppuccin_mocha'
 
-# Optional: starship-jj between dir and model; drop this block + ${custom.jj}
-# from `format` if it's too noisy
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo = "#f2cdcd"
+pink = "#f5c2e7"
+mauve = "#cba6f7"
+red = "#f38ba8"
+maroon = "#eba0ac"
+peach = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+teal = "#94e2d5"
+sky = "#89dceb"
+sapphire = "#74c7ec"
+blue = "#89b4fa"
+lavender = "#b4befe"
+text = "#cdd6f4"
+subtext1 = "#bac2de"
+subtext0 = "#a6adc8"
+overlay2 = "#9399b2"
+overlay1 = "#7f849c"
+overlay0 = "#6c7086"
+surface2 = "#585b70"
+surface1 = "#45475a"
+surface0 = "#313244"
+base = "#1e1e2e"
+mantle = "#181825"
+crust = "#11111b"
+
+
+[directory]
+style = "bg:base fg:sky"
+format = "[ $path ]($style)"
+truncation_length = 2
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = "󰝚 "
+"Pictures" = " "
+"src" = ""
+"dotfiles" = "󰇙"
+
+# Custom jj (Jujutsu) module - replaces git_branch/git_status
 [custom.jj]
-command = "starship-jj --ignore-working-copy starship prompt 2>/dev/null"
-when = ''' command -v starship-jj >/dev/null 2>&1 '''
-format = " [$output]($style)"
-style = "bold green"
+command = "starship-jj --ignore-working-copy starship prompt"
+when = true
+style = "bg:surface0"
+format = "[ $output]($style)"
+ignore_timeout = true
 
 [env_var.CLAUDE_MODEL]
 variable = "CLAUDE_MODEL"
-format = " [$env_value]($style) "
-style = "bold purple"
+format = "[ $env_value]($style)"
+style = "bg:surface1 fg:sapphire"
 
 [env_var.CLAUDE_COST]
 variable = "CLAUDE_COST"
-format = " [$env_value]($style)"
-style = "bold blue"
+format = "[ $env_value]($style)"
+style = "bg:surface2 fg:green"

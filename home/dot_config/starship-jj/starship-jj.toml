@@ -3,106 +3,155 @@
 module_separator = " "
 # Controls whether colors are reset at the end of output.
 # Try this if your prompt displays a blank space at the end.
-# reset_color = true
-# Timeout after wich the process is teminated.
+reset_color = true
+# Timeout after which the process is terminated.
 # timeout = 1000
 
-# Controls the behaviour of the bookmark finding algorythm.
+# Note that you can change the order of the modules on your prompt
+# by changing their order in this config file.
+
+# Controls the behaviour of the bookmark finding algorithm.
 [bookmarks]
-# Controls how far we are looking back to find bookmarks.
+# Exclude certain bookmarks from the search (supports globs); takes a list of strings.
+# Example: `exclude = ["feature branch"]`
 exclude = []
 # Controls how far we are looking back to find bookmarks.
 # search_depth = 0
 
 [[module]]
-# Prints information about bookmarks in the working copies ancestors.
+# Prints information about bookmarks in the working copy's ancestors.
 type = "Bookmarks"
 # Text that will be rendered between each bookmark.
 separator = " "
 # Color the text will be rendered in. One of Black, Red, Green, Yellow, Blue, Magenta, Cyan, White,
 # BrightBlack, BrightRed, BrightGreen, BrightYellow, BrightBlue, BrightMagenta, BrightCyan, BrightWhite
-color = "Magenta"
+# color = "Magenta"
 # True RGB Color can also be used like this. Do not use both color and color.TrueColor at the same time!
-# color.TrueColor = [255, 255, 255]
+# Catppuccin Mocha: maroon (#eba0ac)
+color.TrueColor = [235, 160, 172]
 # Text background color. Can also be TrueColor.
-# bg_color = "Yellow"
-# A suffix that will be printed when the given bookmark is behing the working copy.
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]
+# A suffix that will be printed when the given bookmark is behind the working copy.
 behind_symbol = "⇡"
-# Maximum amout of bookmarks that will be rendered.
+# Surround the bookmark names with double-quotes
+surround_with_quotes = false
+# Ignore Commits without a description.
+# Possible values: None, Current, All
+# None=> [default] Count all commits even ones without description
+# Current => Don't count the current commit if it's description is empty
+# All => Don't count any commits without description
+ignore_empty_commits = "Current"
+# Maximum amount of bookmarks that will be rendered.
 # max_bookmarks = 1
 # Maximum length the bookmark name will be truncated to.
 # max_length = 10
-# Surround the bookmark names with double-quotes
-surround_with_quotes = false
 
 [[module]]
-# Prints the working copies commit text
+# Prints the working copy's commit text.
 type = "Commit"
 # Maximum length the commit text will be truncated to.
-max_length = 24
-# color = "Green"
-# bg_color = "Yellow"
-# default text if the commit description is not set
+max_length = 20
+# Catppuccin Mocha: text (#cdd6f4)
+color.TrueColor = [205, 214, 244]
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]
+# Default text if the commit description is not set
 empty_text = ""
 # Surround the commit text with double-quotes
 # surround_with_quotes = true
+# Show the previous commit's description in case current is empty
+# This will also print the previous_message_symbol
+show_previous_if_empty = false
+# A prefix that will be printed when the current commit is empty and the previous commit is shown
+previous_message_symbol = "⇣"
+
+# Controls if and how the Change Id should be shown
+# [module.change]
+# fg = "magenta"
+
+# Controls if and how the Commit Id should be shown
+# [module.commit]
+# fg = "blue"
 
 [[module]]
-# Prints a warning if the working copy contains any conflicts, is divergent or hidden
+# Prints a warning if the working copy contains any conflicts, is divergent, hidden, immutable, or empty.
 type = "State"
-# Text that will be printed between each Warning.
+# Text that will be printed between each warning.
 separator = " "
 
 [module.conflict]
-text = "(CONFLICT)"
-color = "Red"
-# bg_color = "Yellow"
+text = "conflict"
+# Catppuccin Mocha: red (#f38ba8)
+color.TrueColor = [243, 139, 168]
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]
 
 [module.divergent]
-text = "(DIVERGENT)"
-color = "Cyan"
-# bg_color = "Yellow"
+text = "divergent"
+# Catppuccin Mocha: peach (#fab387)
+color.TrueColor = [250, 179, 135]
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]
 
 [module.hidden]
-text = "(HIDDEN)"
-color = "Yellow"
-# bg_color = "Yellow"
+text = "hidden"
+# Catppuccin Mocha: yellow (#f9e2af)
+color.TrueColor = [249, 226, 175]
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]
 
 [module.immutable]
 disabled = false
-text = "(IMMUTABLE)"
-color = "Blue"
+text = "immutable"
+# Catppuccin Mocha: lavender (#b4befe)
+color.TrueColor = [180, 190, 254]
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]
 
 [module.empty]
 disabled = false
-text = "(empty)"
-color = "Green"
+text = "empty"
+# Catppuccin Mocha: overlay1 (#7f849c) - subtle, not a warning
+color.TrueColor = [127, 132, 156]
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]
 
 [[module]]
-# Prints the amount of changes in the working copy
+# Prints the amount of changes in the working copy.
 type = "Metrics"
-color = "Magenta"
-# bg_color = "Yellow"
-# Controls how the changes are rendered, use {added}, {removed} and {changed} to render the number of changes.
-template = "[{changed} {added}{removed}]"
+# Hide the metrics module in case there are no changes [0 +0-0]
+# hide_if_empty = true
+# Catppuccin Mocha: subtext0 (#a6adc8)
+color.TrueColor = [166, 173, 200]
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]
+# Controls how the changes are rendered. Use {added}, {removed} and {changed} to render the number of changes.
+template = "{changed}{added}{removed}"
 
 [module.changed_files]
-# Controlls how the number of changed files is rendered.
+# Controls how the number of changed files is rendered.
 # suffix = ""
 # prefix = ""
-color = "Cyan"
-# bg_color = "Yellow"
+# Catppuccin Mocha: sapphire (#74c7ec)
+color.TrueColor = [116, 199, 236]
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]
 
 [module.added_lines]
-# Controlls how the number of changed files is rendered.
+# Controls how the number of added lines is rendered.
 prefix = "+"
 # suffix = ""
-color = "Green"
-# bg_color = "Yellow"
+# Catppuccin Mocha: green (#a6e3a1)
+color.TrueColor = [166, 227, 161]
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]
 
 [module.removed_lines]
-# Controlls how the number of removed lines is rendered.
+# Controls how the number of removed lines is rendered.
 prefix = "-"
 # suffix = ""
-color = "Red"
-# bg_color = "Yellow"
+# Catppuccin Mocha: red (#f38ba8)
+color.TrueColor = [243, 139, 168]
+# Catppuccin Mocha: surface0 (#313244)
+bg_color.TrueColor = [49, 50, 68]

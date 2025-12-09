@@ -27,9 +27,9 @@ if command -v jq >/dev/null 2>&1 && [ -n "$payload" ]; then
     lower_model="$(printf '%s' "$raw_model" | tr '[:upper:]' '[:lower:]')"
 
     case "$lower_model" in
-    *haiku*) short_model="haiku" ;;
-    *sonnet*) short_model="sonnet" ;;
-    *opus*) short_model="opus" ;;
+    *haiku*) short_model=" haiku" ;;
+    *sonnet*) short_model="󱜚 sonnet" ;;
+    *opus*) short_model="󱚥 opus" ;;
     *) short_model="$raw_model" ;;
     esac
 
