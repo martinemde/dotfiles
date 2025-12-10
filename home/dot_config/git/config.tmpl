@@ -1,7 +1,7 @@
 [user]
-name = "Martin Emde"
-email = me@martinemde.com
-signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBUOchTXDNe34jfmbmvuPuK4Vi8ClJkbmwkKrULyDh3U
+name = "{{ .git.name }}"
+email = {{ .git.email }}
+signingkey = {{ .git.signingkey }}
 
 [gpg]
 format = ssh

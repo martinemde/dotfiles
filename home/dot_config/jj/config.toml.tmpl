@@ -1,19 +1,19 @@
 #:schema https://jj-vcs.github.io/jj/latest/config-schema.json
 
 # Jujutsu (jj) Configuration
-# Managed by Chezmoi - edit source in dotfiles/home/dot_config/jj/config.toml
+# Managed by Chezmoi - edit source in dotfiles/home/dot_config/jj/config.toml.tmpl
 
 # Significantly borrows from @indirect's dotfiles at:
 # https://github.com/indirect/dotfiles/blob/8948ae89f70f5c5bf37b35d97afe6430827ea974/private_dot_config/private_jj/config.toml
 
 [user]
-name = "Martin Emde"
-email = "me@martinemde.com"
+name = "{{ .git.name }}"
+email = "{{ .git.email }}"
 
 [signing]
 backend = "ssh"
 behavior = "own"
-key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBUOchTXDNe34jfmbmvuPuK4Vi8ClJkbmwkKrULyDh3U"
+key = "{{ .git.signingkey }}"
 
 [git]
 abandon-unreachable-commits = true
