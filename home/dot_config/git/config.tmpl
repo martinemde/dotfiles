@@ -1,13 +1,15 @@
 [user]
 name = "{{ .git.name }}"
-email = {{ .git.email }}
+email = "{{ .git.email }}"
 signingkey = {{ .git.signingkey }}
 
 [gpg]
 format = ssh
 
 [gpg "ssh"]
+{{- if eq .chezmoi.os "darwin" }}
 program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+{{- end }}
 
 [credential]
 helper = !gh auth git-credential
@@ -25,10 +27,9 @@ autocrlf = input
 [alias]
 # Basic shortcuts
 ec      = config --global -e
-co			= checkout
+co      = checkout
 cp      = cherry-pick
 a       = add -p
-ap      = add -p
 ci      = commit
 cif     = commit --fixup
 cia     = commit --amend
@@ -39,11 +40,10 @@ amend   = commit --amend
 wip     = !git add -u && git commit -m "WIP" -n
 unwip   = reset HEAD~1
 st      = status
-b				= branch
-br      = branch
+b       = branch
 m       = merge
 rb      = rebase
-ri			= rebase --interactive
+ri      = rebase --interactive
 rbi     = rebase --interactive --autosquash
 rbim    = rebase --interactive --autosquash origin/main
 rbc     = rebase --continue
@@ -62,8 +62,8 @@ pr      = pull --rebase --prune
 
 # Better logging
 l       = log --oneline --graph --decorate
-lg			= log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-lga			= log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all
+lg      = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+lga     = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all
 ld      = log --pretty=format:"%h%x09%an%x09%ad%x09%s"
 lr      = "!git --no-pager log --oneline --graph --decorate -10"
 long    = log --pretty=fuller --decorate
@@ -83,17 +83,11 @@ cleanup = "!git branch --merged | grep -v '\\*\\|main\\|master\\|develop' | xarg
 # Conflict resolution
 edit-unmerged = "!$VISUAL `git diff --name-only --diff-filter=U`"
 add-unmerged = "!git add `git diff --name-only --diff-filter=U`"
-theirs-unmerged = "!git checkout —theirs `git diff --name-only --diff-filter=U`"
-ours-unmerged = "!git checkout —ours `git diff --name-only --diff-filter=U`"
+theirs-unmerged = "!git checkout --theirs `git diff --name-only --diff-filter=U`"
+ours-unmerged = "!git checkout --ours `git diff --name-only --diff-filter=U`"
 
 # Show files in a commit
 show-files = show --pretty="" --name-only
-
-# Quick commit and push
-cap = "!git add . && git commit -m"
-
-# Show current branch
-current = branch --show-current
 
 # Hotfix workflow
 hotfix = "!git flow hotfix start `date '+%Y%m%d-%H%M'`"
@@ -156,9 +150,6 @@ showUntrackedFiles = all
 
 [log]
 date = relative
-
-[help]
-autocorrect = 18
 
 [advice]
 pushUpdateRejected = false
