@@ -238,7 +238,7 @@ gh pr create --head "$branch" --title "$title" --body "$body" && gh pr merge $br
 "node normal" = { bold = false }
 
 [templates]
-git_push_bookmark = '"martinemde/push-" ++ change_id.short()'
+git_push_bookmark = '"martinemde/" ++ change_id.short()'
 
 # I like this symbol ◉ for @, but it's hard to see
 log_node = '''
