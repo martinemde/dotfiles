@@ -9,9 +9,7 @@ format = """
 $os\
 $user\
 $directory\
-[ ](fg:surface0 bg:base)\
 ${custom.jj}\
-[](bg:surface1 fg:surface0)\
 $c\
 $rust\
 $ruby\
@@ -22,12 +20,11 @@ $java\
 $kotlin\
 $haskell\
 $python\
-[ ](bg:surface1 fg:surface2)\
+[ ](bg:base fg:surface0)\
 $docker_context\
-$conda\
-[ ](bg:surface2 fg:overlay0)\
+[ ](bg:surface0 fg:surface1)\
 $time\
-[ ](fg:overlay0)\
+[ ](fg:surface1)\
 $cmd_duration\
 $line_break\
 $character"""
@@ -110,8 +107,12 @@ truncation_symbol = "…/"
 
 # Custom jj (Jujutsu) module - replaces git_branch/git_status
 [custom.jj]
+format = """
+[](fg:surface0 bg:base)\
+[ $output](fg:sapphire bg:surface0)\
+[](bg:base fg:surface0)\
+"""
 command = "prompt"
-format = "[ $output](fg:sapphire bg:surface0)"
 style = "bg:surface0"
 ignore_timeout = true
 shell = ["starship-jj", "--ignore-working-copy", "starship"]
@@ -120,62 +121,62 @@ when = true
 
 [c]
 symbol = " "
-style = "fg:green bg:surface1"
+style = "fg:green bg:base"
 format = '[ $symbol($version)]($style)'
 
 [rust]
 symbol = " "
-style = "fg:peach bg:surface1"
+style = "fg:peach bg:base"
 format = '[ $symbol($version)]($style)'
 
 [ruby]
 symbol = " "
-style = "fg:red bg:surface1"
+style = "fg:red bg:base"
 format = '[ $symbol($version)]($style)'
 
 [golang]
 symbol = " "
-style = "fg:sky bg:surface1"
+style = "fg:sky bg:base"
 format = '[ $symbol($version)]($style)'
 
 [nodejs]
 symbol = " "
-format = '[ $symbol($version)](fg:green bg:surface1)'
+format = '[ $symbol($version)](fg:green bg:base)'
 
 [php]
 symbol = " "
-style = "fg:lavender bg:surface1"
+style = "fg:lavender bg:base"
 format = '[ $symbol($version)]($style)'
 
 [java]
 symbol = " "
-style = "fg:red bg:surface1"
+style = "fg:red bg:base"
 format = '[ $symbol($version)]($style)'
 
 [kotlin]
 symbol = " "
-style = "fg:mauve bg:surface1"
+style = "fg:mauve bg:base"
 format = '[ $symbol($version)]($style)'
 
 [haskell]
 symbol = " "
-style = "fg:lavender bg:surface1"
+style = "fg:lavender bg:base"
 format = '[ $symbol($version)]($style)'
 
 [python]
 symbol = " "
-style = "fg:green bg:surface1"
+style = "fg:green bg:base"
 format = '[ $symbol($version)(\(#$virtualenv\))]($style)'
 
 [docker_context]
 symbol = " "
-style = "fg:sapphire bg:surface2"
+style = "fg:sapphire bg:surface0"
 format = '[ $symbol($context) ]($style)'
 
 [time]
 disabled = false
 time_format = "%R"
-style = "fg:crust bg:overlay0"
+style = "fg:lavender bg:surface1"
 format = '[ $time]($style)'
 
 [line_break]

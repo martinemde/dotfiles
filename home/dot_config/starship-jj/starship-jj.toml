@@ -45,7 +45,7 @@ ignore_empty_commits = "Current"
 # Maximum amount of bookmarks that will be rendered.
 # max_bookmarks = 1
 # Maximum length the bookmark name will be truncated to.
-# max_length = 10
+max_length = 20
 
 [[module]]
 # Prints the working copy's commit text.

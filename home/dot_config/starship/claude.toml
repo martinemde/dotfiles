@@ -52,7 +52,7 @@ crust = "#11111b"
 [directory]
 style = "bg:base fg:sky"
 format = "[ $path ]($style)"
-truncation_length = 2
+truncation_length = 1
 truncation_symbol = "…/"
 
 [directory.substitutions]
