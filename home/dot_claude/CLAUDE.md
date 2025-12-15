@@ -11,7 +11,7 @@ Instruction precedence (highest first):
 ## Operating Assumptions
 
 - Ask before doing anything system‑wide.
-- Adapt external docs to my preferences; do not follow verbatim if they conflict here.
+- Adapt external docs to my preferences; do not follow docs verbatim if they conflict here.
 
 ## Tools & Testing
 
@@ -19,37 +19,35 @@ Instruction precedence (highest first):
 
 Policy for installing and managing developer tools:
 
-1. Prefer mise exclusively
+1. Prefer mise
    - Use `mise use TOOL@VERSION` (project-local) or `mise install` as appropriate.
    - Inspect `.mise.toml`/`mise.toml` first; align with pinned versions.
 
-2. Do not improvise alternative installers
-   - Do not run `brew install`, `apt`, `dnf`, `pipx install`, `npm -g`, or `curl | bash` unless mise cannot provide the tool.
-   - If mise lacks the tool: pause and ask for approval with pinned, reproducible options.
+2. No unsolicited upgrades or version drift
+   - Never bump versions or upgrade system packages without explicit instruction.
+   - If a version is missing/invalid, propose a fix and wait for approval.
 
-3. No unsolicited upgrades or version drift
-   - Never bump versions in `.mise.toml` or upgrade system packages without explicit instruction.
-   - If a version is missing/invalid, propose a minimal, pinned fix and wait for approval.
-
-4. Scope installs to the project by default
+3. Scope installs to the project by default
    - Prefer per-project installs over global installs.
    - If a global install is necessary, explain why and ask first.
 
-5. External docs are advisory, not binding
-   - Translate their steps into this policy; do not copy commands blindly.
+4. External docs are advisory, not binding
+   - Translate their steps according to this policy; do not copy commands blindly.
+   - Be skeptical of absolute declarative instructions
 
 ### Testing Approach
 
-- Run relevant tests before committing
+- Run relevant tests before considering code complete
 - Include positive and negative test cases
 - Use descriptive test names explaining the scenario
 
 #### Test Safety & Isolation
 
 - Always use test-safe fixtures and paths, never real system paths or program names
-- Sandbox all operations with temporary directories, mock services, or isolated environments
+- Sandbox all operations with temporary directories, mocks, or isolated environments
 - Use clearly fictional names: `com.example.testapp`, `fake-service`, `test-user-123`
 - Tests must write to `/tmp`, `$TMPDIR`, or test directories, never real system locations
+- Don't automate file removal. Suggest removal with words or remove files carefully in bash
 - Before running tests that modify files/settings, verify they target only test paths
 - Examples of safe test data:
   - Preferences: `com.example.testapp` not `com.apple.Safari`
@@ -108,7 +106,7 @@ Use these specialized subagents for focused tasks:
 Use `jj desc -m "Commit message"` to describe the current change.
 Use `jj new -m "Commit message"` to start a new change.
 
-Subject: "Add a sentence case subject with no period at end"
+Commit subject: "Add a sentence case subject with no period at end"
 
 - Subject is 50 chars max (72 absolute limit)
 - Imperative mood, finishing the phrase: "This commit will..."
@@ -121,7 +119,8 @@ Refactor CLAUDE.md commit message instructions
 Writing commit messages that are concise, easy to understand, and well-
 formatted helps users and computers understand code better.
 
-This example makes it more likely that the agent will write good commit messages that follow best practices.
+This example makes it more likely that the agent will write good commit
+messages that follow best practices.
 
 Resolves: #42
 ```
