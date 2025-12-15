@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-set -vx
+[ -n "${DEBUG:-}" ] && set -o xtrace
 
 # {{ include "dot_Brewfile" | sha256sum }}
 brew bundle check --global --no-upgrade || brew bundle install --global --no-upgrade

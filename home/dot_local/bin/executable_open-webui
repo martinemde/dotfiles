@@ -55,7 +55,7 @@ restart() {
 }
 
 logs() {
-  docker-compose -f "$COMPOSE_FILE" logs $*
+  docker-compose -f "$COMPOSE_FILE" logs "$@"
 }
 
 pull() {

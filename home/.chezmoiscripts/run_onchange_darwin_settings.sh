@@ -19,11 +19,11 @@ defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
 defaults write com.apple.dock wvous-br-corner -int 10
 defaults write com.apple.dock wvous-br-modifier -int 0
 
-# restart on power failure
-systemsetup -setrestartpowerfailure on &>/dev/null
+# restart on power failure (requires admin privileges)
+systemsetup -setrestartpowerfailure on 2>/dev/null || echo "Note: Could not set restart-on-power-failure (requires admin)" >&2
 
-# restart on freeze
-systemsetup -setrestartfreeze on &>/dev/null
+# restart on freeze (requires admin privileges)
+systemsetup -setrestartfreeze on 2>/dev/null || echo "Note: Could not set restart-on-freeze (requires admin)" >&2
 
 # Safari settings (may require Full Disk Access)
 {
