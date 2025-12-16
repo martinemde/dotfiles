@@ -6,11 +6,7 @@
 // Dynamically load plugins that are available
 const plugins = [];
 
-const optionalPlugins = [
-  'prettier-plugin-toml',
-  'prettier-plugin-svelte',
-  'prettier-plugin-tailwindcss',
-];
+const optionalPlugins = ['prettier-plugin-toml', 'prettier-plugin-tailwindcss'];
 
 for (const plugin of optionalPlugins) {
   try {
@@ -40,12 +36,6 @@ const config = {
       options: {
         singleQuote: false,
         trailingComma: 'none',
-      },
-    },
-    {
-      files: '*.svelte',
-      options: {
-        parser: 'svelte',
       },
     },
   ],
