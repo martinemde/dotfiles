@@ -20,3 +20,7 @@ patterns = [
 [fix.tools.markdownlint]
 command = ["npx", "markdownlint-cli2", "--format"]
 patterns = ["glob:'**/*.md'"]
+
+[fix.tools.rustfmt]
+command = ["rustfmt"]
+patterns = ["glob:'**/*.rs'"]
