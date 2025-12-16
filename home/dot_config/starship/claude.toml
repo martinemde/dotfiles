@@ -48,7 +48,6 @@ base = "#1e1e2e"
 mantle = "#181825"
 crust = "#11111b"
 
-
 [directory]
 style = "bg:base fg:sky"
 format = "[ $path ]($style)"
