@@ -2,6 +2,25 @@
  * @see https://prettier.io/docs/configuration
  * @type {import("prettier").Config}
  */
+
+// Dynamically load plugins that are available
+const plugins = [];
+
+const optionalPlugins = [
+  'prettier-plugin-toml',
+  'prettier-plugin-svelte',
+  'prettier-plugin-tailwindcss',
+];
+
+for (const plugin of optionalPlugins) {
+  try {
+    await import(plugin);
+    plugins.push(plugin);
+  } catch {
+    // Plugin not installed, skip it
+  }
+}
+
 const config = {
   printWidth: 80,
   tabWidth: 2,
@@ -14,7 +33,7 @@ const config = {
   arrowParens: 'always',
   proseWrap: 'preserve',
   endOfLine: 'lf',
-  plugins: ['prettier-plugin-toml'],
+  plugins,
   overrides: [
     {
       files: ['*.json', '*.jsonc'],
@@ -27,6 +46,12 @@ const config = {
       files: ['*.py'],
       options: {
         tabWidth: 4,
+      },
+    },
+    {
+      files: '*.svelte',
+      options: {
+        parser: 'svelte',
       },
     },
   ],
