@@ -2,7 +2,6 @@
   "name": "node-global-tools",
   "private": true,
   "devDependencies": {
-    "@anthropic-ai/claude-code": "1.0.98",
     "prettier": "3.6.2",
     "prettier-plugin-toml": "^2.0.1"
   }

@@ -9,7 +9,8 @@ brew "ccusage"  # CPU monitor
 brew "chezmoi"  # dotfiles manager
 brew "cloc" # code counter
 brew "cmake" # build tool
-brew "codex" # code search
+brew "codex" # agentic coding
+brew "claude-code" # agentic coding
 brew "colima" # Docker runtime
 brew "coreutils" # GNU coreutils
 brew "cosign" # signature tool
