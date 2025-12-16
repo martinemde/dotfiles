@@ -10,7 +10,6 @@ brew "chezmoi"  # dotfiles manager
 brew "cloc" # code counter
 brew "cmake" # build tool
 brew "codex" # agentic coding
-brew "claude-code" # agentic coding
 brew "colima" # Docker runtime
 brew "coreutils" # GNU coreutils
 brew "cosign" # signature tool
@@ -98,6 +97,7 @@ cask "1password-cli" # password CLI
 cask "1password" # password manager
 cask "amethyst" # window manager
 cask "betterdisplay" # display manager
+cask "claude-code" # agentic coding
 cask "colemak-dh" # keyboard layout
 cask "cursor" # text editor
 cask "ghostty" # terminal emulator
