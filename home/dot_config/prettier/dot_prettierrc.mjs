@@ -43,12 +43,6 @@ const config = {
       },
     },
     {
-      files: ['*.py'],
-      options: {
-        tabWidth: 4,
-      },
-    },
-    {
       files: '*.svelte',
       options: {
         parser: 'svelte',
