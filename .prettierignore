@@ -19,6 +19,7 @@ node_modules/
 bin/
 home/dot_local/bin/
 .chezmoiscripts/
+home/dot_config/nvim/lazy-lock.json
 
 # JSON5 file without plugin support
 renovate.json5
