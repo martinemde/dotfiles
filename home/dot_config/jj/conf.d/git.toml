@@ -1,0 +1,18 @@
+#:schema https://docs.jj-vcs.dev/latest/config-schema.json
+# Git integration settings
+
+[git]
+abandon-unreachable-commits = true
+colocate = true
+sign-on-push = true
+subprocess = true
+write-change-id-header = true
+
+[merge]
+# Line-level merge resolution
+hunk-level = "line"
+# When multiple commits make the same change, accept it automatically
+same-change = "accept"
+
+[remotes.origin]
+auto-track-bookmarks = "exact:'main' | exact:'master' | glob:'martinemde/*'"

@@ -1,0 +1,45 @@
+#:schema https://docs.jj-vcs.dev/latest/config-schema.json
+# UI and display settings
+
+[ui]
+bookmark-list-sort-keys = ["committer-date-"]
+# Default command when running 'jj' without arguments
+default-command = "status"
+# Enable colored output
+color = "auto"
+diff-formatter = ":git"
+editor = "nvim"
+pager = "delta"
+paginate = "auto"
+show-cryptographic-signatures = true
+diff-editor = ":builtin"
+
+[[--scope]]
+--when.commands = ["status"]
+[--scope.ui]
+paginate = "never"
+
+[colors]
+# Used by log node template
+"node" = { bold = true }
+"node elided" = { fg = "bright black" }
+"node working_copy" = { fg = "green" }
+"node conflict" = { fg = "red" }
+"node immutable" = { fg = "bright cyan" }
+"node wip" = { fg = "yellow" }
+"node normal" = { bold = false }
+
+[templates]
+# I like this symbol ◉ for @, but it's hard to see
+log_node = '''
+label("node",
+  coalesce(
+    if(!self, label("elided", "⇋")),
+    if(current_working_copy, label("working_copy", "@")),
+    if(conflict, label("conflict", "✕")),
+    if(immutable, label("immutable", "◆")),
+    if(description.starts_with("wip: "), label("wip", "◠")),
+    label("normal", "○")
+  )
+)
+'''
