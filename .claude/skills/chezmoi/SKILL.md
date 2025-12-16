@@ -59,10 +59,10 @@ Choose the appropriate package manager (see `./ecosystem-guide.md` for details):
 
 ```
 home/.chezmoiexternals/
-├── zsh.externals.toml.tmpl      # Zsh plugins and tools
-├── bat.externals.toml.tmpl      # Bat themes and syntaxes
-├── tmux.externals.toml.tmpl     # Tmux configurations
-└── nvim.externals.toml.tmpl     # Neovim plugins
+├── zsh.externals.toml      # Zsh plugins and tools
+├── bat.externals.toml      # Bat themes and syntaxes
+├── tmux.externals.toml     # Tmux configurations
+└── nvim.externals.toml     # Neovim plugins
 ```
 
 #### How It Works
@@ -72,7 +72,7 @@ home/.chezmoiexternals/
 - Use `.tmpl` suffix for templating support (OS conditionals, variables)
 - Paths in each file are relative to the home directory
 
-#### Example: zsh.externals.toml.tmpl
+#### Example: zsh.externals.toml
 
 ```toml
 {{ if lookPath "zsh" }}
@@ -183,9 +183,9 @@ See `./renovate-integration.md` for detailed patterns.
 
 ### 7. Apply Changes
 
-#### For .chezmoiexternals/ files:
+#### For .chezmoiexternals/ files
 
-1. **Create or update** the appropriate `.externals.toml.tmpl` file
+1. **Create or update** the appropriate `.externals.toml` file
 2. **Add comments** explaining each dependency
 3. **Include Renovate annotations** for tracking:
    ```toml
@@ -196,7 +196,7 @@ See `./renovate-integration.md` for detailed patterns.
    revision = "<commit-sha>"
    ```
 
-#### For packages.yaml:
+#### For packages.yaml
 
 1. **Edit** `home/.chezmoidata/packages.yaml`
 2. **Add to appropriate section** (darwin/linux, brews/casks/mas)
@@ -243,7 +243,7 @@ chezmoi update --force
 # 1. Get latest commit SHA
 gh api repos/zsh-users/zsh-history-substring-search/commits/master --jq .sha
 
-# 2. Add to home/.chezmoiexternals/zsh.externals.toml.tmpl
+# 2. Add to home/.chezmoiexternals/zsh.externals.toml
 # 3. Add Renovate rule to renovate.json5
 # 4. Preview and apply
 chezmoi diff
@@ -260,17 +260,17 @@ chezmoi apply
 
 ### Migrating Existing Externals to .chezmoiexternals/
 
-1. **Identify program groupings** in `home/.chezmoiexternal.toml.tmpl`
+1. **Identify program groupings** in `home/.chezmoiexternal.toml`
 2. **Search for references** to the old file before migration:
    ```bash
    grep -r "\.chezmoiexternal\.toml\.tmpl" home/
    ```
    Common references to fix:
-   - Scripts using `{{ include ".chezmoiexternal.toml.tmpl" }}` for hashing
+   - Scripts using `{{ include ".chezmoiexternal.toml" }}` for hashing
    - Documentation or comments mentioning the file
 3. **Create program-specific files** in `home/.chezmoiexternals/`
 4. **Move related externals** to appropriate file
-5. **Update any references** found in step 2 to point to new files (e.g., `.chezmoiexternals/bat.externals.toml.tmpl`)
+5. **Update any references** found in step 2 to point to new files (e.g., `.chezmoiexternals/bat.externals.toml`)
 6. **Keep conditionals** (e.g., `{{ if lookPath "zsh" }}`)
 7. **Verify with** `chezmoi diff` (will error if references are broken)
 8. **Remove old file** only after all references are updated and `chezmoi diff` succeeds
@@ -281,7 +281,7 @@ chezmoi apply
 # 1. Fetch current SHA
 gh api repos/USER/REPO/commits/BRANCH --jq .sha
 
-# 2. Update revision in .chezmoiexternals/*.toml.tmpl
+# 2. Update revision in .chezmoiexternals/*.toml
 # 3. Apply
 chezmoi apply
 ```
@@ -368,7 +368,7 @@ executable = true
 
 ## Best Practices
 
-1. **Group by program**: Use `.chezmoiexternals/PROGRAM.externals.toml.tmpl`
+1. **Group by program**: Use `.chezmoiexternals/PROGRAM.externals.toml`
 2. **Document dependencies**: Add comments explaining purpose
 3. **Annotate for Renovate**: Include `# renovate:` comments
 4. **Use templates**: Leverage `{{ if }}` for conditional installs

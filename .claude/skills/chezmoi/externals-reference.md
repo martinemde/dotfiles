@@ -456,7 +456,7 @@ curl -fsSL <url> | tar -xzf - -C /tmp  # Extract to temp
 
 ```bash
 # Preview template output
-chezmoi cat home/.chezmoiexternals/program.externals.toml.tmpl
+chezmoi cat home/.chezmoiexternals/program.externals.toml
 
 # Check data variables
 chezmoi data

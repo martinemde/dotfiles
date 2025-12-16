@@ -236,7 +236,7 @@ fileMatch: ["^home/\\.chezmoiexternals/.*\\.toml(\\.tmpl)?$"]
 Matches:
 
 - `home/.chezmoiexternals/zsh.externals.toml`
-- `home/.chezmoiexternals/bat.externals.toml.tmpl`
+- `home/.chezmoiexternals/bat.externals.toml`
 - Any `.toml` or `.toml.tmpl` in directory
 
 ### Match Specific Program
@@ -376,7 +376,7 @@ LOG_LEVEL=debug renovate --dry-run --require-config=false
 # Check specific file
 LOG_LEVEL=debug renovate --dry-run \
   --renovate-config=renovate.json5 \
-  home/.chezmoiexternals/zsh.externals.toml.tmpl
+  home/.chezmoiexternals/zsh.externals.toml
 ```
 
 ### Validate in PR
@@ -434,7 +434,7 @@ Create test PR with intentionally outdated SHA:
 ## Best Practices
 
 1. **Use annotations**: Add `# renovate:` comments for clarity and maintainability
-2. **Group by program**: Organize externals in `.chezmoiexternals/PROGRAM.externals.toml.tmpl`
+2. **Group by program**: Organize externals in `.chezmoiexternals/PROGRAM.externals.toml`
 3. **Consistent formatting**: Use same pattern across similar externals
 4. **Document patterns**: Add comments in `renovate.json5` explaining each rule
 5. **Test thoroughly**: Validate rules before relying on automation

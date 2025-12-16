@@ -276,7 +276,7 @@ services:
 **Format**:
 
 ```toml
-# zsh.externals.toml.tmpl
+# zsh.externals.toml
 [".zsh/plugins/zsh-autosuggestions"]
 type = "git-repo"
 url = "https://github.com/zsh-users/zsh-autosuggestions.git"
@@ -311,7 +311,7 @@ path = "tool"
 
 ```toml
 {{ if lookPath "zsh" }}
-# zsh.externals.toml.tmpl
+# zsh.externals.toml
 [".zsh/znap/zsh-snap"]
 
 {{ end }}type = "git-repo"
@@ -446,7 +446,7 @@ chezmoi = "v2.56.0"
 **When**: Manually downloading files/repos regularly
 
 1. Identify current version/SHA
-2. Create appropriate `.chezmoiexternals/*.toml.tmpl` file
+2. Create appropriate `.chezmoiexternals/*.toml` file
 3. Add external definition with pinned version
 4. Add Renovate rule
 5. Test: `chezmoi apply`
