@@ -16,3 +16,7 @@ patterns = [
   "glob:'**/*.jsonc'",
   "glob:'**/*.toml'",
 ]
+
+[fix.tools.markdownlint]
+command = ["npx", "markdownlint-cli2", "--format"]
+patterns = ["glob:'**/*.md'"]
