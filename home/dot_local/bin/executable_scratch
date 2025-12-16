@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+# scratch — create a scratch directory symlink for the current project
+#
+# Creates ~/notes/projects/<projectname>/ and symlinks ./scratch to it.
+#
+# Usage:
+#   scratch              # Create ./scratch symlink for current project
+#   scratch notes        # Create ./notes symlink instead
+#   scratch -n           # Dry run - show what would be done
+
+set -o errexit -o nounset -o pipefail
+
+NOTES_DIR="${NOTES_DIR:-$HOME/notes}"
+PROJECTS_DIR="$NOTES_DIR/projects"
+
+usage() {
+    echo "Usage: scratch [-n|--dry-run] [NAME]"
+    echo ""
+    echo "Creates a scratch directory at ~/notes/projects/<project>/"
+    echo "and symlinks ./NAME to it (default: scratch)."
+    echo ""
+    echo "Options:"
+    echo "  -n, --dry-run    Show what would be done without doing it"
+    echo "  -h, --help       Show this help message"
+}
+
+main() {
+    local dry_run=false
+    local symlink_name="scratch"
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -n|--dry-run)
+                dry_run=true
+                shift
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            -*)
+                echo "Unknown option: $1" >&2
+                usage >&2
+                exit 1
+                ;;
+            *)
+                symlink_name="$1"
+                shift
+                ;;
+        esac
+    done
+
+    local project_name
+    project_name="$(basename "$PWD")"
+
+    local target_dir="$PROJECTS_DIR/$project_name"
+    local symlink_path="$PWD/$symlink_name"
+
+    # Check if scratch already exists
+    if [[ -e "$symlink_path" ]]; then
+        if [[ -L "$symlink_path" ]]; then
+            local current_target
+            current_target="$(readlink "$symlink_path")"
+            if [[ "$current_target" == "$target_dir" ]]; then
+                echo "Scratch symlink already exists and points to correct target"
+                exit 0
+            else
+                echo "Scratch symlink exists but points to: $current_target" >&2
+                echo "Expected target: $target_dir" >&2
+                exit 1
+            fi
+        else
+            echo "Error: $symlink_path already exists and is not a symlink" >&2
+            exit 1
+        fi
+    fi
+
+    local notes_file="$target_dir/$project_name.md"
+
+    if $dry_run; then
+        echo "[dry-run] Would create directory: $target_dir"
+        echo "[dry-run] Would create file: $notes_file"
+        echo "[dry-run] Would create symlink: $symlink_path -> $target_dir"
+    else
+        mkdir -p "$target_dir"
+        if [[ ! -e "$notes_file" ]]; then
+            echo "# $project_name" > "$notes_file"
+        fi
+        ln -s "$target_dir" "$symlink_path"
+        echo "Created: $target_dir"
+        echo "Created: $notes_file"
+        echo "Symlink: $symlink_path -> $target_dir"
+    fi
+}
+
+main "$@"
