@@ -14,6 +14,10 @@ paginate = "auto"
 show-cryptographic-signatures = true
 diff-editor = ":builtin"
 
+[ui.movement]
+# Default to editing when moving with prev/next
+edit = true
+
 [[--scope]]
 --when.commands = ["status"]
 [--scope.ui]
