@@ -4,9 +4,11 @@
 return {
   { "folke/lazy.nvim", version = false },
   { "LazyVim/LazyVim", version = false },
+  -- Disable the following plugins
+  { "nvim-mini/mini.pairs", enabled = false },
+  --
   -- Ensure the following plugins are installed
   -- No configuration needed
-
   "gbprod/yanky.nvim", -- https://www.lazyvim.org/extras/coding/yanky
   "smjonas/inc-rename.nvim", -- https://www.lazyvim.org/extras/editor/inc-rename
   "ThePrimeagen/refactoring.nvim", -- https://www.lazyvim.org/extras/editor/refactoring
