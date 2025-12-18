@@ -6,13 +6,13 @@ return {
     cmd = { "ChezmoiEdit" },
     opts = {
       edit = {
-        watch = true,
-        force = false,
+        force = false, -- default
+        watch = true, -- Automatically apply changes when editing dotfiles
       },
       notification = {
-        on_open = true,
-        on_apply = true,
-        on_watch = true,
+        on_open = true, -- default
+        on_apply = true, -- default
+        on_watch = true, -- notify when a dotfile will be auto applied
       },
     },
   },
