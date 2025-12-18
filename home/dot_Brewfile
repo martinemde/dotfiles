@@ -60,8 +60,8 @@ brew "mermaid-cli" # diagram generator
 brew "mise" # tool version manager
 brew "mkcert" # cert generator
 brew "mupdf" # PDF viewer
-brew "neovim" # text editor
 brew "neovide" # GUI neovim
+brew "neovim" # text editor
 brew "node" # Node.js runtime
 brew "nvm" # Node version manager
 brew "openssl@3" # crypto library
@@ -85,7 +85,6 @@ brew "tesseract" # OCR tool
 brew "texinfo" # documentation
 brew "trash" # safe delete
 brew "tree" # directory tree
-brew "trufflehog" # secrets scanner
 brew "uv" # Python installer
 brew "vips" # image processing
 brew "watchman"  # file watcher
@@ -103,11 +102,12 @@ cask "cursor" # text editor
 cask "ghostty" # terminal emulator
 cask "keymapp" # key mapper
 cask "loopback" # audio router
-cask "meld" # diff tool
 cask "maccy" # clipboard
+cask "meld" # diff tool
 cask "ngrok" # tunneling tool
 cask "notunes" # Override Apple Music
 cask "obsidian" # notetaker
+cask "raycast" # better spotlight
 cask "slack" # messaging
 cask "spotify" # music
 cask "stats" # system monitor
