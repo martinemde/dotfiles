@@ -8,6 +8,7 @@
 #   scratch              # Create ./scratch symlink for current project
 #   scratch notes        # Create ./notes symlink instead
 #   scratch -n           # Dry run - show what would be done
+#   scratch -d ~/other   # Use ~/other/<project> as destination
 
 set -o errexit -o nounset -o pipefail
 
@@ -15,22 +16,28 @@ NOTES_DIR="${NOTES_DIR:-$HOME/notes}"
 PROJECTS_DIR="$NOTES_DIR/projects"
 
 usage() {
-    echo "Usage: scratch [-n|--dry-run] [NAME]"
+    echo "Usage: scratch [-n|--dry-run] [-d|--destination DIR] [NAME]"
     echo ""
     echo "Creates a scratch directory at ~/notes/projects/<project>/"
     echo "and symlinks ./NAME to it (default: scratch)."
     echo ""
     echo "Options:"
-    echo "  -n, --dry-run    Show what would be done without doing it"
-    echo "  -h, --help       Show this help message"
+    echo "  -d, --destination DIR  Use DIR as the destination root (default: ~/notes/projects)"
+    echo "  -n, --dry-run          Show what would be done without doing it"
+    echo "  -h, --help             Show this help message"
 }
 
 main() {
     local dry_run=false
     local symlink_name="scratch"
+    local dest_root="$PROJECTS_DIR"
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
+            -d|--destination)
+                dest_root="$2"
+                shift 2
+                ;;
             -n|--dry-run)
                 dry_run=true
                 shift
@@ -54,7 +61,7 @@ main() {
     local project_name
     project_name="$(basename "$PWD")"
 
-    local target_dir="$PROJECTS_DIR/$project_name"
+    local target_dir="$dest_root/$project_name"
     local symlink_path="$PWD/$symlink_name"
 
     # Check if scratch already exists
