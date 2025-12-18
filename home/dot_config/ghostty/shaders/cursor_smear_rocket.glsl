@@ -112,6 +112,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec4 prevFrame = texture(iChannel0, uv);
     fragColor = prevFrame;
 
+    // Skip cursor trail effect when window is unfocused
+    if (iFocus == 0) {
+        return;
+    }
+
     // Normalize pixel coordinates to -1..1 space for SDF calculations
     // This makes distance calculations resolution-independent
     vec2 vu = norm(fragCoord, 1.);

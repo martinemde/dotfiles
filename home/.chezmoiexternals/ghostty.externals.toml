@@ -1,8 +1,8 @@
 # Ghostty Configuration
 # Managed via chezmoi externals with Renovate automation
 
-[".config/ghostty/shaders"]
-type = "git-repo"
-url = "https://github.com/KroneCorylus/ghostty-shader-playground.git"
-revision = "7b0c94df4c5dfeb6686edeb9ef8d89456bbc8ae3"
-include = ["public/shaders/*.glsl"]
+# [".config/ghostty/shaders"]
+# type = "git-repo"
+# url = "https://github.com/KroneCorylus/ghostty-shader-playground.git"
+# revision = "7b0c94df4c5dfeb6686edeb9ef8d89456bbc8ae3"
+# include = ["public/shaders/*.glsl"]

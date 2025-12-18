@@ -55,8 +55,10 @@ background = "#11111b"
 # Cursor
 cursor-invert-fg-bg = true
 cursor-style-blink = false
-custom-shader = "cursor_smear_rocket.glsl"
-custom-shader = "focus_vignette.glsl"
+custom-shader = "shaders/cursor_smear_rocket.glsl"
+custom-shader = "shaders/cursor_focus.glsl"
+# custom-shader = "shaders/focus_vignette.glsl"
+custom-shader = "shaders/crt_unfocused.glsl"
 
 config-file = config-keybind
 config-file = config-hyperlinks
