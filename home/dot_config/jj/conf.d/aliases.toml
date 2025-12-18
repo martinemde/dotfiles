@@ -11,7 +11,6 @@ l = ["log", "-r", "(trunk()..@):: | (trunk()..@)-"]
 la = ["log", "-r", "..@"]
 ll = ["log", "--template", "builtin_log_detailed"]
 rb = ["rebase"]
-rebase-all = ["rebase", "-s", "all:roots(trunk()..mutable())", "-d", "trunk()"]
 s = ["status"]
 
 fetch = ["git", "fetch"]
@@ -28,17 +27,17 @@ credit = ["file", "annotate"]
 
 # Retrunk a series. Typically used as `jj retrunk -s ...`, and notably can be
 # used with open:
-# - jj retrunk -s 'all:roots(open())'
-retrunk = ["rebase", "--destination", "trunk()"]
+# - jj retrunk -s 'roots(open())'
+retrunk = ["rebase", "--onto", "trunk()"]
 
 # Retrunk the current stack of work.
-reheat = [
-  "rebase",
-  "--destination",
-  "trunk()",
-  "--source",
-  "all:roots(trunk()..stack(@))",
-]
+reheat = ["rebase", "--source", "roots(trunk()..stack(@))", "--onto", "trunk()"]
+
+# Rebase all mutable commits on trunk
+rball = ["rebase", "--source", "roots(trunk()..mutable())", "--onto", "trunk()"]
+
+# Rebase all open commits on trunk
+rbopen = ["rebase", "--source", "roots(open())", "--onto", "trunk()"]
 
 # Eject content from @ into any other change.
 # - jj eject xyz --interactive
