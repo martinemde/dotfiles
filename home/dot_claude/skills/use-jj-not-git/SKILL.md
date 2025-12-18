@@ -35,16 +35,16 @@ jj new main -m "Start feature"
 
 ## Quick Reference
 
-| Task                  | Command                      |
-| --------------------- | ---------------------------- |
-| Set commit message    | `jj describe -m "message"`   |
-| Finalize and continue | `jj commit -m "message"`     |
-| Start new change      | `jj new` or `jj new main`    |
-| Amend into parent     | `jj squash`                  |
-| View status           | `jj st`                      |
-| View log              | `jj log`                     |
-| Push to remote        | `jj git push --change @`     |
-| Undo last operation   | `jj undo`                    |
+| Task                  | Command                    |
+| --------------------- | -------------------------- |
+| Set commit message    | `jj describe -m "message"` |
+| Finalize and continue | `jj commit -m "message"`   |
+| Start new change      | `jj new` or `jj new main`  |
+| Amend into parent     | `jj squash`                |
+| View status           | `jj st`                    |
+| View log              | `jj log`                   |
+| Push to remote        | `jj git push --change @`   |
+| Undo last operation   | `jj undo`                  |
 
 ## References
 
