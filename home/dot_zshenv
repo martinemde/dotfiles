@@ -25,6 +25,9 @@ if [[ -f "$HOME/.cargo/env" ]]; then
   source "$HOME/.cargo/env"
 fi
 
+# Add Go bin directory to PATH (for go install)
+[[ -d "${GOPATH:-$HOME/go}/bin" ]] && path=("${GOPATH:-$HOME/go}/bin" $path)
+
 # Editor configuration
 export EDITOR="nvim"
 
