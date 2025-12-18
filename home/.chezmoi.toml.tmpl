@@ -14,15 +14,15 @@
 # These values can be referenced in template files throughout the dotfiles repo.
 
 {{- $choices := list "home" "work" -}}
-{{- $hosttype := promptChoiceOnce . "hosttype" "Which host?" $choices "home" -}}
+{{- $hosttype := promptChoiceOnce . "hosttype" "Which host" $choices "home" -}}
 [data]
     hosttype = {{- $hosttype | quote -}}
 
 {{- $gitSigningKeyRef := "op://Private/GitHub SSH Signing Key/public key" }}
 {{- $awsProfile := "" }}
 {{- if eq $hosttype "work" -}}
-  {{- $awsProfile := promptStringOnce . "aws_profile" "AWS Profile" "bedrock-users" }}
-  {{- $gitSigningKeyRef := "op://Employee/GitHub SSH Signing Key/public key" }}
+  {{- $awsProfile = promptStringOnce . "aws_profile" "AWS Profile" "bedrock-users" }}
+  {{- $gitSigningKeyRef = "op://Employee/GitHub SSH Signing Key/public key" }}
 {{- end -}}
 
 {{- $gitSigningKey := onepasswordRead $gitSigningKeyRef }}
