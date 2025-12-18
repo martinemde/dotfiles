@@ -86,7 +86,6 @@ brew "texinfo" # documentation
 brew "thefuck" # command corrector
 brew "trash" # safe delete
 brew "tree" # directory tree
-brew "uv" # Python installer
 brew "vips" # image processing
 brew "watchman"  # file watcher
 brew "yamllint"  # YAML linter
