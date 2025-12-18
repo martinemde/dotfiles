@@ -33,7 +33,6 @@ brew "flyctl" # fly.io CLI
 brew "fzf" # fuzzy finder
 brew "gh" # GitHub CLI
 brew "ghostscript" # PostScript interpreter
-brew "ghq" # Git repo manager
 brew "git" # version control
 brew "git-delta" # git diff tool
 brew "gitleaks" # secrets scanner
