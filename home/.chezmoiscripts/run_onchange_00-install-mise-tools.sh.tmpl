@@ -17,4 +17,9 @@ echo "Installing global mise tools..."
 # Install all tools defined in global config
 mise install --yes
 
+# Generate bun completions (installed to site-functions, loaded by compinit)
+if command -v bun >/dev/null 2>&1; then
+    bun completions
+fi
+
 echo "Global mise tools installation complete"

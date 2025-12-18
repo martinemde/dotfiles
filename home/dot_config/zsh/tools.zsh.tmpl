@@ -8,9 +8,6 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # 1Password CLI plugins (aliases like gh to use op)
 [[ -f "$XDG_CONFIG_HOME/op/plugins.sh" ]] && source "$XDG_CONFIG_HOME/op/plugins.sh"
 
-# bun completions
-[[ -s "/Users/martinemde/.bun/_bun" ]] && source "/Users/martinemde/.bun/_bun"
-
 # mise manages its own hooks, run directly (don't cache)
 eval "$(mise activate zsh)"
 
