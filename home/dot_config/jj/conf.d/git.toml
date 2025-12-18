@@ -7,6 +7,7 @@ colocate = true
 sign-on-push = true
 subprocess = true
 write-change-id-header = true
+private-commits = "unready()"
 
 [merge]
 # Line-level merge resolution
