@@ -5,16 +5,17 @@ add_newline = false
 # dir | (jj) | model | cost
 format = """
 [](base)\
+[](fg:#D97757 bg:base)\
 $directory\
-[ ](fg:surface0 bg:base)\
+[](fg:surface0 bg:base)\
 ${custom.jj}\
-[](bg:surface1 fg:surface0)\
+[](bg:base fg:surface0)\
 ${env_var.CLAUDE_MODEL}\
-[ ](bg:surface1 fg:surface2)\
+[](bg:base fg:surface0)\
+${env_var.CLAUDE_CONTEXT}\
+[](bg:surface0 fg:surface1)\
 ${env_var.CLAUDE_COST}\
-[ ](bg:surface2 fg:overlay0)\
-$time\
-[ ](fg:overlay0)\
+[](fg:surface1)\
 $cmd_duration\
 """
 
@@ -72,10 +73,15 @@ ignore_timeout = true
 
 [env_var.CLAUDE_MODEL]
 variable = "CLAUDE_MODEL"
-format = "[ $env_value]($style)"
-style = "bg:surface1 fg:sapphire"
+format = "[ $env_value ]($style)"
+style = "bg:base fg:sapphire"
+
+[env_var.CLAUDE_CONTEXT]
+variable = "CLAUDE_CONTEXT"
+format = "[$env_value]($style) "
+style = "bg:surface0 fg:peach"
 
 [env_var.CLAUDE_COST]
 variable = "CLAUDE_COST"
-format = "[ $env_value]($style)"
-style = "bg:surface2 fg:green"
+format = "[$env_value]($style)"
+style = "bg:surface1 fg:green"

@@ -71,6 +71,29 @@ if command -v jq >/dev/null 2>&1 && [ -n "$payload" ]; then
   if [ -n "$session_id" ]; then
     export CLAUDE_SESSION_ID="$session_id"
   fi
+
+  #
+  # 5) Context window usage percentage
+  #
+  context_size="$(
+    printf '%s' "$payload" |
+      jq -r '.context_window.context_window_size // empty'
+  )"
+  current_usage="$(
+    printf '%s' "$payload" |
+      jq '.context_window.current_usage // null'
+  )"
+
+  if [ -n "$context_size" ] && [ "$context_size" != "null" ] && [ "$current_usage" != "null" ]; then
+    current_tokens="$(
+      printf '%s' "$current_usage" |
+        jq '.input_tokens + .cache_creation_input_tokens + .cache_read_input_tokens'
+    )"
+    if [ -n "$current_tokens" ] && [ "$current_tokens" != "null" ]; then
+      percent_used=$((current_tokens * 100 / context_size))
+      export CLAUDE_CONTEXT="${percent_used}%"
+    fi
+  fi
 fi
 
 # Force non-zsh-style output so we don't get %{%} markers
