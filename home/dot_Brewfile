@@ -101,7 +101,7 @@ cask "claude-code" # coding agent
 cask "colemak-dh" # keyboard layout
 cask "copilot-cli" # coding agent
 cask "cursor" # text editor
-cask "ghostty" # terminal emulator
+cask "ghostty@tip" # terminal emulator
 cask "keymapp" # key mapper
 cask "loopback" # audio router
 cask "maccy" # clipboard
