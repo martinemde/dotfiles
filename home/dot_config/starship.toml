@@ -9,7 +9,9 @@ format = """
 $os\
 $user\
 $directory\
+[](fg:surface0 bg:base)\
 ${custom.jj}\
+[](bg:base fg:surface0)\
 $c\
 $rust\
 $ruby\
@@ -22,9 +24,9 @@ $haskell\
 $python\
 [ ](bg:base fg:surface0)\
 $docker_context\
-[ ](bg:surface0 fg:surface1)\
+[](bg:surface0 fg:surface1)\
 $time\
-[ ](fg:surface1)\
+[](fg:surface1)\
 $cmd_duration\
 $line_break\
 $character"""
@@ -107,11 +109,7 @@ truncation_symbol = "…/"
 
 # Custom jj (Jujutsu) module - replaces git_branch/git_status
 [custom.jj]
-format = """
-[](fg:surface0 bg:base)\
-[ $output](fg:sapphire bg:surface0)\
-[](bg:base fg:surface0)\
-"""
+format = '[ $output](fg:sapphire bg:surface0)'
 command = "prompt"
 style = "bg:surface0"
 ignore_timeout = true
@@ -193,7 +191,7 @@ vimcmd_visual_symbol = '[❮](bold fg:yellow)'
 
 [cmd_duration]
 show_milliseconds = false
-format = "[ $duration](fg:yellow) "
+format = "[  $duration](fg:yellow) "
 disabled = false
 show_notifications = true
 min_time_to_notify = 45000

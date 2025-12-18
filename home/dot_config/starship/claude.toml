@@ -78,10 +78,17 @@ style = "bg:base fg:sapphire"
 
 [env_var.CLAUDE_CONTEXT]
 variable = "CLAUDE_CONTEXT"
-format = "[$env_value]($style) "
+format = "[$env_value ]($style)"
 style = "bg:surface0 fg:peach"
 
 [env_var.CLAUDE_COST]
 variable = "CLAUDE_COST"
 format = "[$env_value]($style)"
 style = "bg:surface1 fg:green"
+
+[cmd_duration]
+show_milliseconds = false
+format = "[ $duration](fg:yellow) "
+disabled = false
+show_notifications = true
+min_time_to_notify = 45000
