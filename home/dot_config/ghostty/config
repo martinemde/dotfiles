@@ -56,13 +56,11 @@ unfocused-split-opacity = 0.85
 background = "#11111b"
 
 # Shaders
-custom-shader = "shaders/public/shaders/cursor_smear_fade.glsl"
+custom-shader = "cursor_smear_rocket.glsl"
+# custom-shader = "shaders/public/shaders/cursor_frozen.glsl"
 # custom-shader = "shaders/public/shaders/shake.glsl"
 
-# load keybinds
 config-file = config-keybind
-
-# load hyperlink configuration
 config-file = config-hyperlinks
 
 # vim: ft=toml
