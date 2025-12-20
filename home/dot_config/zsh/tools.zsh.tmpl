@@ -11,10 +11,11 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # mise manages its own hooks, run directly (don't cache)
 eval "$(mise activate zsh)"
 
-znap eval atuin 'atuin init zsh' # atuin - magical shell history
 # disable rv temporarily, it causes issues with gems
 # znap eval rv 'rv shell init zsh' # rv - ruby manager
+znap eval atuin 'atuin init zsh' # atuin - magical shell history
 znap eval starship 'starship init zsh' # starship - cross-shell prompt
 znap eval zoxide 'zoxide init zsh' # zoxide - smarter cd command
+znap eval jj 'COMPLETE=zsh jj'
 
 # vi: ft=zsh
