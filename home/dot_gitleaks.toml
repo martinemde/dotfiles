@@ -16,6 +16,7 @@ paths = [
   '''.colima''',
   '''.config/colima''',
   '''.config/zsh/plugins''',
+  '''.config/zsh/secrets.zsh''',
   '''.cursor/extensions''',
   '''esdata''',
   '''.local''',
