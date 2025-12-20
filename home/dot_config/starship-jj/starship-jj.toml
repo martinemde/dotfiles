@@ -3,9 +3,9 @@
 module_separator = " "
 # Controls whether colors are reset at the end of output.
 # Try this if your prompt displays a blank space at the end.
-reset_color = true
+reset_color = false
 # Timeout after which the process is terminated.
-# timeout = 1000
+timeout = 1000
 
 # Note that you can change the order of the modules on your prompt
 # by changing their order in this config file.

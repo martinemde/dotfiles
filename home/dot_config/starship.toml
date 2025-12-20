@@ -26,7 +26,7 @@ $python\
 $docker_context\
 [](bg:surface0 fg:surface1)\
 $time\
-[](fg:surface1)\
+[ ](fg:surface1)\
 $cmd_duration\
 $line_break\
 $character"""
@@ -112,7 +112,7 @@ truncation_symbol = "…/"
 format = '[ $output](fg:sapphire bg:surface0)'
 command = "prompt"
 style = "bg:surface0"
-ignore_timeout = true
+ignore_timeout = false
 shell = ["starship-jj", "--ignore-working-copy", "starship"]
 use_stdin = false
 when = true
@@ -191,7 +191,7 @@ vimcmd_visual_symbol = '[❮](bold fg:yellow)'
 
 [cmd_duration]
 show_milliseconds = false
-format = "[  $duration](fg:yellow) "
+format = "[ $duration](fg:yellow) "
 disabled = false
-show_notifications = true
+show_notifications = false
 min_time_to_notify = 45000
