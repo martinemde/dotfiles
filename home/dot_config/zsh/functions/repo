@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+local name=$1
+
+if [ -z "$name" ]; then
+  echo "Usage: repo <name>"
+  return 1
+fi
+
+local dir="$HOME/src/martinemde/$name"
+mkdir -p "$dir"
+z "$dir"
+
+if [ ! -d .jj ]; then
+  jj init
+fi
