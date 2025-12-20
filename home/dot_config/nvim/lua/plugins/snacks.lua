@@ -1,9 +1,44 @@
 return {
   "folke/snacks.nvim",
   opts = {
-    gh = {
-      -- Enable the GitHub integration module
+    ---@class snacks.dim.Config
+    dim = {
+      ---@type snacks.scope.Config
+      scope = {
+        min_size = 9,
+        max_size = 25,
+        siblings = true,
+      },
+      -- animate scopes. Enabled by default for Neovim >= 0.10
+      -- Works on older versions but has to trigger redraws during animation.
+      ---@type snacks.animate.Config|{enabled?: boolean}
+      animate = {
+        enabled = false, -- it really lags behind
+        easing = "outQuad",
+        duration = {
+          step = 20, -- ms per step
+          total = 200, -- maximum duration
+        },
+      },
+      -- what buffers to dim
+      filter = function(buf)
+        return vim.g.snacks_dim ~= false and vim.b[buf].snacks_dim ~= false and vim.bo[buf].buftype == ""
+      end,
     },
+    gh = { enabled = true },
+    image = { enabled = true },
+    picker = {
+      sources = {
+        files = { hidden = true },
+        grep = { hidden = true },
+        explorer = { hidden = true, ignored = true },
+      },
+    },
+    explorer = {
+      ignored = true,
+      hidden = true,
+    },
+    zen = {},
   },
   keys = {
     {
