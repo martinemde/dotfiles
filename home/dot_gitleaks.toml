@@ -15,6 +15,7 @@ paths = [
   '''.claude/ide''',
   '''.colima''',
   '''.config/colima''',
+  '''.config/raycast/extensions''',
   '''.config/zsh/plugins''',
   '''.config/zsh/secrets.zsh''',
   '''.cursor/extensions''',
