@@ -9,7 +9,7 @@ brew "ccusage"  # CPU monitor
 brew "chezmoi"  # dotfiles manager
 brew "cloc" # code counter
 brew "cmake" # build tool
-brew "codex" # agentic coding
+brew "codex" # coding agent
 brew "colima" # Docker runtime
 brew "coreutils" # GNU coreutils
 brew "cosign" # signature tool
@@ -54,6 +54,7 @@ brew "libffi" # FFI library
 brew "librdkafka" # Kafka library
 brew "libsodium" # crypto library
 brew "libyaml" # YAML library
+brew "luarocks" # Lua package manager
 brew "mailhog", restart_service: :changed # mail testing
 brew "mas" # Mac App Store CLI
 brew "mermaid-cli" # diagram generator
@@ -61,7 +62,7 @@ brew "mise" # tool version manager
 brew "mkcert" # cert generator
 brew "mupdf" # PDF viewer
 brew "neovide" # GUI neovim
-brew "neovim" # text editor
+brew "neovim", args: ["HEAD"] # text editor
 brew "node" # Node.js runtime
 brew "nvm" # Node version manager
 brew "openssl@3" # crypto library
@@ -96,8 +97,9 @@ cask "1password-cli" # password CLI
 cask "1password" # password manager
 cask "amethyst" # window manager
 cask "betterdisplay" # display manager
-cask "claude-code" # agentic coding
+cask "claude-code" # coding agent
 cask "colemak-dh" # keyboard layout
+cask "copilot-cli" # coding agent
 cask "cursor" # text editor
 cask "ghostty" # terminal emulator
 cask "keymapp" # key mapper

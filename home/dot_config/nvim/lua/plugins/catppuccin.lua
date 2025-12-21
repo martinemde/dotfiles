@@ -72,20 +72,9 @@ return {
           WinSeparator = { fg = colors.blue },
         }
       end,
+      -- Integrations, Lazy allows auto integrations
       default_integrations = true,
       auto_integrations = true,
-      integrations = {
-        blink_cmp = true,
-        cmp = true,
-        gitsigns = true,
-        nvimtree = true,
-        notify = false,
-        mini = {
-          enabled = true,
-          indentscope_color = "",
-        },
-        -- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
-      },
     },
     config = function(_, opts)
       require("catppuccin").setup(opts)

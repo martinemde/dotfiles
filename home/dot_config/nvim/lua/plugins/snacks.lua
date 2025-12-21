@@ -34,6 +34,22 @@ return {
         grep = { hidden = true },
         explorer = { hidden = true, ignored = true },
       },
+      -- Sidekick integration: Send selections to AI CLI tools
+      win = {
+        input = {
+          keys = {
+            ["<c-s>"] = {
+              "sidekick_send",
+              desc = "Send to Sidekick CLI",
+            },
+          },
+        },
+      },
+      actions = {
+        sidekick_send = function(...)
+          return require("sidekick.cli.picker.snacks").send(...)
+        end,
+      },
     },
     explorer = {
       ignored = true,
