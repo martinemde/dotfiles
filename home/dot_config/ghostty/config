@@ -1,5 +1,4 @@
 # Ghostty config
-#
 # Run `ghostty +show-config --default --docs` to view a list of
 # all available config options and their default values.
 #
@@ -41,24 +40,23 @@ macos-icon-frame = beige
 macos-icon-ghost-color = "#ea76cb"
 macos-icon-screen-color = "#04a5e5"
 
-# Cursor
-cursor-invert-fg-bg = true
-cursor-style-blink = false
-
 # Theme
 # Having both keeps flashing light mode color on new tabs
 theme = dark:Catppuccin Mocha,light:Catppuccin Latte
 # theme = Catppuccin Mocha
+
+# Make the divides visible
 split-divider-color = "#585b70"
-unfocused-split-fill = "#181824"
+unfocused-split-fill = "#0a0a0e"
 unfocused-split-opacity = 0.85
 # Override default Catppuccin with a darker background
 background = "#11111b"
 
+# Cursor
+cursor-invert-fg-bg = true
+cursor-style-blink = false
 # Shaders
 custom-shader = "cursor_smear_rocket.glsl"
-# custom-shader = "shaders/public/shaders/cursor_frozen.glsl"
-# custom-shader = "shaders/public/shaders/shake.glsl"
 
 config-file = config-keybind
 config-file = config-hyperlinks

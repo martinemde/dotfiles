@@ -1,5 +1,6 @@
 // Based on curoser_smear_fade.glsl Copyright (c) 2025 Krone Corylus
 // https://github.com/KroneCorylus/ghostty-shader-playground
+// Modified version Copyright (c) 2025 Martin Emde
 
 float getSdfRectangle(in vec2 p, in vec2 xy, in vec2 b)
 {
@@ -43,10 +44,6 @@ vec2 norm(vec2 value, float isPosition) {
     return (value * 2.0 - (iResolution.xy * isPosition)) / iResolution.y;
 }
 
-float antialising(float distance) {
-    return 1. - smoothstep(0., norm(vec2(2., 2.), 0.).x, distance);
-}
-
 float determineStartVertexFactor(vec2 a, vec2 b) {
     // Conditions using step
     float condition1 = step(b.x, a.x) * step(a.y, b.y); // a.x < b.x && a.y > b.y
@@ -56,9 +53,6 @@ float determineStartVertexFactor(vec2 a, vec2 b) {
     return 1.0 - max(condition1, condition2);
 }
 
-vec2 getRectangleCenter(vec4 rectangle) {
-    return vec2(rectangle.x + (rectangle.z / 2.), rectangle.y - (rectangle.w / 2.));
-}
 float ease(float x) {
     // Quadratic easing - faster finish than cubic
     return pow(1.0 - x, 2.0);
@@ -91,14 +85,24 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     // ========================================================================
     // SETUP: Get the previous frame and normalize coordinates
     // ========================================================================
+    // Cache UV coordinate to avoid repeated division
+    vec2 uv = fragCoord.xy / iResolution.xy;
+
     // Start with the previous frame's output - this is critical because
     // we're drawing trails over time and need to see previous frames
-    fragColor = texture(iChannel0, fragCoord.xy / iResolution.xy);
+    // Cache the texture fetch to avoid duplicate lookup later
+    vec4 prevFrame = texture(iChannel0, uv);
+    fragColor = prevFrame;
 
     // Normalize pixel coordinates to -1..1 space for SDF calculations
     // This makes distance calculations resolution-independent
     vec2 vu = norm(fragCoord, 1.);
     vec2 offsetFactor = vec2(-.5, 0.5);
+
+    // Pre-compute normalized pixel values for trail rendering
+    // Computed once here instead of inline to avoid repeated calculations
+    float shrinkAmount = 12.0 / iResolution.y;   // norm(vec2(6., 6.), 0.).x - 6px inward
+    float fuzzyEdgeWidth = 16.0 / iResolution.y; // norm(vec2(8., 8.), 0.).x - 8px fuzzy edge
 
     // ========================================================================
     // CURSOR DATA: Normalize cursor positions and sizes
@@ -107,6 +111,28 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     // .xy = position, .zw = width/height
     vec4 currentCursor = vec4(norm(iCurrentCursor.xy, 1.), norm(iCurrentCursor.zw, 0.));
     vec4 previousCursor = vec4(norm(iPreviousCursor.xy, 1.), norm(iPreviousCursor.zw, 0.));
+
+    // ========================================================================
+    // EARLY EXIT: Skip expensive calculations for tiny cursor movements
+    // ========================================================================
+    // Calculate cursor centers and distance traveled
+    vec2 centerCC = vec2(currentCursor.x + (currentCursor.z / 2.), currentCursor.y - (currentCursor.w / 2.));
+    vec2 centerCP = vec2(previousCursor.x + (previousCursor.z / 2.), previousCursor.y - (previousCursor.w / 2.));
+
+    // Use squared distance for early exit to avoid expensive sqrt()
+    vec2 delta = centerCC - centerCP;
+    float lineLengthSq = dot(delta, delta);
+
+    // Skip effect for tiny jumps (1-2 character movements)
+    // This prevents stuttering during character-by-character scrolling
+    float minJumpThreshold = currentCursor.z * 2.0; // 2 character widths
+    float minJumpThresholdSq = minJumpThreshold * minJumpThreshold;
+    if (lineLengthSq < minJumpThresholdSq) {
+        return; // No trail effect for small movements
+    }
+
+    // Only compute sqrt when we actually need the distance
+    float lineLength = sqrt(lineLengthSq);
 
     // ========================================================================
     // PARALLELOGRAM GEOMETRY: Create the tapered trail shape
@@ -139,18 +165,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float sdfCurrentCursor = getSdfRectangle(vu, currentCursor.xy - (currentCursor.zw * offsetFactor), currentCursor.zw * 0.5);
     float sdfTrail = getSdfParallelogram(vu, v0, v1, v2, v3);
 
-    // Calculate the distance the cursor traveled
-    vec2 centerCC = getRectangleCenter(currentCursor);
-    vec2 centerCP = getRectangleCenter(previousCursor);
-    float lineLength = distance(centerCC, centerCP);
-
-    // Skip effect for tiny jumps (1-2 character movements)
-    // This prevents stuttering during character-by-character scrolling
-    float minJumpThreshold = currentCursor.z * 2.0; // 2 character widths
-    if (lineLength < minJumpThreshold) {
-        return; // No trail effect for small movements
-    }
-
     // ========================================================================
     // ANIMATION TIMING: Dynamic duration based on jump distance
     // ========================================================================
@@ -181,8 +195,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     // Shrink trail and add fuzzy edges for softer, more vapor-like appearance
     // Shrink by 6 pixels to tighten the core, then extend fuzzy edge to 8 pixels
     // Net effect: same overall size but very soft, diffuse, vapor-like edges
-    float shrinkAmount = norm(vec2(6., 6.), 0.).x;  // 6 pixels inward
-    float fuzzyEdgeWidth = norm(vec2(8., 8.), 0.).x; // 8 pixels of fuzzy edge
     float trailMask = 1.0 - smoothstep(0., fuzzyEdgeWidth, sdfTrail + shrinkAmount);
 
     // Combine all fading: trail mask * spatial fade * temporal fade
@@ -197,5 +209,5 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     // CRITICAL MASKING - Only show trail within animated distance
     // Soft falloff at the edge to prevent hard cutoff artifacts
     float distanceMask = smoothstep(easedProgress * lineLength * 1.1, easedProgress * lineLength * 0.9, distFromCurrent);
-    fragColor = mix(texture(iChannel0, fragCoord.xy / iResolution.xy), fragColor, distanceMask);
+    fragColor = mix(prevFrame, fragColor, distanceMask);
 }
