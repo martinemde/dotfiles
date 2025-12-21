@@ -2,7 +2,7 @@
 local name=$1
 
 if [ -z "$name" ]; then
-  echo "Usage: repo <name>"
+  echo "Usage: mkrepo <name>"
   return 1
 fi
 
