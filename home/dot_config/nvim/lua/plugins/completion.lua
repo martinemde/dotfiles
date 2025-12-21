@@ -39,6 +39,8 @@ local openrouter = {
 -- }),
 
 return {
+  -- Configure AI tab completion
+  -- https://github.com/milanglacier/minuet-ai.nvim
   {
     "milanglacier/minuet-ai.nvim",
     config = function()
@@ -55,8 +57,7 @@ return {
     end,
   },
   { "nvim-lua/plenary.nvim" },
-  -- optional, if you are using virtual-text frontend, nvim-cmp is not required.
-  -- { "hrsh7th/nvim-cmp" },
+
   -- Configure blink.cmp (LazyVim default)
   {
     "saghen/blink.cmp",
