@@ -70,6 +70,8 @@ return {
       custom_highlights = function(colors)
         return {
           WinSeparator = { fg = colors.blue },
+          TreesitterContextBottom = { underline = true, sp = colors.overlay0 },
+          TreesitterContextLineNumberBottom = { underline = true, sp = colors.overlay0 },
         }
       end,
       -- Integrations, Lazy allows auto integrations
