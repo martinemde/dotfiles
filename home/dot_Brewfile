@@ -85,6 +85,7 @@ brew "starship" # shell prompt
 brew "terraform" # IaC tool
 brew "tesseract" # OCR tool
 brew "texinfo" # documentation
+brew "thefuck" # command corrector
 brew "trash" # safe delete
 brew "tree" # directory tree
 brew "uv" # Python installer
