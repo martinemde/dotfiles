@@ -1,3 +1,9 @@
+# Neovim natively supports .editorconfig
+# See: https://neovim.io/doc/user/plugins.html#editorconfig
+#
+# Other editors might need plugins installed
+# Prettier can be configured to work with editorconfig
+
 root = true
 
 [*]
@@ -6,10 +12,13 @@ insert_final_newline = true
 end_of_line = lf
 indent_style = space
 indent_size = 2
+tab_width = 4
 max_line_length = 100
 trim_trailing_whitespace = true
+spelling_language = en-US
 
-[*.md]
+# Trailing whitespace is meaningful
+[*.{diff,md}]
 trim_trailing_whitespace = false
 
 [*.rs]
