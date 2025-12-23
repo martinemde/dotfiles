@@ -6,7 +6,8 @@
 # Allows us to maintain Chezmoi outside of the default `~/.local/share/chezmoi/`.
 # This enables storing the dotfiles repository in a custom location while still
 # using chezmoi for management. The workingTree variable points to the repo root.
-sourceDir = "{{ .chezmoi.workingTree }}"
+# NOTE: I moved this to the standard location so this is commented now.
+# sourceDir = "{{ .chezmoi.workingTree }}"
 
 # Data Section
 # Variables defined here are available in all templates via the .data namespace.
