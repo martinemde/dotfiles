@@ -11,9 +11,20 @@ sourceDir = "{{ .chezmoi.workingTree }}"
 # Data Section
 # Variables defined here are available in all templates via the .data namespace.
 # These values can be referenced in template files throughout the dotfiles repo.
-{{- $awsProfile := promptStringOnce . "aws_profile" "AWS Profile (leave empty for personal machines)" }}
-{{- $gitSigningKey := promptStringOnce . "git_signing_key" "Git signing key (SSH public key)" }}
 
+{{- $choices := list "home" "work" -}}
+{{- $hosttype := promptChoiceOnce . "hosttype" "Which host?" $choices "home" -}}
+[data]
+    hosttype = {{- $hosttype | quote -}}
+
+{{- $gitSigningKeyRef := "op://Private/GitHub SSH Signing Key/public key" }}
+{{- $awsProfile := "" }}
+{{- if eq $hosttype "work" -}}
+  {{- $awsProfile := promptStringOnce . "aws_profile" "AWS Profile" "bedrock-users" }}
+  {{- $gitSigningKeyRef := "op://Employee/GitHub SSH Signing Key/public key" }}
+{{- end -}}
+
+{{- $gitSigningKey := onepasswordRead $gitSigningKeyRef }}
 [data.git]
 # Git user configuration - prompted during initialization
 # Used in git config templates and other version control settings
