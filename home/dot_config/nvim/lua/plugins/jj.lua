@@ -1,5 +1,6 @@
 local function change_id()
-  return " " .. io.popen("jj log -r @ --template 'self.change_id().shortest()' --no-graph"):read("*a"):gsub("\n", "")
+  return " "
+    .. io.popen("jj log -r @ --template 'self.change_id().shortest()' --no-graph 2>/dev/null"):read("*a"):gsub("\n", "")
 end
 
 return {
