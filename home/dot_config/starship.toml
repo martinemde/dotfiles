@@ -100,11 +100,10 @@ truncation_length = 3
 truncation_symbol = "…/"
 
 [directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music" = "󰝚 "
+"Documents" = "󰧮"
+"Downloads" = "󰇚"
+"Music" = "󰎇"
 "Pictures" = " "
-"src" = ""
 "dotfiles" = "󰇙"
 
 # Custom jj (Jujutsu) module - replaces git_branch/git_status
