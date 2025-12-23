@@ -1,4 +1,39 @@
 return {
+  {
+    "neovim/nvim-lspconfig",
+    dependencies = {
+      {
+        "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
+        config = function()
+          require("lsp_lines").setup()
+          vim.diagnostic.config({
+            virtual_text = false,
+            virtual_lines = true,
+          })
+
+          Snacks.toggle({
+            name = "Virtual Lines",
+            get = function()
+              local config = vim.diagnostic.config() ---@cast config -nil
+              return not not config.virtual_lines
+            end,
+            set = function(state)
+              vim.diagnostic.config({
+                virtual_text = not state,
+                virtual_lines = state,
+              })
+            end,
+          }):map("<leader>uv")
+        end,
+      },
+    },
+    opts = {
+      diagnostics = {
+        virtual_text = false,
+        virtual_lines = true,
+      },
+    },
+  },
   -- add any tools you want to have installed below
   {
     "mason-org/mason.nvim",
