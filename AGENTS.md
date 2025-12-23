@@ -68,14 +68,14 @@ Go text/template syntax. Key variables: `.chezmoi.os`, `.chezmoi.workingTree`, `
 
 ## CRITICAL: Edit Source Files Only
 
-**ALWAYS edit `home/` source files, NEVER `~/` installed files.**
+**ALWAYS edit `home/` source files, NEVER `~/` installed target files.**
 
 - **DO**: `home/dot_config/nvim/...`
 - **DON'T**: `~/.config/nvim/...`
 
-Why: Chezmoi copies `home/` to `~/`. Edits to `~/` are overwritten on next apply.
+Chezmoi copies `home/` to `~/`. Edits to `~/` are overwritten on next apply.
 
-Apply changes: `chezmoi diff` (preview), `chezmoi apply [path]` (apply)
+Apply changes: `chezmoi diff` (preview), `chezmoi apply [target_path]` (apply)
 
 ## Testing
 
