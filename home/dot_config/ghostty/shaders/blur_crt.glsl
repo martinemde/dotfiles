@@ -20,7 +20,8 @@
 
 // How far apart the different colors are from each other
 // x \in R
-#define COLOR_FRINGING_SPREAD 0.1
+// #define COLOR_FRINGING_SPREAD 0.1
+#define COLOR_FRINGING_SPREAD 0.4
 
 // How much the ghost images are spread out
 // x \in R : x >= 0
@@ -38,7 +39,7 @@
 #define VIGNETTE_SPREAD 0.4
 // How bright the vignette is
 // x \in R : x >= 0
-#define VIGNETTE_BRIGHTNESS 8.0
+#define VIGNETTE_BRIGHTNESS 10.0
 
 // Tint all colors
 // [0, 1]^3
@@ -64,10 +65,11 @@
 
 // How much the screen flickers
 // x \in R : x >= 0
-// #define FLICKER_STRENGTH 0.04
+#define FLICKER_STRENGTH 0.04
 // How fast the screen flickers
 // x \in R : x > 0
 // #define FLICKER_FREQUENCY 20.0
+#define FLICKER_FREQUENCY 0.2
 
 // How much noise is added to filled areas
 // [0, 1]
@@ -78,7 +80,7 @@
 
 // How big the bloom is
 // x \in R : x >= 0
-#define BLOOM_SPREAD 8.0
+#define BLOOM_SPREAD 10.0
 // How visible the bloom is
 // [0, 1]
 #define BLOOM_STRENGTH 0.004
@@ -165,7 +167,7 @@
 #ifdef BLOOM_SPREAD
 // Golden spiral samples used for bloom.
 //   [x, y, weight] weight is inverse of distance.
-const vec3[24] bloomSamples = {
+const vec3 bloomSamples[24] = vec3[24](
     vec3( 0.1693761725038636,  0.9855514761735895,  1),
     vec3(-1.333070830962943,   0.4721463328627773,  0.7071067811865475),
     vec3(-0.8464394909806497, -1.51113870578065,    0.5773502691896258),
@@ -190,7 +192,7 @@ const vec3[24] bloomSamples = {
     vec3( 3.8639122286635708, -2.6589814382925123,  0.21320071635561041),
     vec3( 3.3486228404946234,  3.4331800232609,     0.20851441405707477),
     vec3(-2.8769733643574344,  3.9652268864187157,  0.20412414523193154)
-};
+);
 #endif
 
 
@@ -252,36 +254,36 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // Add scan lines effect
     fragColor.rgb *= mix(
         1.0,
-        SCAN_LINES_VARIANCE/2.0*(1.0 + sin(2*PI* uv.y * iResolution.y/SCAN_LINES_PERIOD)),
+        SCAN_LINES_VARIANCE/2.0*(1.0 + sin(2.0*PI* uv.y * iResolution.y/SCAN_LINES_PERIOD)),
         SCAN_LINES_STRENGTH
     );
 
 
     // Add aperture grille
-    int apertureGrilleStep = int(8 * mod(fragCoord.x, APERTURE_GRILLE_PERIOD) / APERTURE_GRILLE_PERIOD);
+    int apertureGrilleStep = int(8.0 * mod(fragCoord.x, APERTURE_GRILLE_PERIOD) / APERTURE_GRILLE_PERIOD);
     float apertureGrilleMask;
 
     if (apertureGrilleStep < 3)
         apertureGrilleMask = 0.0;
     else if (apertureGrilleStep < 4)
-        apertureGrilleMask = mod(8*fragCoord.x, APERTURE_GRILLE_PERIOD) / APERTURE_GRILLE_PERIOD;
+        apertureGrilleMask = mod(8.0*fragCoord.x, APERTURE_GRILLE_PERIOD) / APERTURE_GRILLE_PERIOD;
     else if (apertureGrilleStep < 7)
         apertureGrilleMask = 1.0;
     else if (apertureGrilleStep < 8)
-        apertureGrilleMask = mod(-8*fragCoord.x, APERTURE_GRILLE_PERIOD) / APERTURE_GRILLE_PERIOD;
+        apertureGrilleMask = mod(-8.0*fragCoord.x, APERTURE_GRILLE_PERIOD) / APERTURE_GRILLE_PERIOD;
 
     fragColor.rgb *= 1.0 - APERTURE_GRILLE_STRENGTH*apertureGrilleMask;
 
 
     // Add flicker
-    fragColor *= 1.0 - FLICKER_STRENGTH/2.0*(1.0 + sin(2*PI*FLICKER_FREQUENCY*iTime));
+    fragColor *= 1.0 - FLICKER_STRENGTH/2.0*(1.0 + sin(2.0*PI*FLICKER_FREQUENCY*iTime));
 
 
     // Add noise
     // NOTE: Hard-coded noise distributions
     float noise = smoothstep(0.4, 0.6, gold_v2_noise(fragCoord.xy, fract(iTime*0.001)));
     fragColor.rgb *= clamp(noise + 1.0 - NOISE_CONTENT_STRENGTH, 0.0, 1.0);
-    fragColor.rgb = clamp(fragColor.rgb + noise * NOISE_UNIFORM_STRENGTH / 100, 0.0, 1.0);
+    fragColor.rgb = clamp(fragColor.rgb + noise * NOISE_UNIFORM_STRENGTH / 100.0, 0.0, 1.0);
 
 
     // NOTE: At this point, RGB values are again within [0, 1]
