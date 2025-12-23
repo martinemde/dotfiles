@@ -38,7 +38,7 @@ return {
       win = {
         input = {
           keys = {
-            ["<c-s>"] = {
+            ["<a-a>"] = {
               "sidekick_send",
               desc = "Send to Sidekick CLI",
             },
