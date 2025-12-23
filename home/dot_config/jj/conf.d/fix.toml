@@ -24,3 +24,7 @@ patterns = ["glob:'**/*.md'"]
 [fix.tools.rustfmt]
 command = ["rustfmt"]
 patterns = ["glob:'**/*.rs'"]
+
+[fix.tools.gofmt]
+command = ["gofmt"]
+patterns = ["glob:'**/*.go'"]
