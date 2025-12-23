@@ -2,6 +2,17 @@
 // https://github.com/KroneCorylus/ghostty-shader-playground
 // Modified version Copyright (c) 2025 Martin Emde
 
+// ============================================================================
+// CONFIGURATION - Adjust these to customize the effect
+// ============================================================================
+const float MIN_DURATION = 0.08; // Fast fade for short jumps
+const float MAX_DURATION = 0.3;  // Duration for long jumps
+const float LONG_JUMP_THRESHOLD = 0.5; // Distance threshold for "long jump" in normalized space
+const float TAPER_FACTOR = 0.15; // How narrow the tail gets (0.0 = point, 1.0 = full width)
+const float TRAIL_INTENSITY = 0.8; // Overall trail opacity (0.0 = invisible, 1.0 = full, >1.0 = boosted)
+const float GLOW_INTENSITY = 0.0; // Brightness boost at trail tail (0.0 = no glow, 0.5 = subtle, 1.0 = bright)
+const float GLOW_FALLOFF = 0.3; // How quickly glow fades (lower = more concentrated at tail)
+
 float getSdfRectangle(in vec2 p, in vec2 xy, in vec2 b)
 {
     vec2 d = abs(p - xy) - b;
@@ -58,6 +69,11 @@ float ease(float x) {
     return pow(1.0 - x, 2.0);
 }
 
+vec2 getRectangleCenter(vec4 rect) {
+    // Calculate center point of a rectangle (accounts for Y-down coordinate system)
+    return vec2(rect.x + rect.z * 0.5, rect.y - rect.w * 0.5);
+}
+
 // ============================================================================
 // ROCKET CURSOR TRAIL SHADER
 // ============================================================================
@@ -73,12 +89,14 @@ float ease(float x) {
 //    - Temporal: fade over time (trail disappears after DURATION)
 // 4. Masking prevents trails from persisting forever
 // 5. Quadratic easing for snappy, responsive feel
+// 6. Optional glow effect for enhanced visual impact
+// 7. Multiple early exits for optimal performance
+//
+// PERFORMANCE NOTES:
+// - Frame-rate independent animation using (iTime - iTimeCursorChange)
+// - Early exits skip rendering when effect is inactive or complete
+// - Optimized distance calculations minimize expensive operations
 // ============================================================================
-
-const float MIN_DURATION = 0.08; // Fast fade for short jumps
-const float MAX_DURATION = 0.3;  // Duration for long jumps
-const float LONG_JUMP_THRESHOLD = 0.5; // Distance threshold for "long jump" in normalized space
-const float TAPER_FACTOR = 0.15; // How narrow the tail gets (0.0 = point, 1.0 = full width)
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
@@ -116,8 +134,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     // EARLY EXIT: Skip expensive calculations for tiny cursor movements
     // ========================================================================
     // Calculate cursor centers and distance traveled
-    vec2 centerCC = vec2(currentCursor.x + (currentCursor.z / 2.), currentCursor.y - (currentCursor.w / 2.));
-    vec2 centerCP = vec2(previousCursor.x + (previousCursor.z / 2.), previousCursor.y - (previousCursor.w / 2.));
+    vec2 centerCC = getRectangleCenter(currentCursor);
+    vec2 centerCP = getRectangleCenter(previousCursor);
 
     // Use squared distance for early exit to avoid expensive sqrt()
     vec2 delta = centerCC - centerCP;
@@ -179,6 +197,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float easedProgress = ease(progress);
 
     // ========================================================================
+    // EARLY EXIT: Skip rendering if animation is complete
+    // ========================================================================
+    if (progress >= 1.0) {
+        return; // Animation finished, no trail to render
+    }
+
+    // ========================================================================
     // VAPOR TRAIL EFFECT: Semi-transparent particles fading with distance
     // ========================================================================
 
@@ -187,27 +212,45 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float distFromCurrent = distance(vu, centerCC);
     float spatialFade = lineLength > 0.001 ? 1.0 - clamp(distFromCurrent / lineLength, 0.0, 1.0) : 1.0;
 
+    // Shrink trail and add fuzzy edges for softer, more vapor-like appearance
+    // Shrink by 6 pixels to tighten the core, then extend fuzzy edge to 8 pixels
+    float trailMask = 1.0 - smoothstep(0., fuzzyEdgeWidth, sdfTrail + shrinkAmount);
+
+    // CRITICAL MASKING - Only show trail within animated distance
+    // Combine distance mask with trail mask early to avoid unnecessary blending
+    float animatedDistance = easedProgress * lineLength;
+    float distanceMask = smoothstep(animatedDistance * 1.1, animatedDistance * 0.9, distFromCurrent);
+    float combinedMask = trailMask * distanceMask;
+
+    // ========================================================================
+    // EARLY EXIT: Skip blending if completely masked out
+    // ========================================================================
+    if (combinedMask < 0.001) {
+        return; // No visible trail at this pixel
+    }
+
+    // ========================================================================
+    // COLOR AND ALPHA: Apply gradient, glow, and intensity
+    // ========================================================================
     // Color gradient from source (previous cursor) to destination (current cursor)
     // spatialFade = 1.0 at current cursor -> use iCurrentCursorColor
     // spatialFade = 0.0 at previous cursor -> use iPreviousCursorColor
     vec4 gradientColor = mix(iPreviousCursorColor, iCurrentCursorColor, spatialFade);
 
-    // Shrink trail and add fuzzy edges for softer, more vapor-like appearance
-    // Shrink by 6 pixels to tighten the core, then extend fuzzy edge to 8 pixels
-    // Net effect: same overall size but very soft, diffuse, vapor-like edges
-    float trailMask = 1.0 - smoothstep(0., fuzzyEdgeWidth, sdfTrail + shrinkAmount);
-
-    // Combine all fading: trail mask * spatial fade * temporal fade
-    // This gives us semi-transparent blending that fades progressively from cursor
-    float alpha = trailMask * spatialFade * easedProgress;
+    // Combine all fading: combined mask * spatial fade * temporal fade * intensity
+    float alpha = combinedMask * spatialFade * easedProgress * TRAIL_INTENSITY;
 
     // Apply trail with color gradient and alpha blending
     vec4 trailColor = gradientColor;
-    trailColor.a = alpha;
-    fragColor = mix(fragColor, trailColor, trailColor.a);
 
-    // CRITICAL MASKING - Only show trail within animated distance
-    // Soft falloff at the edge to prevent hard cutoff artifacts
-    float distanceMask = smoothstep(easedProgress * lineLength * 1.1, easedProgress * lineLength * 0.9, distFromCurrent);
-    fragColor = mix(prevFrame, fragColor, distanceMask);
+    // Optional glow effect: boost brightness at the tail for "energy" feel
+    // GLOW_INTENSITY controls the effect strength, GLOW_FALLOFF controls distribution
+    if (GLOW_INTENSITY > 0.0) {
+        // Glow is strongest at the tail (low spatialFade) and fades toward cursor
+        float glowFactor = pow(1.0 - spatialFade, GLOW_FALLOFF) * GLOW_INTENSITY;
+        trailColor.rgb *= 1.0 + glowFactor;
+    }
+
+    trailColor.a = alpha;
+    fragColor = mix(prevFrame, trailColor, trailColor.a);
 }
