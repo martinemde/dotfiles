@@ -1,0 +1,50 @@
+# Font Configuration
+font-family = MonoLisa Nerd Font SemiBold
+font-size = 10
+font-feature = +calt,+liga,+dlig,+zero,+ss02,+ss10,+ss11,+ss12,+ss13,+ss14,+ss15,+ss16
+font-synthetic-style = false
+# font-thicken = true
+
+# Icon silliness
+# macos-icon = official
+# macos-icon = blueprint
+# macos-icon = chalkboard
+# macos-icon = microchip
+# macos-icon = glass
+# macos-icon = holographic
+# macos-icon = paper
+# macos-icon = retro
+# macos-icon = xray
+macos-icon = custom-style
+
+macos-icon-frame = beige
+# macos-icon-frame = plastic
+# macos-icon-frame = chrome
+# macos-icon-frame = aluminum
+
+macos-icon-ghost-color = "#ea76cb"
+macos-icon-screen-color = "#04a5e5"
+
+# Theme
+# Having both keeps flashing light mode color on new tabs
+# theme = dark:Catppuccin Mocha,light:Catppuccin Latte
+theme = Catppuccin Mocha
+# theme = Catppuccin Latte
+
+# Make the divides visible
+split-divider-color = "#585b70"
+# unfocused-split-fill = "#0a0a0e"
+# Don't alter unfocused splits at all (that's the shader's job)
+unfocused-split-opacity = 1.0
+# Override default Catppuccin with a darker background
+# AKA Catppuccin Espresso
+background = "#11111b"
+
+# Cursor
+cursor-invert-fg-bg = true
+cursor-style-blink = false
+custom-shader = "shaders/cursor_smear_rocket.glsl"
+custom-shader = "shaders/focus_cursor.glsl"
+custom-shader = "shaders/blur_crt.glsl"
+
+# vim: ft=ghostty

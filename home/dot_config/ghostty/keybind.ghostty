@@ -126,5 +126,4 @@ keybind = ctrl+s>u=undo
 keybind = ctrl+s>shift+u=redo
 keybind = ctrl+s>ctrl+r=redo
 
-# vim: ft=toml
-
+# vim: ft=ghostty

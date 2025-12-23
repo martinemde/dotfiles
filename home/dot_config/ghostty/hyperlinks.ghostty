@@ -31,4 +31,4 @@ link-url = true
 # Only show previews for OSC 8 hyperlinks (where text can differ from URL)
 link-previews = osc8
 
-# vim: ft=toml
+# vim: ft=ghostty

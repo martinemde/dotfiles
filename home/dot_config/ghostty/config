@@ -8,13 +8,6 @@
 # Round these parts we run dev builds
 auto-update-channel = tip
 
-# Font Configuration
-font-family = MonoLisa Nerd Font SemiBold
-font-size = 10
-font-feature = +calt,+liga,+dlig,+zero,+ss02,+ss10,+ss11,+ss12,+ss13,+ss14,+ss15,+ss16
-font-synthetic-style = false
-# font-thicken = true
-
 # Shell Integration
 shell-integration = zsh
 shell-integration-features = cursor,sudo,title
@@ -22,48 +15,10 @@ shell-integration-features = cursor,sudo,title
 # OS
 mouse-hide-while-typing = true
 window-save-state = always
-quit-after-last-window-closed-delay = 3y 14w 15h 92m 65s 358ms 979µs 323ns
 
-# macos-icon = official
-# macos-icon = blueprint
-# macos-icon = chalkboard
-# macos-icon = microchip
-# macos-icon = glass
-# macos-icon = holographic
-# macos-icon = paper
-# macos-icon = retro
-# macos-icon = xray
-macos-icon = custom-style
+config-file = style.ghostty
+config-file = keybind.ghostty
+config-file = hyperlinks.ghostty
+config-file = vim.ghostty
 
-macos-icon-frame = beige
-# macos-icon-frame = plastic
-# macos-icon-frame = chrome
-# macos-icon-frame = aluminum
-
-macos-icon-ghost-color = "#ea76cb"
-macos-icon-screen-color = "#04a5e5"
-
-# Theme
-# Having both keeps flashing light mode color on new tabs
-theme = dark:Catppuccin Mocha,light:Catppuccin Latte
-# theme = Catppuccin Mocha
-
-# Make the divides visible
-split-divider-color = "#585b70"
-# unfocused-split-fill = "#0a0a0e"
-# unfocused-split-opacity = 0.85
-# Override default Catppuccin with a darker background
-background = "#11111b"
-
-# Cursor
-cursor-invert-fg-bg = true
-cursor-style-blink = false
-custom-shader = "shaders/cursor_smear_rocket.glsl"
-custom-shader = "shaders/focus_cursor.glsl"
-# custom-shader = "shaders/blur_vignette.glsl"
-custom-shader = "shaders/blur_crt.glsl"
-
-config-file = config-keybind
-config-file = config-hyperlinks
-
-# vim: ft=toml
+# vim: ft=ghostty
