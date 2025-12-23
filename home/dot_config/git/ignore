@@ -92,8 +92,9 @@ mise/*.local.toml
 /.lefthook-local/
 
 .obsidian/
-
-**/.claude/settings.local.json
-.claude/settings.local.json
+ile-
+**/.claude/*.local.*
+.claude/*.local.*
+.claude/file-suggestions.cache
 
 scratch/

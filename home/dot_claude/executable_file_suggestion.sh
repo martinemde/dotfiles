@@ -1,5 +1,38 @@
 #!/bin/bash
-# Fast file suggestion for Claude Code @file autocomplete
+#
+# Fast file suggestion for Claude Code @file in big repositories
+#
+# Repository: https://github.com/martinemde/dotfiles
+#
+# Usage:
+#   Add to ~/.claude/settings.json:
+#   {
+#     "fileSuggestion": {
+#       "type": "command",
+#       "command": "~/.claude/file_suggestion.sh"
+#     }
+#   }
+#
+# MIT License
+# Copyright (c) 2026 Martin Emde
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 1
 
@@ -37,9 +70,11 @@ if [[ -e .git ]]; then
     head -15 "$CACHE_FILE"
   elif [[ $HAS_FZF -eq 1 ]]; then
     safe_query="${query//[^a-zA-Z0-9_\/.-]/}"
-    first_term="${safe_query%%[/.-]*}"
-    if [[ -n "$first_term" ]] && [[ ${#first_term} -ge 2 ]]; then
-      rg -i "$first_term" "$CACHE_FILE" 2>/dev/null | fzf --filter="$query" 2>/dev/null | head -15 || true
+    # Extract first few chars for rg pre-filter (not whole first term)
+    first_chars="${safe_query:0:3}"
+    if [[ -n "$first_chars" ]] && [[ ${#first_chars} -ge 2 ]]; then
+      # Pre-filter with just first 2-3 chars to keep rg fast but not too restrictive
+      rg -i "$first_chars" "$CACHE_FILE" 2>/dev/null | fzf --filter="$query" 2>/dev/null | head -15 || true
     else
       fzf --filter="$query" <"$CACHE_FILE" 2>/dev/null | head -15 || true
     fi
