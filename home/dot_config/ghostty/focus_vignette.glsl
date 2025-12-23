@@ -16,8 +16,8 @@
 
 // Configuration constants
 const float PULSE_DURATION = 0.15;       // How long the focus pulse lasts (seconds)
-const float VIGNETTE_STRENGTH = 0.6;     // How dark the vignette gets (0.0-1.0)
-const float VIGNETTE_FALLOFF = 1.0;      // Inner shadow width (lower = thinner shadow, higher = wider)
+const float VIGNETTE_STRENGTH = 0.3;     // How dark the vignette gets (0.0-1.0)
+const float VIGNETTE_FALLOFF = 1.4;      // Inner shadow width (lower = thinner shadow, higher = wider)
 
 // ============================================================================
 // HELPER FUNCTIONS
