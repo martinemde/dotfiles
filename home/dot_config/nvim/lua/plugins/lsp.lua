@@ -4,21 +4,40 @@ return {
     "mason-org/mason.nvim",
     opts = {
       ensure_installed = {
-        "copilot-language-server",
-        "gitleaks",
-        "hadolint",
+        "bash-language-server", -- Bash LSP
+        "copilot-language-server", -- Tab completions and Next Edit Suggestions from GitHub Copilot
+        "docker-compose-language-service", -- Docker Compose LSP
+        "dockerfile-language-server", -- Dockerfile LSP
+        "eslint-lsp", -- ESLint LSP
+        "gitleaks", -- Secret scanning
+        "gofumpt", -- Go code formatter
+        "goimports", -- Go import formatter
+        "golangci-lint", -- Go linter
+        "gopls", -- Go LSP
+        "hadolint", -- Dockerfile linter
+        "herb-language-server", -- HTML+ERB for Ruby on Rails
+        "json-lsp", -- JSON LSP
+        "lua-language-server", -- Lua LSP
         "markdown-oxide", -- Obsidian Markdown
-        "markdownlint-cli2",
-        "prettier",
-        "pyright",
-        "rubocop",
-        "ruby-lsp",
-        "rust-analyzer",
-        "shellcheck",
-        "shfmt",
-        "stylua",
-        "svelte-language-server",
-        "tailwindcss-language-server",
+        "markdown-toc", -- Markdown table of contents generator
+        "markdownlint-cli2", -- Markdown linter
+        "marksman", -- Markdown LSP
+        "prettier", -- Code formatter
+        "pyright", -- Python LSP
+        "rubocop", -- Ruby linter and formatter
+        "ruby-lsp", -- Ruby LSP
+        "ruff", -- Python linter
+        "rust-analyzer", -- Rust LSP
+        "shellcheck", -- Shell script linter
+        "shfmt", -- Shell script formatter
+        "stylua", -- Lua formatter
+        "svelte-language-server", -- Svelte LSP
+        "tailwindcss-language-server", -- Tailwind CSS LSP
+        "terraform-ls", -- Terraform LSP
+        "tflint", -- Terraform linter
+        "tree-sitter-cli", -- Tree-sitter parser generator
+        "yaml-language-server", -- YAML LSP
+        "zls", -- Zig LSP
       },
     },
   },
