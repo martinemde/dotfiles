@@ -1,3 +1,7 @@
 # Managed by Renovate (pip_requirements). See docs/renovate.md for policy.
 # Python tools pin manifest for uv-installed CLI tools
+
+# https://github.com/simonw/claude-code-transcripts
+claude-code-transcripts==0.5
+
 gitingest==0.3.1
