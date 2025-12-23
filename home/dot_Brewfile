@@ -70,7 +70,6 @@ brew "openssl@3" # crypto library
 brew "overmind" # process manager
 brew "pandoc" # document converter
 brew "pgvector" # PostgreSQL extension
-brew "pipx" # Python installer
 brew "poppler" # PDF library
 brew "pre-commit" # Git hooks
 brew "rbspy" # Ruby profiler

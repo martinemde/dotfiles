@@ -14,7 +14,7 @@ Is it a package/tool to install?
 │   │       └─ NO → Use appropriate OS package manager
 │   └─ NO → Is it a CLI developer tool (language version manager, etc.)?
 │       ├─ YES → Use mise (.mise.toml)
-│       ├─ NO → Is it a Python tool (pipx)?
+│       ├─ NO → Is it a Python tool (uv tool install)?
 │       │   ├─ YES → Use Python requirements (requirements.txt)
 │       │   └─ NO → Is it for containers/development environments?
 │       │       ├─ YES → Use Docker/devcontainer configs
@@ -29,7 +29,7 @@ Is it a package/tool to install?
 | --------------------- | -------------------------------- | ----------------------------------------- | ---------------- | ---------------------------- |
 | **Homebrew**          | macOS packages, Linux packages   | `.chezmoidata/packages.yaml`              | Built-in         | System-wide installation     |
 | **mise**              | CLI dev tools, language runtimes | `.mise.toml`                              | Custom regex     | Per-project or global        |
-| **Python/pipx**       | Python CLI tools                 | `requirements.txt`                        | Built-in         | Isolated Python environments |
+| **Python/uv**         | Python CLI tools                 | `requirements.txt`                        | Built-in         | Isolated Python environments |
 | **Docker**            | Container images                 | `docker-compose.yml`, `devcontainer.json` | Built-in         | Development environments     |
 | **Chezmoi Externals** | Files, archives, Git repos       | `.chezmoiexternals/*.toml`                | Custom regex     | Dotfiles, configs, plugins   |
 | **CLI Versions**      | Script-installed CLIs            | `cli-versions.toml`                       | Custom regex     | Install script dependencies  |
@@ -145,11 +145,11 @@ terraform = "1.7.0"
 kubectl = "1.29.1"
 ```
 
-### 3. Python Requirements (pip/pipx)
+### 3. Python Requirements (uv tool install)
 
 **When to use**:
 
-- Python CLI tools (pipx)
+- Python CLI tools (uv tool install)
 - Python libraries and dependencies
 - Tools best installed via pip
 
@@ -163,21 +163,20 @@ ruff==0.2.0
 poetry==1.7.1
 ```
 
-**Installation**: Run script installing via pip/pipx
+**Installation**: Run script installing via uv tool install
 
 **Renovate**: Built-in support via `pypi` datasource
 
 **Pros**:
 
-- Isolated Python environments (pipx)
-- Latest Python packages
+- Isolated Python environments (uv)
+- Fast installation (Rust-based)
 - Cross-platform
 - Built-in Renovate support
 
 **Cons**:
 
 - Python-specific
-- Can be slow to install
 - May require Python version management
 
 **Example**:
@@ -192,8 +191,8 @@ ruff==0.2.0
 mypy==1.8.0
 
 # CLI tools
-pipx==1.4.3
-poetry==1.7.1
+claude-code-transcripts==0.5
+gitingest==0.3.1
 ```
 
 ### 4. Docker / Devcontainer
@@ -375,7 +374,7 @@ chezmoi = "v2.56.0"
 | **GUI application** (VS Code, Chrome) | Homebrew (cask)       | Manual install         |
 | **CLI dev tool** (gh, jq, yq)         | mise                  | Homebrew               |
 | **Language runtime** (Node, Python)   | mise                  | Homebrew               |
-| **Python tool** (black, poetry)       | pip/pipx              | mise                   |
+| **Python tool** (black, poetry)       | uv tool install       | mise                   |
 | **Shell plugin**                      | Chezmoi externals     | Manual                 |
 | **Editor plugin**                     | Chezmoi externals     | Editor package manager |
 | **Config framework** (oh-my-zsh)      | Chezmoi externals     | Manual                 |
@@ -461,13 +460,13 @@ chezmoi = "v2.56.0"
 3. Test on clean machine
 4. Document in README
 
-### From Python Global to pipx
+### From Python Global to uv
 
 **When**: Want isolated Python tool environments
 
 1. Add tool to `requirements.txt`
-2. Update install script to use pipx
-3. Test isolation: `pipx list`
+2. Update install script to use uv tool install
+3. Test isolation: `uv tool list`
 4. Remove global pip install
 
 ## Best Practices
@@ -571,7 +570,7 @@ This setup:
 | Add macOS app   | Homebrew cask    | Edit `packages.yaml`                                  |
 | Add CLI tool    | mise             | `mise use <tool>@<version>`                           |
 | Add zsh plugin  | Chezmoi external | Create in `.chezmoiexternals/zsh.externals.toml.tmpl` |
-| Add Python tool | pip/pipx         | Add to `requirements.txt`                             |
+| Add Python tool | uv tool install  | Add to `requirements.txt`                             |
 | Add binary      | Chezmoi external | Create in `.chezmoiexternals/` with type=archive-file |
 | Update versions | Renovate         | Wait for PR or update manually                        |
 | Preview changes | Chezmoi          | `chezmoi diff`                                        |

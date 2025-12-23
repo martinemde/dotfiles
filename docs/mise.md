@@ -2,7 +2,7 @@
 
 ## Context and Problem Statement
 
-The dotfiles repository currently uses Homebrew to install development tools like Python, Node.js, and associated tooling. While working on a project requiring Ansible (which Mise can manage via its pipx backend), inconsistencies emerged: Python was installed via Homebrew, but pipx (needed for Python package isolation) would ideally be installed through the Python managed by Mise for consistency. This creates a fragmented tool management approach where some tools come from package managers and others from version managers.
+The dotfiles repository currently uses Homebrew to install development tools like Python, Node.js, and associated tooling. While working on a project requiring Ansible and other Python CLI tools, inconsistencies emerged: Python was installed via Homebrew, but Python tool management (via uv) needed to align with the Python runtime managed by Mise for consistency. This creates a fragmented tool management approach where some tools come from package managers and others from version managers.
 
 ## Decision Drivers
 
@@ -10,7 +10,7 @@ The dotfiles repository currently uses Homebrew to install development tools lik
 - **Reproducibility**: Pinned versions ensure consistent environments across machines and time
 - **Performance**: Faster dotfile provisioning by avoiding unnecessary tool reinstallations
 - **Consistency**: Single tool management approach reduces complexity
-- **Toolchain integration**: Tools like pipx, npm globals should use the same runtime they're installed for
+- **Toolchain integration**: Tools like uv, npm globals should use the same runtime they're installed for
 
 ## Considered Options
 
@@ -27,7 +27,7 @@ Chosen option: "Mise-first approach", because it provides project-specific versi
 - Good, because tools are pinned to specific versions improving reproducibility
 - Good, because project-specific version switching is seamless
 - Good, because dotfile updates only reinstall affected toolchains
-- Good, because toolchain integration (Python + pipx) is consistent
+- Good, because toolchain integration (Python + uv) is consistent
 - Bad, because pinned versions require ongoing maintenance
 - Bad, because adds complexity to the chezmoi template system
 
@@ -37,7 +37,7 @@ Implementation success will be confirmed by:
 
 - Fast dotfile provisioning (no unnecessary tool reinstalls)
 - Successful project-specific Python version switching
-- Consistent toolchain behavior (pipx using Mise-managed Python)
+- Consistent toolchain behavior (uv using Mise-managed Python)
 - Granular run_onchange script execution
 
 ## Pros and Cons of the Options
@@ -49,7 +49,7 @@ Install all development tools including Python, Node.js via Homebrew packages.
 - Good, because simple single package manager approach
 - Good, because automatic dependency management
 - Bad, because no project-specific version switching
-- Bad, because pipx/npm tools don't align with runtime versions
+- Bad, because uv/npm tools don't align with runtime versions
 - Bad, because system-wide version conflicts
 
 ### Hybrid Homebrew + Mise approach
@@ -88,7 +88,7 @@ This ensures scripts only execute when their specific tool version changes, not 
 **Script execution order**: The base mise installation script is prefixed with `00-` to ensure tools are installed before language-specific scripts run:
 
 - `run_onchange_00-install-mise-tools.sh.tmpl` - Installs all mise-defined tools
-- `run_onchange_install-python-tools.sh.tmpl` - Installs Python ecosystem tools (pipx, etc.)
+- `run_onchange_install-python-tools.sh.tmpl` - Installs Python ecosystem tools (via uv tool install)
 - Future: `run_onchange_install-nodejs-tools.sh.tmpl`, etc.
 
 ### Technical Implementation Notes
@@ -106,7 +106,7 @@ This ensures scripts only execute when their specific tool version changes, not 
 
 ### Migration Path
 
-1. Move pipx installation from Homebrew to Mise-managed Python
+1. Migrate from pipx to uv for Python tool management (uv installed via Homebrew)
 2. Establish tool-specific script patterns
 3. Migrate other development tooling incrementally
 4. Document patterns for future tool additions

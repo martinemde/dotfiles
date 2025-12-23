@@ -56,7 +56,7 @@ These files purposely centralize versions so Renovate can update them automatica
   - Renovate updates native mise tools via the Mise manager, and Aqua‑prefixed tools via a custom regex manager (GitHub Releases datasource).
 
 - `home/dot_config/dotfiles/requirements.txt`
-  - Pinned versions for Python tools (installed via pipx). Updated by Renovate's pip manager.
+  - Pinned versions for Python tools (installed via uv tool install). Updated by Renovate's pip manager.
 
 - `home/dot_config/dotfiles/package.json`
   - Pinned versions for Node.js CLI tools (installed globally via npm). Updated by Renovate's npm manager.

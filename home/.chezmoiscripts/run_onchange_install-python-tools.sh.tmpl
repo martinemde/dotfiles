@@ -7,6 +7,12 @@
 set -o errexit
 set -o nounset
 
+# Only run if uv is available
+if ! command -v uv >/dev/null 2>&1; then
+    echo "uv not found, skipping Python tools installation"
+    exit 0
+fi
+
 # Only run if mise is available
 if ! command -v mise >/dev/null 2>&1; then
     echo "mise not found, skipping Python tools installation"
@@ -19,22 +25,16 @@ if ! mise which python >/dev/null 2>&1; then
     exit 0
 fi
 
-# Get Python path once
-PYTHON="$(mise which python)"
-
 echo "Installing Python tools..."
 
-# Use mise's Python to upgrade pip and install pipx
-"$PYTHON" -m pip install --upgrade pip pipx
-
-# Install Python tools via pipx from requirements.txt
+# Install Python tools via uv from requirements.txt
 REQ_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/requirements.txt"
 if [ -f "$REQ_FILE" ]; then
-  echo "Installing pinned pipx tools from $REQ_FILE..."
+  echo "Installing pinned uv tools from $REQ_FILE..."
   # Ignore comments and blank lines
   grep -Ev '^(#|\s*$)' "$REQ_FILE" | while read -r spec; do
-    # --force updates existing venvs when version pins change
-    "$PYTHON" -m pipx install --force "$spec"
+    # --force updates existing tools when version pins change
+    uv tool install --force "$spec"
   done
 else
   echo "No requirements.txt found at $REQ_FILE, skipping Python tools installation"
