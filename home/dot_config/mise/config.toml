@@ -3,6 +3,7 @@
 [tools]
 "aqua:jqlang/jq" = "1.7.1"
 "aqua:technicalpickles/envsense" = "0.3.0"
+"aqua:tree-sitter/tree-sitter" = "latest"
 "cargo:starship-jj" = "0.6.0"
 bun = "latest"
 node = "24.11.0"

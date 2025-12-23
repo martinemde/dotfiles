@@ -14,4 +14,8 @@ return {
   "ThePrimeagen/refactoring.nvim", -- https://www.lazyvim.org/extras/editor/refactoring
   "monaqa/dial.nvim", -- https://www.lazyvim.org/extras/editor/dial
   "folke/edgy.nvim", -- https://www.lazyvim.org/extras/ui/edgy
+  {
+    "bezhermoso/tree-sitter-ghostty",
+    build = "make nvim_install",
+  },
 }
