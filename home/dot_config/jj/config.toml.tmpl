@@ -11,8 +11,11 @@ email = "{{ .git.email }}"
 
 [signing]
 backend = "ssh"
-behavior = "own"
+behavior = "drop"
 key = "{{ .git.signingkey }}"
+
+[git]
+sign-on-push = true
 
 [templates]
 git_push_bookmark = '"martinemde/" ++ change_id.short()'
