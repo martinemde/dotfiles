@@ -7,12 +7,16 @@ bookmark-list-sort-keys = ["committer-date-"]
 default-command = "status"
 # Enable colored output
 color = "auto"
-diff-formatter = ":git"
 editor = "nvim"
 pager = "delta"
 paginate = "auto"
 show-cryptographic-signatures = true
+
+diff-formatter = "delta"
 diff-editor = ":builtin"
+
+[merge-tools.delta]
+diff-expected-exit-codes = [0, 1]
 
 [ui.movement]
 # Default to editing when moving with prev/next
