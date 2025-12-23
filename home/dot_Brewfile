@@ -2,8 +2,8 @@
 brew "atuin" # shell history
 brew "automake" # build tool
 brew "awscli" # AWS CLI
-brew "bat-extras" # bat extensions
 brew "bat" # cat replacement
+brew "bat-extras" # bat extensions
 brew "bison" # parser generator
 brew "ccusage"  # CPU monitor
 brew "chezmoi"  # dotfiles manager
@@ -15,11 +15,11 @@ brew "coreutils" # GNU coreutils
 brew "cosign" # signature tool
 brew "curl" # HTTP client
 brew "devcontainer" # devcontainer CLI
+brew "docker" # container runtime
 brew "docker-buildx" # Docker build
 brew "docker-compose" # container orchestration
-brew "docker-credential-helper-ecr" # ECR auth
 brew "docker-credential-helper" # Docker auth
-brew "docker" # container runtime
+brew "docker-credential-helper-ecr" # ECR auth
 brew "dotslash" # executable runner
 brew "duf" # disk usage
 brew "dust" # disk usage
@@ -33,10 +33,10 @@ brew "fzf" # fuzzy finder
 brew "gh" # GitHub CLI
 brew "ghostscript" # PostScript interpreter
 brew "ghq" # Git repo manager
-brew "git-delta" # git diff tool
-brew "git-lfs" # Git LFS
 brew "git" # version control
+brew "git-delta" # git diff tool
 brew "gitleaks" # secrets scanner
+brew "git-lfs" # Git LFS
 brew "glow" # markdown viewer
 brew "gmp" # math library
 brew "go" # Go runtime
@@ -93,8 +93,8 @@ brew "yamllint"  # YAML linter
 brew "yq" # YAML processor
 brew "zoxide" # cd replacement
 brew "zsh" # shell
-cask "1password-cli" # password CLI
 cask "1password" # password manager
+cask "1password-cli" # password CLI
 cask "amethyst" # window manager
 cask "betterdisplay" # display manager
 cask "claude-code" # coding agent
