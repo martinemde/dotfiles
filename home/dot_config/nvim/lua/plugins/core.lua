@@ -6,7 +6,10 @@ return {
   { "LazyVim/LazyVim", version = false },
   -- Ensure the following plugins are installed
   -- No configuration needed
+
   "gbprod/yanky.nvim", -- https://www.lazyvim.org/extras/coding/yanky
   "smjonas/inc-rename.nvim", -- https://www.lazyvim.org/extras/editor/inc-rename
   "ThePrimeagen/refactoring.nvim", -- https://www.lazyvim.org/extras/editor/refactoring
+  "monaqa/dial.nvim", -- https://www.lazyvim.org/extras/editor/dial
+  "folke/edgy.nvim", -- https://www.lazyvim.org/extras/ui/edgy
 }
