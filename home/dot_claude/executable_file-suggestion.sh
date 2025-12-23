@@ -9,7 +9,7 @@
 #   {
 #     "fileSuggestion": {
 #       "type": "command",
-#       "command": "~/.claude/file_suggestion.sh"
+#       "command": "~/.claude/file-suggestion.sh"
 #     }
 #   }
 #
