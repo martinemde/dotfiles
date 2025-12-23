@@ -1,5 +1,6 @@
 local function change_id()
-  return " " .. io.popen("jj log -r @ --template 'self.change_id().shortest()' --no-graph"):read("*a"):gsub("\n", "")
+  local cmd = "jj --ignore-working-copy --quiet log -r @ --template 'self.change_id().shortest()' --no-graph"
+  return " " .. io.popen(cmd):read("*a"):gsub("\n", "")
 end
 return {
   "nvim-lualine/lualine.nvim",
