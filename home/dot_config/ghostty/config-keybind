@@ -82,7 +82,7 @@ keybind = ctrl+s>shift+\=new_split:left
 keybind = ctrl+s>shift+-=new_split:right
 keybind = ctrl+s>-=new_split:down
 keybind = ctrl+s>%=new_split:auto
-keybind = ctrl+s>"=new_split:up
+keybind = ctrl+s>shift+'=new_split:up
 
 ## Switch Splits
 keybind = ctrl+s>i=goto_split:next
@@ -101,26 +101,30 @@ keybind = ctrl+s>shift+l=resize_split:right,200
 keybind = ctrl+s>==equalize_splits
 
 ## Split/Pane Management
-keybind = ctrl+s>,=prompt_surface_title
+keybind = ctrl+s>t=prompt_surface_title
 keybind = ctrl+s>x=close_surface
 keybind = ctrl+s>z=toggle_split_zoom
 
 # Vim-oriented scroll and navigation
 keybind = ctrl+s>g>g=scroll_to_top
 keybind = ctrl+s>shift+g=scroll_to_bottom
-keybind = ctrl+s>u=scroll_page_up
-keybind = ctrl+s>d=scroll_page_down
+keybind = ctrl+s>ctrl+u=scroll_page_up
+keybind = ctrl+s>ctrl+d=scroll_page_down
 keybind = "ctrl+s>[=jump_to_prompt:-1"
 keybind = "ctrl+s>]=jump_to_prompt:1"
 
-# Clear (disable common navigation movement and reassign)
+# Disable vim/tmux navigation movement
 keybind = ctrl+l=unbind
 keybind = ctrl+s>ctrl+l=clear_screen
 
 ## Utility
 keybind = ctrl+s>:=toggle_command_palette
 keybind = ctrl+s>?=inspector:toggle
+keybind = ctrl+s>,=reload_config
 keybind = ctrl+s>r=reload_config
+keybind = ctrl+s>u=undo
+keybind = ctrl+s>shift+u=redo
+keybind = ctrl+s>ctrl+r=redo
 
 # vim: ft=toml
 
