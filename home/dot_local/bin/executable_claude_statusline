@@ -92,6 +92,17 @@ if command -v jq >/dev/null 2>&1 && [ -n "$payload" ]; then
     if [ -n "$current_tokens" ] && [ "$current_tokens" != "null" ]; then
       percent_used=$((current_tokens * 100 / context_size))
       export CLAUDE_CONTEXT="${percent_used}%"
+
+      # OSC 9;4 progress bar: ESC ] 9 ; 4 ; <state> ; <progress> BEL
+      # 0-45%: normal (state 1), 45-60%: warning (state 4), 60%+: error (state 2)
+      if [ "$percent_used" -ge 60 ]; then
+        progress_state=2  # Error
+      elif [ "$percent_used" -ge 45 ]; then
+        progress_state=4  # Warning
+      else
+        progress_state=1  # Normal
+      fi
+      printf '\033]9;4;%d;%d\a' "$progress_state" "$percent_used"
     fi
   fi
 fi
