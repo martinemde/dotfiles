@@ -38,7 +38,7 @@
 #define VIGNETTE_SPREAD 0.4
 // How bright the vignette is
 // x \in R : x >= 0
-#define VIGNETTE_BRIGHTNESS 20.0
+#define VIGNETTE_BRIGHTNESS 8.0
 
 // Tint all colors
 // [0, 1]^3
@@ -64,10 +64,10 @@
 
 // How much the screen flickers
 // x \in R : x >= 0
-#define FLICKER_STRENGTH 0.04
+// #define FLICKER_STRENGTH 0.04
 // How fast the screen flickers
 // x \in R : x > 0
-#define FLICKER_FREQUENCY 15.0
+// #define FLICKER_FREQUENCY 20.0
 
 // How much noise is added to filled areas
 // [0, 1]
