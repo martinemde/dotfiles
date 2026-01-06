@@ -15,14 +15,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Disable concealing in markdown files to show all syntax elements
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "markdown",
-  callback = function()
-    vim.opt_local.conceallevel = 0
-  end,
-})
-
 -- Automatically check for file changes when focus returns or buffer is entered
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "TermClose", "TermLeave" }, {
   callback = function()
