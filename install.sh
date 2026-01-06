@@ -382,22 +382,22 @@ install_mise() {
   elif command -v apt-get >/dev/null 2>&1; then
     log_info "Installing mise via apt repository..."
     system=$(detect_system)
-    
+
     # Determine architecture for apt repository
     case "$system" in
-      linux_amd64) repo_arch="amd64" ;;
-      linux_arm64) repo_arch="arm64" ;;
-      *) 
-        log_info "Unsupported architecture for mise apt repository: $system"
-        return 1
-        ;;
+    linux_amd64) repo_arch="amd64" ;;
+    linux_arm64) repo_arch="arm64" ;;
+    *)
+      log_info "Unsupported architecture for mise apt repository: $system"
+      return 1
+      ;;
     esac
-    
+
     # Install required dependencies and set up repository
     if run_with_sudo apt-get update -y && run_with_sudo apt-get install -y gpg wget curl; then
       if run_with_sudo install -dm 755 /etc/apt/keyrings; then
         download_cmd=$(get_download_cmd)
-        
+
         if $download_cmd https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | run_with_sudo tee /etc/apt/keyrings/mise-archive-keyring.gpg >/dev/null; then
           echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$repo_arch] https://mise.jdx.dev/deb stable main" | run_with_sudo tee /etc/apt/sources.list.d/mise.list
           if run_with_sudo apt-get update && try_package_install "mise" "apt" "run_with_sudo apt-get install -y mise"; then
@@ -683,7 +683,7 @@ main() {
 
   # Execute the initialization command with proper argument handling
   set -- --apply --source="$script_dir" --working-tree="$script_dir"
-  
+
   # Add promptString arguments if environment variables are set
   if [ -n "${GIT_USER_NAME:-}" ]; then
     set -- "$@" --promptString "Git user.name=$GIT_USER_NAME"
@@ -691,13 +691,13 @@ main() {
   if [ -n "${GIT_USER_EMAIL:-}" ]; then
     set -- "$@" --promptString "Git user.email=$GIT_USER_EMAIL"
   fi
-  
+
   # Add any additional passthrough arguments
   if [ -n "$CHEZMOI_ARGS" ]; then
     # shellcheck disable=SC2086
     set -- "$@" $CHEZMOI_ARGS
   fi
-  
+
   # Execute the initialization command
   exec "$chezmoi" init "$@"
 }
