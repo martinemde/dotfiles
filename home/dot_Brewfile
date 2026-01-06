@@ -39,7 +39,6 @@ brew "gitleaks" # secrets scanner
 brew "git-lfs" # Git LFS
 brew "glow" # markdown viewer
 brew "gmp" # math library
-brew "go" # Go runtime
 brew "graphicsmagick" # image processing
 brew "graphviz" # graph visualization
 brew "htop" # process monitor
