@@ -328,7 +328,7 @@ themes {
     catppuccin-espresso {
         text_unselected {
             base "#cdd6f4"
-            background "#181825"
+            background "#11111b"
             emphasis_0 "#fab387"
             emphasis_1 "#89dceb"
             emphasis_2 "#a6e3a1"
