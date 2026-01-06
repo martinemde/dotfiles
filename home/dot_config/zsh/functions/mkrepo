@@ -2,11 +2,16 @@
 local name=$1
 
 if [ -z "$name" ]; then
-  echo "Usage: mkrepo <name>"
+  echo "Usage: mkrepo <name> or mkrepo <org>/<name>"
   return 1
 fi
 
-local dir="$HOME/src/martinemde/$name"
+local dir
+if [[ "$name" == */* ]]; then
+  dir="$HOME/src/$name"
+else
+  dir="$HOME/src/martinemde/$name"
+fi
 mkdir -p "$dir"
 z "$dir"
 
