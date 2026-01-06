@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# zellij-open - Open files in a floating zellij editor pane
+#
+# Handles file:// URIs and regular paths with optional line numbers
+# Supports formats:
+#   - file:///path/to/file
+#   - file:///path/to/file:123
+#   - /path/to/file
+#   - /path/to/file:123
+#   - path/to/file:123
+
+set -o errexit -o nounset -o pipefail
+
+# Parse input - handle file:// URIs and line numbers
+# Outputs two lines: file path, then line number (or empty)
+parse_file_uri() {
+  local input="$1"
+  local file=""
+  local line=""
+
+  # Remove file:// prefix if present
+  input="${input#file://}"
+
+  # Check if there's a line number (format: path:123)
+  if [[ "$input" =~ ^(.+):([0-9]+)$ ]]; then
+    file="${BASH_REMATCH[1]}"
+    line="${BASH_REMATCH[2]}"
+  else
+    file="$input"
+  fi
+
+  # Make path absolute if it isn't already
+  if [[ ! "$file" =~ ^/ ]]; then
+    file="$(pwd)/$file"
+  fi
+
+  echo "$file"
+  echo "$line"
+}
+
+main() {
+  if [[ $# -eq 0 ]]; then
+    echo "Usage: zellij-open <file|file://uri>" >&2
+    exit 1
+  fi
+
+  local input="$1"
+  local file line
+
+  # Parse the file and line number
+  read -r file < <(parse_file_uri "$input" | head -n1)
+  read -r line < <(parse_file_uri "$input" | tail -n1)
+
+  # Check if file exists
+  if [[ ! -e "$file" ]]; then
+    echo "Error: File not found: $file" >&2
+    exit 1
+  fi
+
+  # Open in floating zellij editor pane
+  if [[ -n "$line" ]]; then
+    zellij edit --floating --line "$line" "$file"
+  else
+    zellij edit --floating "$file"
+  fi
+}
+
+main "$@"

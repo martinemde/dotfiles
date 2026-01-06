@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+# kitty-open - URL handler for kitty terminal's open_url_with config
+#
+# Opens file paths in nvim via kitty overlay window, web URLs in browser.
+# Kitty passes the clicked URL as the first argument.
+#
+# Supports formats:
+#   - file:///path/to/file
+#   - file:///path/to/file:123
+#   - /path/to/file
+#   - /path/to/file:123
+#   - relative/path/file:123
+#   - https://example.com
+
+set -o errexit -o nounset -o pipefail
+
+# Find kitty remote control socket
+# Priority: KITTY_LISTEN_ON env var > configured path > auto-discovered PID socket
+find_kitty_socket() {
+  if [[ -n "${KITTY_LISTEN_ON:-}" ]]; then
+    echo "$KITTY_LISTEN_ON"
+    return
+  fi
+
+  if [[ -S /tmp/kitty ]]; then
+    echo "unix:/tmp/kitty"
+    return
+  fi
+
+  # Find PID-suffixed socket (kitty creates these with allow_remote_control)
+  local socket
+  for socket in /tmp/kitty-*; do
+    if [[ -S "$socket" ]]; then
+      echo "unix:$socket"
+      return
+    fi
+  done
+
+  echo "unix:/tmp/kitty"
+}
+
+# Determine if input is a file path or web URL
+is_file_path() {
+  local input="$1"
+
+  # file:// URIs are always files
+  if [[ "$input" =~ ^file:// ]]; then
+    return 0
+  fi
+
+  # Absolute paths starting with /
+  if [[ "$input" =~ ^/ ]]; then
+    return 0
+  fi
+
+  # Relative paths: contains / but no ://
+  if [[ "$input" == */* ]] && [[ "$input" != *://* ]]; then
+    return 0
+  fi
+
+  # Everything else (http://, https://, etc.) is a web URL
+  return 1
+}
+
+# Parse file path and optional line number from input
+parse_file_path() {
+  local input="$1"
+  local file=""
+  local line=""
+
+  # Remove file:// prefix if present
+  input="${input#file://}"
+
+  # Check if there's a line number (format: path:123)
+  if [[ "$input" =~ ^(.+):([0-9]+)$ ]]; then
+    file="${BASH_REMATCH[1]}"
+    line="${BASH_REMATCH[2]}"
+  else
+    file="$input"
+  fi
+
+  # Make path absolute if it isn't already
+  if [[ ! "$file" =~ ^/ ]]; then
+    file="$(pwd)/$file"
+  fi
+
+  echo "$file"
+  echo "$line"
+}
+
+# Open file in kitty overlay with editor
+open_in_overlay() {
+  local file="$1"
+  local line="${2:-}"
+  local editor="${EDITOR:-nvim}"
+
+  # Build the command arguments
+  local cmd_args=()
+  if [[ -n "$line" ]]; then
+    cmd_args+=("+${line}")
+  fi
+  cmd_args+=("$file")
+
+  local socket
+  socket="$(find_kitty_socket)"
+
+  kitty @ --to "$socket" launch \
+    --cwd=current \
+    --type=overlay \
+    -- "$editor" "${cmd_args[@]}"
+}
+
+# Open URL in default browser
+open_in_browser() {
+  local url="$1"
+  open "$url"
+}
+
+main() {
+  if [[ $# -eq 0 ]]; then
+    echo "Usage: kitty-open <url|file|file://uri>" >&2
+    exit 1
+  fi
+
+  local input="$1"
+
+  if is_file_path "$input"; then
+    local file line
+    read -r file < <(parse_file_path "$input" | head -n1)
+    read -r line < <(parse_file_path "$input" | tail -n1)
+
+    # Check if file exists
+    if [[ ! -e "$file" ]]; then
+      echo "Error: File not found: $file" >&2
+      exit 1
+    fi
+
+    open_in_overlay "$file" "$line"
+  else
+    open_in_browser "$input"
+  fi
+}
+
+main "$@"
