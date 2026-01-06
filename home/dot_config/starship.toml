@@ -98,6 +98,7 @@ style = "bg:base fg:sky"
 format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
+fish_style_pwd_dir_length = 2
 
 [directory.substitutions]
 "Documents" = "󰧮"
