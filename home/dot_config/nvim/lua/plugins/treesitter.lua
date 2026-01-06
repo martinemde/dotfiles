@@ -7,6 +7,7 @@ return {
         "comment",
         "dockerfile",
         "editorconfig",
+        "ghostty",
         "gotmpl",
         "html",
         "javascript",

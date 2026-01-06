@@ -16,6 +16,6 @@ return {
   "folke/edgy.nvim", -- https://www.lazyvim.org/extras/ui/edgy
   {
     "bezhermoso/tree-sitter-ghostty",
-    build = "make nvim_install",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
   },
 }
