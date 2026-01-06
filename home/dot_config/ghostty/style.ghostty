@@ -1,4 +1,4 @@
-# Font Configuration
+## Font Configuration
 # font-family = Kelmscott Mono
 font-family = MonoLisa Nerd Font SemiBold
 font-size = 10
@@ -6,7 +6,7 @@ font-feature = +calt,+liga,+dlig,+zero,+ss02,+ss10,+ss11,+ss12,+ss13,+ss14,+ss15
 font-synthetic-style = false
 # font-thicken = true
 
-# Icon silliness
+## Icon silliness
 # macos-icon = official
 # macos-icon = blueprint
 # macos-icon = chalkboard
@@ -26,7 +26,7 @@ macos-icon-frame = beige
 macos-icon-ghost-color = "#ea76cb"
 macos-icon-screen-color = "#04a5e5"
 
-# Theme
+## Theme
 # Having both keeps flashing light mode color on new tabs
 # theme = dark:Catppuccin Mocha,light:Catppuccin Latte
 theme = Catppuccin Mocha
@@ -41,9 +41,11 @@ unfocused-split-opacity = 1.0
 # AKA Catppuccin Espresso
 background = "#11111b"
 
-# Cursor
+## Cursor
 cursor-invert-fg-bg = true
 cursor-style-blink = false
+
+## Shaders
 custom-shader-animation = false
 # custom-shader = "shaders/cursor_smear_rocket.glsl"
 # custom-shader = "shaders/focus_cursor.glsl"
