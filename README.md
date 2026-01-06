@@ -21,7 +21,7 @@ This repository contains my personal dotfiles for setting up a productive develo
 ### Quick Start
 
 ```bash
-git clone https://github.com/ivy/dotfiles-redux.git && cd dotfiles-redux && ./install.sh
+chezmoi init --apply $GITHUB_USERNAME
 ```
 
 ### Advanced Usage
