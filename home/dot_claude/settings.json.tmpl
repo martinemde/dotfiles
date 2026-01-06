@@ -1,7 +1,14 @@
-{{- /* Include work settings if AWS profile was configured during init */ -}}
+{{- /* Include work settings if AWS profile was configured during init (order intentionally maintained) */ -}}
 {
 {{- if .aws.profile }}
   "awsAuthRefresh": "aws sso login --profile $AWS_PROFILE",
+{{- end }}
+  "fileSuggestion": {
+    "type": "command",
+    "command": "~/.claude/file-suggestion.sh"
+  },
+  "cleanupPeriodDays": 90,
+{{- if .aws.profile }}
   "env": {
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-5-20251101-v1:0",
@@ -15,10 +22,8 @@
     "USE_TMUX_WINDOWS": "1"
   },
   "includeCoAuthoredBy": true,
-  "model": "us.anthropic.claude-opus-4-6-v1",
 {{- else }}
   "includeCoAuthoredBy": false,
-  "model": "opus",
 {{- end }}
   "permissions": {
     "allow": [
@@ -36,11 +41,23 @@
       "Bash(bin/srb:*)",
       "Bash(bin/rubocop:*)",
       "Bash(bin/rspec:*)",
-      "Bash(tmux:*)"
+      "Bash(tmux:*)",
+      "Bash(find:*)",
+      "Bash(go:*)"
     ],
     "deny": [],
-    "ask": ["Bash(rm:*)"]
+    "ask": [
+      "Bash(rm:*)",
+      "Bash(jj push:*)",
+      "Bash(jj git push:*)",
+      "Bash(git push:*)"
+    ]
   },
+{{- if .aws.profile }}
+  "model": "us.anthropic.claude-opus-4-6-v1",
+{{- else }}
+  "model": "opus-4-6",
+{{- end }}
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -53,14 +70,10 @@
       }
     ]
   },
-  "fileSuggestion": {
-    "type": "command",
-    "command": "~/.claude/file-suggestion.sh"
-  },
   "statusLine": {
     "type": "command",
-    "padding": 0,
-    "command": "~/src/martinemde/starship-claude/starship-claude"
+    "command": "~/src/martinemde/starship-claude/starship-claude",
+    "padding": 0
   },
   "enabledPlugins": {
     "superpowers-developing-for-claude-code@superpowers-marketplace": true,
@@ -74,5 +87,5 @@
   },
   "alwaysThinkingEnabled": true,
   "gitAttribution": false,
-  "cleanupPeriodDays": 90
+  "skipDangerousModePermissionPrompt": true
 }
