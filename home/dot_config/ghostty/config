@@ -18,6 +18,8 @@ command = /opt/homebrew/bin/tmux
 # OS
 mouse-hide-while-typing = true
 window-save-state = always
+macos-titlebar-style = hidden
+window-decoration = none
 
 config-file = style.ghostty
 config-file = keybind.ghostty
