@@ -66,4 +66,4 @@ For a complete list of options, run `./install.sh --help`.
 
 ## License
 
-This project is open source under the [ISC License](LICENSE.md), credited to Ivy Evans.
+This project is open source under the [ISC License](LICENSE.md), credited to Ivy Evans, Martin Emde.
