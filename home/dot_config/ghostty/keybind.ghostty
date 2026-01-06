@@ -15,23 +15,8 @@
 # [LLM docs: config reference](https://raw.githubusercontent.com/ghostty-org/website/refs/heads/main/docs/config/reference.mdx)
 # [LLM docs: keybind actions](https://raw.githubusercontent.com/ghostty-org/website/refs/heads/main/docs/config/keybind/reference.mdx)
 
-## Unbind hardcoded physical keys that break in dvorak
-keybind = super+equal=unbind
-keybind = super+plus=unbind
-keybind = super+bracket_left=unbind
-keybind = super+bracket_right=unbind
-keybind = super+shift+bracket_left=unbind
-keybind = super+shift+bracket_right=unbind
-
-## Rebind default actions but with regular unicode points
-keybind = "super+[=goto_split:previous"
-keybind = "super+]=goto_split:next"
-keybind = "super+shift+[=previous_tab"
-keybind = "super+shift+]=next_tab"
-keybind = super+==increase_font_size:1
-keybind = super++=increase_font_size:1
-keybind = super+shift++=increase_font_size:1
-keybind = super+shift+==increase_font_size:1
+# Send Meta/Alt key
+macos-option-as-alt = true
 
 ## Make font changes across all surfaces
 keybind = all:super+alt+==increase_font_size:1
