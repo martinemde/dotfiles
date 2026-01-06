@@ -12,7 +12,9 @@ pager = "delta"
 paginate = "auto"
 show-cryptographic-signatures = true
 
-diff-formatter = "delta"
+# Use builtin git diff format so delta only runs as a pager.
+# This lets --color=never and --no-pager produce clean output.
+diff-formatter = ":git"
 diff-editor = ":builtin"
 
 [merge-tools.delta]
