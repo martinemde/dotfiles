@@ -17,6 +17,7 @@ ${env_var.CLAUDE_CONTEXT}\
 ${env_var.CLAUDE_COST}\
 [](fg:surface1)
 ${env_var.CLAUDE_SUMMARY}\
+${env_var.CLAUDE_SESSION_ID}\
 """
 
 palette = 'catppuccin_mocha'
@@ -91,3 +92,8 @@ style = "bg:surface1 fg:green"
 variable = "CLAUDE_SUMMARY"
 format = "[$env_value]($style)"
 style = "fg:rosewater"
+
+[env_var.CLAUDE_SESSION_ID]
+style = "fg:overlay1"
+variable = "CLAUDE_SESSION_ID"
+format = "[$env_value]($style)"
