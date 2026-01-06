@@ -92,9 +92,10 @@ mise/*.local.toml
 /.lefthook-local/
 
 .obsidian/
-ile-
 **/.claude/*.local.*
 .claude/*.local.*
+**/CLAUDE.local.md
+CLAUDE.local.md
+
 .claude/file-suggestions.cache
 
-scratch/

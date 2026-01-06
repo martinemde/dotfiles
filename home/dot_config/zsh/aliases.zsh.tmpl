@@ -38,6 +38,7 @@ alias codex='OPENAI_API_KEY=$(op read "op://Personal/openai-codex/credential") c
 {{- end }}
 {{- if lookPath "claude" }}
 alias claude-api='ANTHROPIC_API_KEY=$(op read "op://Personal/claude-code/credential") command claude'
+alias clauded='claude --dangerously-skip-permissions'
 {{- end }}
 
 # vi: ft=zsh
