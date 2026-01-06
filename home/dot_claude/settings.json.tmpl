@@ -10,11 +10,14 @@
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-5-20251101-v1:0",
     "AWS_PROFILE": {{ .aws.profile | quote }},
-    "AWS_REGION": "us-west-2"
+    "AWS_REGION": "us-west-2",
+    "GUSTO_CLAUDE_SETUP": "true"
   },
   "model": "us.anthropic.claude-opus-4-5-20251101-v1:0",
-{{- end }}
+  "includeCoAuthoredBy": true,
+{{ else }}
   "includeCoAuthoredBy": false,
+{{- end }}
   "permissions": {
     "allow": [
       "Bash(ls:*)",
@@ -57,6 +60,7 @@
     "superpowers-developing-for-claude-code@superpowers-marketplace": true,
     "elements-of-style@superpowers-marketplace": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
+    "episodic-memory@superpowers-marketplace": true,
     "typescript-lsp@claude-plugins-official": true,
     "plugin-dev@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,
