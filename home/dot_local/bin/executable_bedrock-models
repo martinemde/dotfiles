@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+#
+# bedrock-models -- Resolve latest AWS Bedrock Claude model per tier
+#
+# Queries AWS Bedrock for active Anthropic Claude inference profiles and
+# outputs the latest model ID for each tier (opus, sonnet, haiku) as JSON.
+#
+# Usage:
+#   bedrock-models
+#
+# Requires: aws CLI (with valid credentials), jq
+#
+# Output (stdout):
+#   {"haiku":"us.anthropic.claude-...","opus":"us.anthropic.claude-...","sonnet":"us.anthropic.claude-..."}
+#
+
+[[ -n "${DEBUG:-}" ]] && set -o xtrace
+set -o errexit
+set -o errtrace
+set -o nounset
+set -o pipefail
+
+export AWS_PROFILE=default
+
+require_command() {
+  local cmd="$1"
+  local hint="${2:-}"
+
+  if ! command -v "${cmd}" >/dev/null 2>&1; then
+    printf 'error: required command "%s" not found in PATH\n' "${cmd}" >&2
+    [[ -n "${hint}" ]] && printf '  hint: %s\n' "${hint}" >&2
+    exit 1
+  fi
+}
+
+fetch_inference_profiles() {
+  aws bedrock list-inference-profiles \
+    --output json \
+    --type-equals SYSTEM_DEFINED
+}
+
+filter_active_claude_profiles() {
+  jq --raw-output '
+        .inferenceProfileSummaries[]
+        | select(
+            .inferenceProfileId
+            | startswith("us.anthropic.claude-")
+        )
+        | select(.status == "ACTIVE")
+        | .inferenceProfileId
+    '
+}
+
+resolve_latest_per_tier() {
+  jq --raw-input --slurp '
+        # Split input into lines, remove blanks
+        split("\n") | map(select(length > 0))
+
+        # Group into tiers by keyword presence
+        | {
+            opus:   map(select(contains("opus")))   | sort | last,
+            sonnet: map(select(contains("sonnet"))) | sort | last,
+            haiku:  map(select(contains("haiku")))  | sort | last
+          }
+
+        # Remove tiers with no matches (null values)
+        | with_entries(select(.value != null))
+    '
+}
+
+main() {
+  require_command aws "install the AWS CLI: https://aws.amazon.com/cli/"
+  require_command jq "install jq: https://jqlang.github.io/jq/"
+
+  fetch_inference_profiles |
+    filter_active_claude_profiles |
+    resolve_latest_per_tier
+}
+
+main "$@"
