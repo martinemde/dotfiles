@@ -13,7 +13,7 @@ shell-integration = zsh
 shell-integration-features = cursor,sudo,title
 
 # Launch
-command = /opt/homebrew/bin/tmux
+initial-command = /opt/homebrew/bin/tmux
 
 # OS
 mouse-hide-while-typing = true
