@@ -1,16 +1,6 @@
 # Tmux Configuration
 # Managed via chezmoi externals with Renovate automation
 
-# gpakosz/.tmux: Oh My Tmux configuration framework
-# Purpose: Provides XDG-compliant tmux config with sensible defaults and powerline theme
-# Updates: Daily via Renovate tracking master branch (actively maintained)
-# renovate: repo=gpakosz/.tmux branch=master
-[".config/tmux/.tmux"]
-type = "git-repo"
-url = "https://github.com/gpakosz/.tmux.git"
-revision = "23f6e11e65657406be2b2557148d831c631778d7"
-refreshPeriod = "24h"
-
 # TPM: Tmux Plugin Manager
 # Purpose: Manages tmux plugins including resurrect and continuum for session persistence
 # Updates: Weekly via Renovate tracking master branch
