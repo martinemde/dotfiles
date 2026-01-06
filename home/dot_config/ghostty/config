@@ -21,7 +21,6 @@ window-save-state = always
 
 config-file = style.ghostty
 config-file = keybind.ghostty
-config-file = hyperlinks.ghostty
 config-file = vim.ghostty
 
 # vim: ft=ghostty
