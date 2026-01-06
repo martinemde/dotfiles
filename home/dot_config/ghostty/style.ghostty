@@ -1,4 +1,5 @@
 # Font Configuration
+# font-family = Kelmscott Mono
 font-family = MonoLisa Nerd Font SemiBold
 font-size = 10
 font-feature = +calt,+liga,+dlig,+zero,+ss02,+ss10,+ss11,+ss12,+ss13,+ss14,+ss15,+ss16
@@ -43,8 +44,9 @@ background = "#11111b"
 # Cursor
 cursor-invert-fg-bg = true
 cursor-style-blink = false
-custom-shader = "shaders/cursor_smear_rocket.glsl"
-custom-shader = "shaders/focus_cursor.glsl"
-custom-shader = "shaders/blur_crt.glsl"
+custom-shader-animation = false
+# custom-shader = "shaders/cursor_smear_rocket.glsl"
+# custom-shader = "shaders/focus_cursor.glsl"
+# custom-shader = "shaders/blur_crt.glsl"
 
 # vim: ft=ghostty
