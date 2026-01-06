@@ -10,6 +10,8 @@ d = ["diff"]
 l = ["log", "-r", "(trunk()..@):: | (trunk()..@)-"]
 la = ["log", "-r", "..@"]
 ll = ["log", "--template", "builtin_log_detailed"]
+long = ["log", "--template", "builtin_log_compact"]
+
 rb = ["rebase"]
 s = ["status"]
 
