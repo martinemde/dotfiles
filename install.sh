@@ -24,6 +24,9 @@
 #   VERIFY_SIGNATURES: Disable signature verification (default: true)
 #   SKIP_PACKAGE_MANAGER: Force binary download (default: false)
 #   DEBUG: Enable debug output
+#   GIT_USER_NAME: Git user name (bypasses prompt if set)
+#   GIT_USER_EMAIL: Git user email (bypasses prompt if set)
+#   AWS_PROFILE: AWS profile name (bypasses prompt if set, empty string for none)
 #
 # EXAMPLE USAGE:
 #   $ git clone https://github.com/ivy/dotfiles.git
@@ -116,6 +119,9 @@ ENVIRONMENT VARIABLES:
     VERIFY_SIGNATURES       Disable signature verification (default: true)
     SKIP_PACKAGE_MANAGER    Force binary download (default: false)
     DEBUG                   Enable debug output
+    GIT_USER_NAME           Git user name (bypasses prompt if set)
+    GIT_USER_EMAIL          Git user email (bypasses prompt if set)
+    AWS_PROFILE             AWS profile name (bypasses prompt if set, use empty string for none)
 
 EXAMPLES:
     ./install.sh                                    # Install normally
@@ -690,6 +696,10 @@ main() {
   fi
   if [ -n "${GIT_USER_EMAIL:-}" ]; then
     set -- "$@" --promptString "Git user.email=$GIT_USER_EMAIL"
+  fi
+  # Handle AWS_PROFILE - can be set to empty string to bypass prompt in CI
+  if [ -n "${AWS_PROFILE+x}" ]; then
+    set -- "$@" --promptString "aws_profile=$AWS_PROFILE"
   fi
   
   # Add any additional passthrough arguments
