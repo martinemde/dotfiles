@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Generate a compact jj prompt showing:
+# - Closest pushable bookmark
+# - Commits ahead
+# - Current commit description (truncated)
+# - File/line stats
+
+set -o errexit -o nounset -o pipefail
+
+# Catppuccin Mocha colors (24-bit RGB)
+PINK='\033[38;2;245;194;231m'     # #f5c2e7 - change_id prefix
+RED='\033[38;2;243;139;168m'      # #f38ba8 - lines removed
+MAROON='\033[38;2;235;160;172m'   # #eba0ac - bookmark
+PEACH='\033[38;2;250;179;135m'    # #fab387 - ahead indicator
+YELLOW='\033[38;2;249;226;175m'   # #f9e2af - description
+GREEN='\033[38;2;166;227;161m'    # #a6e3a1 - lines added
+SKY='\033[38;2;137;220;235m'      # #89dceb - file count
+OVERLAY0='\033[38;2;108;112;134m' # #6c7086 - change_id rest (dimmed)
+RESET='\033[0m'
+
+# Helper: run jj log with common flags for prompt use
+jjlog() { jj log --ignore-working-copy --color=never --no-graph "$@" 2>/dev/null; }
+
+# Get closest bookmark in ancestry (preferring parent bookmarks over current)
+closest_bookmark_plain=$(jjlog -r 'heads(::@ & bookmarks() & ~@)' -T 'bookmarks' | head -n1 | cut -d' ' -f1 || echo "")
+
+# If no ancestor bookmark, check if @ itself has one
+if [[ -z "$closest_bookmark_plain" ]]; then
+  closest_bookmark_plain=$(jjlog -r 'closest_bookmark(@)' -T 'bookmarks' | head -n1 | cut -d' ' -f1 || echo "")
+fi
+
+# Count commits ahead
+if [[ -n "$closest_bookmark_plain" ]]; then
+  ahead_count=$(jjlog -r "${closest_bookmark_plain}..@" -T 'commit_id.short() ++ "\n"' | wc -l | tr -d ' ')
+  if [[ "$ahead_count" -gt 0 ]]; then
+    ahead_indicator="${PEACH}⇡${ahead_count}"
+  else
+    ahead_indicator=""
+  fi
+else
+  # Fallback to trunk
+  closest_bookmark_plain=$(jjlog -r 'trunk()' -T 'bookmarks' | head -n1 | cut -d' ' -f1 || echo "main")
+  ahead_count=$(jjlog -r "trunk()..@" -T 'commit_id.short() ++ "\n"' | wc -l | tr -d ' ')
+  ahead_indicator="${PEACH}⇡${ahead_count}"
+fi
+
+# Get all @ info in one call: change_id_prefix|change_id_rest|description|file_count|added|removed
+info=$(jjlog -r @ -T 'change_id.shortest(4).prefix() ++ "|" ++ change_id.shortest(4).rest() ++ "|" ++ description.first_line().substr(0, 10) ++ "|" ++ diff.stat().files().len() ++ "|" ++ diff.stat().total_added() ++ "|" ++ diff.stat().total_removed()')
+IFS='|' read -r change_id_prefix change_id_rest desc file_count added removed <<<"$info"
+
+# Output format: xzvt main⇡2 "Revert "Re…" 3+20-0
+# With colors: change_id prefix (pink) + rest (bright black), bookmark (maroon), ahead (peach), desc (yellow), files (sky), added (green), removed (red)
+# Only reset at the very end to preserve background colors
+if [[ -n "$desc" ]]; then
+  desc_formatted="\"${desc}\""
+else
+  desc_formatted=""
+fi
+echo -e "${PINK}${change_id_prefix}${OVERLAY0}${change_id_rest} ${MAROON}${closest_bookmark_plain}${ahead_indicator} ${YELLOW}${desc_formatted} ${SKY}${file_count}${GREEN}+${added}${RED}-${removed}${RESET}"

@@ -108,11 +108,11 @@ truncation_symbol = "…/"
 
 # Custom jj (Jujutsu) module - replaces git_branch/git_status
 [custom.jj]
-format = '[ $output](fg:sapphire bg:surface0)'
-command = "prompt"
+format = '[$output](fg:sapphire bg:surface0)'
+command = "jj-prompt"
 style = "bg:surface0"
 ignore_timeout = false
-shell = ["starship-jj", "--ignore-working-copy", "starship"]
+shell = ["bash"]
 use_stdin = false
 when = true
 

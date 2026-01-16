@@ -53,7 +53,6 @@ crust = "#11111b"
 style = "bg:base fg:sky"
 format = "[ $path ]($style)"
 truncation_length = 1
-truncation_symbol = "…/"
 
 [directory.substitutions]
 "Documents" = "󰈙 "
@@ -65,10 +64,11 @@ truncation_symbol = "…/"
 
 # Custom jj (Jujutsu) module - replaces git_branch/git_status
 [custom.jj]
-command = "starship-jj --ignore-working-copy starship prompt"
+command = "jj-prompt"
 when = true
 style = "bg:surface0"
-format = "[ $output]($style)"
+format = "[$output]($style)"
+shell = ["bash"]
 ignore_timeout = true
 
 [env_var.CLAUDE_MODEL]
