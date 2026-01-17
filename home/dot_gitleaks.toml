@@ -45,3 +45,7 @@ paths = [
   '''src''',
 ]
 description = "global allow list"
+
+# Acceptable values for regexTarget are "match" and "line"
+regexTarget = "match"
+regexes = ['''YOUR_TOKEN''']
