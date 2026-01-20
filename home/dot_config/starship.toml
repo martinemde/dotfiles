@@ -9,9 +9,7 @@ format = """
 $os\
 $user\
 $directory\
-[](fg:surface0 bg:base)\
 ${custom.jj}\
-[](bg:base fg:surface0)\
 $c\
 $rust\
 $ruby\
@@ -110,13 +108,14 @@ truncate_to_repo = false
 
 # Custom jj (Jujutsu) module - replaces git_branch/git_status
 [custom.jj]
-format = '[$output](fg:sapphire bg:surface0)'
+format = '[](fg:surface0 bg:base)[$output](fg:sapphire bg:surface0)[](bg:base fg:surface0)'
 command = "jj-prompt"
 style = "bg:surface0"
 ignore_timeout = false
 shell = ["bash"]
 use_stdin = false
 when = true
+require_repo = true
 
 [c]
 symbol = " "
