@@ -281,7 +281,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     // Add noise
     // NOTE: Hard-coded noise distributions
-    float noise = smoothstep(0.4, 0.6, gold_v2_noise(fragCoord.xy, fract(iTime*0.001)));
+    // Center coordinates to avoid radial moiré from top-left origin.
+    // abs() maps all quadrants to quadrant 1, avoiding sign discontinuities
+    // at the axes since gold_v2_noise multiplies xy.x*xy.y.
+    vec2 centered = abs(fragCoord.xy - iResolution.xy * 0.5);
+    float noise = smoothstep(0.4, 0.6, gold_v2_noise(centered, fract(iTime*0.001)));
     fragColor.rgb *= clamp(noise + 1.0 - NOISE_CONTENT_STRENGTH, 0.0, 1.0);
     fragColor.rgb = clamp(fragColor.rgb + noise * NOISE_UNIFORM_STRENGTH / 100.0, 0.0, 1.0);
 
