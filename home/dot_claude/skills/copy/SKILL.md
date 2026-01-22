@@ -1,9 +1,9 @@
 ---
 name: copy
 description: Copy the last response to the clipboard
-disable-model-invocation: true
-argument-hint: '[instructions for what to copy]'
+argument-hint: '[instructions]'
 allowed-tools: 'Bash(cat:*), Bash(pbcopy:*), Read'
+disable-model-invocation: true
 ---
 
 # Copy content to my clipboard using pbcopy
