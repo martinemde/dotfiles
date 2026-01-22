@@ -1,8 +1,11 @@
 ---
 name: copy
-description: Copy the last response to the clipboard
-argument-hint: '[instructions]'
-allowed-tools: 'Bash(cat:*), Bash(pbcopy:*), Read'
+description: Copy the last response to the clipboard with pbcopy
+metadata:
+  author: '@ivy (Ivy Evans)'
+  version: '1.0'
+argument-hint: '[instructions of what to copy]'
+allowed-tools: 'Bash(pbcopy:*), Bash(cat:*), Bash(jq:*), Read'
 disable-model-invocation: true
 ---
 
@@ -14,4 +17,4 @@ pbcopy << 'EOF'
 EOF
 ```
 
-If no arguments are provided, copy your last response.
+If arguments are provided, follow their instructions, otherwise copy your last response.

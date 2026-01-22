@@ -1,0 +1,65 @@
+---
+description: Create a PR from the diff from trunk()
+disable-model-invocation: true
+arguments-hint: '<revision> [ready] - Create a draft or ready PR for the specified revision.'
+---
+
+# Create Pull Request
+
+Create a pull request using gh for a specified revision.
+
+Usage:
+
+- `/pr <revision>` - Create a draft PR for the specified revision
+- `/pr <revision> ready` - Create a ready-for-review PR
+
+Revision must be provided (bookmark, change ID, revset, or commit hash). The revision will be resolved to a bookmark for the PR.
+
+When creating a pull request:
+
+1. Push revision and get bookmark name:
+   - If revision has a remote-tracked bookmark: `jj git push --bookmark <name>`
+   - If revision has a local-only bookmark: track then push:
+     `jj bookmark track <name>@origin && jj git push --bookmark <name>`
+   - If revision has no bookmark: `jj git push -c <revision>` (creates and pushes)
+   - Retrieve the bookmark name from the output
+2. Run `jj log -r 'trunk()..<bookmark>'` to list commits between trunk and the bookmark
+3. Run `jj diff --from trunk() --to <bookmark> --stat` to review all changes in the PR
+4. Consider whether the pending changes should be organized into smaller, easier
+   to review commits. If so, use `jj split` or `jj squash` to reorganize before
+   proceeding.
+5. Check for .github PR templates and follow them
+6. **Invoke the `elements-of-style:writing-clearly-and-concisely` skill** before
+   drafting any prose. This is mandatory.
+7. **Search episodic memory for design decisions**: Use `episodic-memory:search`
+   to find conversations related to the files changed in this PR. Look for:
+   - Design decisions and their rationale
+   - Alternative approaches that were considered and rejected
+   - Tradeoffs discussed during implementation
+   - Requirements or constraints that shaped the solution
+     Extract key decisions to include in the PR summary's "Design Decisions" section.
+8. Generate a PR title summarizing all commits in the changeset (not just the
+   most recent). The title reflects the overall change, not individual commits.
+9. Draft a PR summary explaining why the changes were made and their impact.
+   Focus on context and motivation, not implementation details. Include only
+   "Assisted-by" footer for attribution—no "Generated with Claude Code"
+   - Do not repeat information obvious from the diff
+   - Omit details like "added function X" or "modified file Y" unless
+     non-obvious reasoning justifies them
+   - Explain user-facing impact, architectural decisions, and tradeoffs
+   - If design decisions were found in episodic memory, include a "Design Decisions"
+     section highlighting key choices and their rationale
+   - Follow repository conventions
+10. **Self-review**: Review the PR changes as a code reviewer. Check for:
+    - Code smells or antipatterns
+    - Missing tests for new functionality
+    - Code repetition that should be refactored
+    - Lengthy or poorly-documented modules
+    - Report findings to the user; address any issues before proceeding
+11. Create the PR: `gh pr create --head <bookmark-name> --title "<title>"` using
+    a HEREDOC to pass the body. Add `--draft` unless `ready` was specified.
+12. **If a Jira card is detected**, transition it to "In Review":
+    - Check workspace name or bookmark for pattern like `PROJ-123` (e.g., `LDE-488`)
+    - If found: `acli jira workitem transition --key <KEY> --status "In Review"`
+    - If not found, skip this step silently
+13. Return the PR URL
