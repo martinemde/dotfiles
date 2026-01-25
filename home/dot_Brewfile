@@ -95,7 +95,6 @@ cask "1password" # password manager
 cask "1password-cli" # password CLI
 cask "amethyst" # window manager
 cask "betterdisplay" # display manager
-cask "claude-code" # coding agent
 cask "colemak-dh" # keyboard layout
 cask "copilot-cli" # coding agent
 cask "cursor" # text editor

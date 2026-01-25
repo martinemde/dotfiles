@@ -17,14 +17,14 @@ export XDG_CONFIG_DIRS="${XDG_CONFIG_DIRS:-/etc/xdg}"
 # Add bun global bin directory to PATH
 [[ -d "$HOME/.cache/.bun/bin" ]] && path=("$HOME/.cache/.bun/bin" $path)
 
-# Add ~/.local/bin to front of PATH
-[[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
 
 # Source cargo environment for Rust toolchain
 if [[ -f "$HOME/.cargo/env" ]]; then
   source "$HOME/.cargo/env"
 fi
 
+# Add ~/.local/bin to front of PATH
+[[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
 # Add Go bin directory to PATH (for go install)
 [[ -d "${GOPATH:-$HOME/go}/bin" ]] && path=("${GOPATH:-$HOME/go}/bin" $path)
 
@@ -52,3 +52,15 @@ export CPPFLAGS="-I/opt/homebrew/opt/openssl@3/include"
 if [[ -f "$HOME/.config/zsh/secrets.zsh" ]]; then
   source "$HOME/.config/zsh/secrets.zsh"
 fi
+
+
+{{- if .aws.profile }}
+export CLAUDE_CODE_USE_BEDROCK="true"
+export CLAUDE_CODE_SUBAGENT_MODEL="us.anthropic.claude-opus-4-5-20251101-v1:0"
+export ANTHROPIC_SMALL_FAST_MODEL="us.anthropic.claude-haiku-4-5-20251001-v1:0"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="us.anthropic.claude-haiku-4-5-20251001-v1:0"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="us.anthropic.claude-opus-4-5-20251101-v1:0"
+export AWS_PROFILE="bedrock-users"
+export AWS_REGION="us-west-2"
+{{- end }}
