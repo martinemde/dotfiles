@@ -57,6 +57,7 @@ Why: Enforces immutable pins (versions/digests/SHAs) and maintains Renovate auto
 
 - `home/` - Managed dotfiles/config
 - `home/dot_config/` - XDG config
+- `home/dot_config/zsh/functions/` - Zsh autoload functions (one function per file)
 - `home/dot_local/bin/` - User binaries
 - `home/private_Library/` - Private macOS files (Cursor, etc.)
 - `test/` - BATS tests
