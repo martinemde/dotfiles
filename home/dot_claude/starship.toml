@@ -15,8 +15,8 @@ ${env_var.CLAUDE_MODEL}\
 ${env_var.CLAUDE_CONTEXT}\
 [](bg:surface0 fg:surface1)\
 ${env_var.CLAUDE_COST}\
-[](fg:surface1)\
-$cmd_duration\
+[](fg:surface1)
+${env_var.CLAUDE_SUMMARY}\
 """
 
 palette = 'catppuccin_mocha'
@@ -87,9 +87,7 @@ variable = "CLAUDE_COST"
 format = "[$env_value]($style)"
 style = "bg:surface1 fg:green"
 
-[cmd_duration]
-show_milliseconds = false
-format = "[ $duration](fg:yellow) "
-disabled = false
-show_notifications = true
-min_time_to_notify = 45000
+[env_var.CLAUDE_SUMMARY]
+variable = "CLAUDE_SUMMARY"
+format = "[$env_value]($style)"
+style = "fg:rosewater"
