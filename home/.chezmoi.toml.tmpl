@@ -19,14 +19,16 @@
 [data]
 hosttype = {{ $hosttype | quote }}
 
-{{- $gitSigningKeyRef := "op://Private/GitHub SSH Signing Key/public key" }}
+{{- $gitSigningKey := "" }}
 {{- $awsProfile := "" }}
-{{- if eq $hosttype "work" -}}
-  {{- $awsProfile = promptStringOnce . "aws.profile" "AWS Profile" "bedrock-users" }}
-  {{- $gitSigningKeyRef = "op://Employee/GitHub SSH Signing Key/public key" }}
-{{- end -}}
-
-{{- $gitSigningKey := onepasswordRead $gitSigningKeyRef }}
+{{- if lookPath "op" }}
+  {{- $gitSigningKeyRef := "op://Private/GitHub SSH Signing Key/public key" }}
+  {{- if eq $hosttype "work" -}}
+    {{- $awsProfile = promptStringOnce . "aws.profile" "AWS Profile" "bedrock-users" }}
+    {{- $gitSigningKeyRef = "op://Employee/GitHub SSH Signing Key/public key" }}
+  {{- end -}}
+  {{- $gitSigningKey = onepasswordRead $gitSigningKeyRef }}
+{{- end }}
 [data.git]
 # Git user configuration - prompted during initialization
 # Used in git config templates and other version control settings

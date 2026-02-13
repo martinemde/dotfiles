@@ -44,10 +44,12 @@ if [[ "$OSTYPE" == darwin* ]]; then
   export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 fi
 
+{{- if eq .chezmoi.os "darwin" }}
 # Use homebrew openssl (for ruby)
 export PKG_CONFIG_PATH="/opt/homebrew/opt/openssl@3/lib/pkgconfig:$PKG_CONFIG_PATH"
 export LDFLAGS="-L/opt/homebrew/opt/openssl@3/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/openssl@3/include"
+{{- end }}
 
 if [[ -f "$HOME/.config/zsh/secrets.zsh" ]]; then
   source "$HOME/.config/zsh/secrets.zsh"
