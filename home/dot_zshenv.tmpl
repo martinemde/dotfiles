@@ -1,5 +1,10 @@
 # vim: ft=zsh
 
+# Fall back to xterm-256color if terminfo is missing (e.g. SSH to a host without ghostty)
+if [[ -n "$TERM" ]] && ! infocmp "$TERM" &>/dev/null; then
+  export TERM=xterm-256color
+fi
+
 # Prevent duplicates in PATH automatically
 typeset -U path
 
