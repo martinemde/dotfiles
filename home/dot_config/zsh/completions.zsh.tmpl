@@ -17,7 +17,7 @@ autoload -Uz compinit
 compinit
 
 # Load dynamic tool completions
-source <(jj util completion zsh)
-znap fpath _rv 'rv shell completions zsh'
+(( $+commands[jj] )) && source <(jj util completion zsh)
+(( $+commands[rv] )) && znap fpath _rv 'rv shell completions zsh'
 
 # vi: ft=zsh

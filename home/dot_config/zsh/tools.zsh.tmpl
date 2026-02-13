@@ -2,8 +2,10 @@
 # Tool Integrations
 # ============================================================================
 
+{{- if eq .chezmoi.os "darwin" }}
 # Homebrew - ensure brew binaries come before system binaries
 eval "$(/opt/homebrew/bin/brew shellenv)"
+{{- end }}
 
 # 1Password CLI plugins (aliases like gh to use op)
 [[ -f "$XDG_CONFIG_HOME/op/plugins.sh" ]] && source "$XDG_CONFIG_HOME/op/plugins.sh"
@@ -13,10 +15,10 @@ eval "$(mise activate zsh)"
 
 # disable rv temporarily, it causes issues with gems
 # znap eval rv 'rv shell init zsh' # rv - ruby manager
-znap eval atuin 'atuin init zsh' # atuin - magical shell history
-znap eval starship 'starship init zsh' # starship - cross-shell prompt
-znap eval zoxide 'zoxide init zsh' # zoxide - smarter cd command
-znap eval jj 'COMPLETE=zsh jj'
-znap eval thefuck 'thefuck --alias'
+(( $+commands[atuin] ))    && znap eval atuin 'atuin init zsh'
+(( $+commands[starship] )) && znap eval starship 'starship init zsh'
+(( $+commands[zoxide] ))   && znap eval zoxide 'zoxide init zsh'
+(( $+commands[jj] ))       && znap eval jj 'COMPLETE=zsh jj'
+(( $+commands[thefuck] ))  && znap eval thefuck 'thefuck --alias'
 
 # vi: ft=zsh
