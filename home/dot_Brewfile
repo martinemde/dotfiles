@@ -14,10 +14,12 @@ brew "docker-compose" # container orchestration
 brew "docker-credential-helper" # Docker auth
 brew "docker-credential-helper-ecr" # ECR auth
 brew "dotslash" # executable runner
+brew "eza" # modern ls replacement
 brew "ffmpeg" # media converter
 brew "flac" # audio codec
 brew "flock" # file locking
 brew "ghostscript" # PostScript interpreter
+brew "gh" # GitHub CLI
 brew "git" # version control
 brew "gmp" # math library
 brew "graphicsmagick" # image processing

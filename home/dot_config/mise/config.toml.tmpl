@@ -12,11 +12,13 @@
 "aqua:bootandy/dust" = "latest"
 "aqua:BurntSushi/ripgrep" = "latest"
 "aqua:charmbracelet/glow" = "latest"
+{{ if ne .chezmoi.os "darwin" -}}
 "aqua:cli/cli" = "latest"
+"aqua:eza-community/eza" = "latest"
+{{ end -}}
 "aqua:dandavison/delta" = "latest"
 "aqua:eth-p/bat-extras" = "latest"
 "aqua:evilmartians/lefthook" = "latest"
-"aqua:eza-community/eza" = "latest"
 "aqua:FiloSottile/mkcert" = "latest"
 "aqua:git-lfs/git-lfs" = "latest"
 "aqua:gitleaks/gitleaks" = "latest"
@@ -37,6 +39,7 @@
 "aqua:starship/starship" = "latest"
 "aqua:superfly/flyctl" = "latest"
 "aqua:tree-sitter/tree-sitter" = "latest"
+"aqua:zellij-org/zellij" = "latest"
 "go:golang.org/x/tools/gopls" = "latest"
 bun = "latest"
 go = "latest"
