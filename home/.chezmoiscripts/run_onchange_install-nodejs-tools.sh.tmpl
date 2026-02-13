@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# bun version hash: {{ include "dot_config/mise/config.toml" | regexFind "bun = \"[^\"]*\"" | sha256sum }}
+# bun version hash: {{ include "dot_config/mise/config.toml.tmpl" | regexFind "bun = \"[^\"]*\"" | sha256sum }}
 # node tools manifest hash: {{ include "dot_config/dotfiles/package.json" | sha256sum }}
 
 [ -n "${DEBUG:-}" ] && set -o xtrace

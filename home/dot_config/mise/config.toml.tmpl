@@ -1,0 +1,48 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+
+[tools]
+{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.arch "amd64") -}}
+"aqua:technicalpickles/envsense" = "latest"
+"cargo:starship-jj" = "latest"
+{{ end -}}
+"aqua:ajeetdsouza/zoxide" = "latest"
+"aqua:ast-grep/ast-grep" = "latest"
+"aqua:atuinsh/atuin" = "latest"
+"aqua:aws/aws-cli" = "latest"
+"aqua:bootandy/dust" = "latest"
+"aqua:BurntSushi/ripgrep" = "latest"
+"aqua:charmbracelet/glow" = "latest"
+"aqua:cli/cli" = "latest"
+"aqua:dandavison/delta" = "latest"
+"aqua:eth-p/bat-extras" = "latest"
+"aqua:evilmartians/lefthook" = "latest"
+"aqua:eza-community/eza" = "latest"
+"aqua:FiloSottile/mkcert" = "latest"
+"aqua:git-lfs/git-lfs" = "latest"
+"aqua:gitleaks/gitleaks" = "latest"
+"aqua:hashicorp/terraform" = "latest"
+"aqua:jesseduffield/lazygit" = "latest"
+"aqua:jj-vcs/jj" = "latest"
+"aqua:jqlang/jq" = "latest"
+"aqua:junegunn/fzf" = "latest"
+"aqua:koalaman/shellcheck" = "latest"
+"aqua:mikefarah/yq" = "latest"
+"aqua:muesli/duf" = "latest"
+"aqua:neovim/neovim" = "latest"
+"aqua:openai/codex" = "latest"
+"aqua:pre-commit/pre-commit" = "latest"
+"aqua:sharkdp/bat" = "latest"
+"aqua:sharkdp/fd" = "latest"
+"aqua:sigstore/cosign" = "latest"
+"aqua:starship/starship" = "latest"
+"aqua:superfly/flyctl" = "latest"
+"aqua:tree-sitter/tree-sitter" = "latest"
+"go:golang.org/x/tools/gopls" = "latest"
+bun = "latest"
+go = "latest"
+node = "latest"
+python = "latest"
+uv = "latest"
+
+[settings]
+idiomatic_version_file_enable_tools = ["ruby"]

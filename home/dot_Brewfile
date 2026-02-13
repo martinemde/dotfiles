@@ -1,19 +1,11 @@
 # vim: ft=ruby
-brew "ast-grep" # code search
-brew "atuin" # shell history
 brew "automake" # build tool
-brew "awscli" # AWS CLI
-brew "bat" # cat replacement
-brew "bat-extras" # bat extensions
 brew "bison" # parser generator
 brew "ccusage"  # CPU monitor
-brew "chezmoi"  # dotfiles manager
 brew "cloc" # code counter
 brew "cmake" # build tool
-brew "codex" # coding agent
 brew "colima" # Docker runtime
 brew "coreutils" # GNU coreutils
-brew "cosign" # signature tool
 brew "curl" # HTTP client
 brew "devcontainer" # devcontainer CLI
 brew "docker" # container runtime
@@ -22,33 +14,18 @@ brew "docker-compose" # container orchestration
 brew "docker-credential-helper" # Docker auth
 brew "docker-credential-helper-ecr" # ECR auth
 brew "dotslash" # executable runner
-brew "duf" # disk usage
-brew "dust" # disk usage
-brew "eza" # ls replacement
-brew "fd" # find replacement
 brew "ffmpeg" # media converter
 brew "flac" # audio codec
 brew "flock" # file locking
-brew "flyctl" # fly.io CLI
-brew "fzf" # fuzzy finder
-brew "gh" # GitHub CLI
 brew "ghostscript" # PostScript interpreter
 brew "git" # version control
-brew "git-delta" # git diff tool
-brew "gitleaks" # secrets scanner
-brew "git-lfs" # Git LFS
-brew "glow" # markdown viewer
 brew "gmp" # math library
 brew "graphicsmagick" # image processing
 brew "graphviz" # graph visualization
 brew "htop" # process monitor
 brew "imagemagick" # image processing
-brew "jj"  # version control
-brew "jq"  # JSON processor
 brew "kcat" # Kafka tool
-brew "lazygit" # Git TUI
 brew "lbzip2" # parallel bzip2
-brew "lefthook" # Git hooks
 brew "libffi" # FFI library
 brew "librdkafka" # Kafka library
 brew "libsodium" # crypto library
@@ -57,29 +34,20 @@ brew "luarocks" # Lua package manager
 brew "mailhog", restart_service: :changed # mail testing
 brew "mas" # Mac App Store CLI
 brew "mermaid-cli" # diagram generator
-brew "mise" # tool version manager
-brew "mkcert" # cert generator
 brew "mupdf" # PDF viewer
 brew "neovide" # GUI neovim
-brew "neovim", args: ["HEAD"] # text editor
-brew "node" # Node.js runtime
 brew "nvm" # Node version manager
 brew "openssl@3" # crypto library
 brew "overmind" # process manager
 brew "pandoc" # document converter
 brew "pgvector" # PostgreSQL extension
 brew "poppler" # PDF library
-brew "pre-commit" # Git hooks
 brew "rbspy" # Ruby profiler
 brew "readline" # line editing library
 brew "redis", restart_service: :changed # database
-brew "ripgrep" # grep replacement
 brew "ruby-build" # Ruby builder
 brew "ruby-install" # Ruby installer
 brew "rv" # Ruby version manager
-brew "shellcheck" # shell linter
-brew "starship" # shell prompt
-brew "terraform" # IaC tool
 brew "tesseract" # OCR tool
 brew "texinfo" # documentation
 brew "thefuck" # command corrector
@@ -88,8 +56,6 @@ brew "tree" # directory tree
 brew "vips" # image processing
 brew "watchman"  # file watcher
 brew "yamllint"  # YAML linter
-brew "yq" # YAML processor
-brew "zoxide" # cd replacement
 brew "zsh" # shell
 cask "1password" # password manager
 cask "1password-cli" # password CLI
