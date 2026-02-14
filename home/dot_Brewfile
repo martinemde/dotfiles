@@ -35,6 +35,7 @@ brew "libyaml" # YAML library
 brew "luarocks" # Lua package manager
 brew "mailhog", restart_service: :changed # mail testing
 brew "mas" # Mac App Store CLI
+brew "mosh" # mobile shell
 brew "mermaid-cli" # diagram generator
 brew "mupdf" # PDF viewer
 brew "neovide" # GUI neovim
