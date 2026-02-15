@@ -324,11 +324,131 @@ load_plugins {
 //         white 255 255 255
 //     }
 // }
+themes {
+    catppuccin-espresso {
+        text_unselected {
+            base "#cdd6f4"
+            background "#181825"
+            emphasis_0 "#fab387"
+            emphasis_1 "#89dceb"
+            emphasis_2 "#a6e3a1"
+            emphasis_3 "#f5c2e7"
+        }
+        text_selected {
+            base "#cdd6f4"
+            background "#585b70"
+            emphasis_0 "#fab387"
+            emphasis_1 "#89dceb"
+            emphasis_2 "#a6e3a1"
+            emphasis_3 "#f5c2e7"
+        }
+        ribbon_selected {
+            base "#11111b"
+            background "#cdd6f4"
+            emphasis_0 "#fab387"
+            emphasis_1 "#94e2d5"
+            emphasis_2 "#f5c2e7"
+            emphasis_3 "#89b4fa"
+        }
+        ribbon_unselected {
+            base "#cdd6f4"
+            background "#313244"
+            emphasis_0 "#cba6f7"
+            emphasis_1 "#cdd6f4"
+            emphasis_2 "#89b4fa"
+            emphasis_3 "#f5c2e7"
+        }
+        table_title {
+            base "#a6e3a1"
+            background 0
+            emphasis_0 "#fab387"
+            emphasis_1 "#89dceb"
+            emphasis_2 "#a6e3a1"
+            emphasis_3 "#f5c2e7"
+        }
+        table_cell_selected {
+            base "#cdd6f4"
+            background "#585b70"
+            emphasis_0 "#fab387"
+            emphasis_1 "#89dceb"
+            emphasis_2 "#a6e3a1"
+            emphasis_3 "#f5c2e7"
+        }
+        table_cell_unselected {
+            base "#cdd6f4"
+            background "#11111b"
+            emphasis_0 "#fab387"
+            emphasis_1 "#89dceb"
+            emphasis_2 "#a6e3a1"
+            emphasis_3 "#f5c2e7"
+        }
+        list_selected {
+            base 205 214 244
+            background 88 91 112
+            emphasis_0 250 179 135
+            emphasis_1 137 220 235
+            emphasis_2 166 227 161
+            emphasis_3 245 194 231
+        }
+        list_unselected {
+            base 205 214 244
+            background 24 24 37
+            emphasis_0 250 179 135
+            emphasis_1 137 220 235
+            emphasis_2 166 227 161
+            emphasis_3 245 194 231
+        }
+        frame_selected {
+            base "#89b4fa"
+            background 0
+            emphasis_0 "#fab387"
+            emphasis_1 "#89dceb"
+            emphasis_2 "#f5c2e7"
+            emphasis_3 0
+        }
+        frame_highlight {
+            base "#fab387"
+            background 0
+            emphasis_0 "#f5c2e7"
+            emphasis_1 "#fab387"
+            emphasis_2 "#fab387"
+            emphasis_3 "#fab387"
+        }
+        exit_code_success {
+            base "#a6e3a1"
+            background 0
+            emphasis_0 "#89dceb"
+            emphasis_1 "#11111b"
+            emphasis_2 "#f5c2e7"
+            emphasis_3 "#89b4fa"
+        }
+        exit_code_error {
+            base "#f38ba8"
+            background 0
+            emphasis_0 "#f9e2af"
+            emphasis_1 0
+            emphasis_2 0
+            emphasis_3 0
+        }
+        multiplayer_user_colors {
+            player_1 "#f5c2e7"
+            player_2 "#89b4fa"
+            player_3 0
+            player_4 "#f9e2af"
+            player_5 "#89dceb"
+            player_6 0
+            player_7 "#f38ba8"
+            player_8 0
+            player_9 0
+            player_10 0
+        }
+    }
+}
 
 // Choose the theme that is specified in the themes section.
 // Default: default
 //
-theme "catppuccin-macchiato"
+theme "catppuccin-espresso"
 
 // The name of the default layout to load on startup
 // Default: "default"
