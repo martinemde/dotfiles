@@ -33,6 +33,10 @@ alias tree='eza --icons --tree'
 alias vi='nvim'
 alias vim='nvim'
 
+{{ if eq .chezmoi.os "darwin" -}}
+alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+{{ end -}}
+
 # 1Password-authenticated commands
 {{- if lookPath "codex" }}
 alias codex='OPENAI_API_KEY=$(op read "op://Personal/openai-codex/credential") command codex'
