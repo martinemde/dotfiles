@@ -11,12 +11,12 @@
 {{- if .aws.profile }}
   "env": {
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-5-20251101-v1:0",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-6-v1",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
     "AWS_PROFILE": {{ .aws.profile | quote }},
     "AWS_REGION": "us-west-2",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "us.anthropic.claude-opus-4-5-20251101-v1:0",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "us.anthropic.claude-opus-4-6-v1",
     "CLAUDE_CODE_USE_BEDROCK": "true",
     "GUSTO_CLAUDE_SETUP": "true",
     "USE_TMUX_WINDOWS": "1"
@@ -29,6 +29,8 @@
     "allow": [
       "Bash(ls:*)",
       "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
       "Bash(echo:*)",
       "Bash(jq:*)",
       "Bash(bats:*)",
@@ -94,6 +96,7 @@
     "gopls-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
     "ci-cd-tools@pickled-claude-plugins": true,
+    "playground@claude-plugins-official": true,
     "dev-tools@pickled-claude-plugins": true
   },
   "alwaysThinkingEnabled": true,
