@@ -24,7 +24,9 @@ mise install --yes
 
 # Generate bun completions (installed to site-functions, loaded by compinit)
 if command -v bun >/dev/null 2>&1; then
-    bun completions
+    ZSH_SITE="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/site-functions"
+    mkdir -p "$ZSH_SITE"
+    bun completions > "$ZSH_SITE/_bun"
 fi
 
 echo "Global mise tools installation complete"
