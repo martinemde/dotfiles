@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Show estimated employment cost accrued so far today.
+# Workday: 9:30–17:30 (8 hours), Monday–Friday.
+
+set -o errexit -o nounset -o pipefail
+
+usage() {
+  cat <<EOF
+Usage: cost-so-far [--hourly-rate RATE]
+
+Show how much of your daily employment cost has accrued based on the
+current time. Uses an 8-hour workday (9:30 AM – 5:30 PM), Mon–Fri.
+
+Options:
+  --hourly-rate RATE   Fully-loaded hourly cost (default: \$HOURLY_RATE)
+  --help               Show this help
+
+Environment:
+  HOURLY_RATE          Fallback when --hourly-rate is not passed
+EOF
+  exit 0
+}
+
+hourly_rate="${HOURLY_RATE:-260}"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  --hourly-rate)
+    hourly_rate="$2"
+    shift 2
+    ;;
+  --help) usage ;;
+  *)
+    echo "Unknown option: $1" >&2
+    exit 1
+    ;;
+  esac
+done
+
+if [[ -z "$hourly_rate" ]]; then
+  echo "Error: pass --hourly-rate or set HOURLY_RATE" >&2
+  exit 1
+fi
+
+day_of_week=$(date +%u) # 1=Mon … 7=Sun
+if [[ "$day_of_week" -gt 5 ]]; then
+  echo "\$0"
+  exit 0
+fi
+
+# Minutes since midnight
+now_minutes=$(($(date +%-H) * 60 + $(date +%-M)))
+start_minutes=$((9 * 60 + 30))                 # 9:30
+end_minutes=$((17 * 60 + 30))                  # 17:30
+total_minutes=$((end_minutes - start_minutes)) # 480 = 8 hours
+
+if [[ "$now_minutes" -le "$start_minutes" ]]; then
+  echo "\$0"
+elif [[ "$now_minutes" -ge "$end_minutes" ]]; then
+  awk -v rate="$hourly_rate" -v hrs="$((total_minutes / 60))" 'BEGIN {
+    printf "$%d\n", rate * hrs
+  }'
+else
+  elapsed=$((now_minutes - start_minutes))
+  awk -v rate="$hourly_rate" -v mins="$elapsed" 'BEGIN {
+    printf "$%d\n", rate * (mins / 60)
+  }'
+fi

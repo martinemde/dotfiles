@@ -15,6 +15,7 @@ ${env_var.CLAUDE_MODEL}\
 ${env_var.CLAUDE_CONTEXT}\
 [](bg:surface0 fg:surface1)\
 ${env_var.CLAUDE_COST}\
+${custom.cost}\
 [](fg:surface1)
 ${env_var.CLAUDE_SUMMARY}\
 ${env_var.CLAUDE_SESSION_ID}\
@@ -97,3 +98,12 @@ style = "fg:rosewater"
 style = "fg:overlay1"
 variable = "CLAUDE_SESSION_ID"
 format = "[$env_value]($style)"
+
+# Cost accrued so far today (9:30–5:30 workday, weekdays only)
+[custom.cost]
+command = "cost-so-far"
+when = true
+format = '[/$output]($style)'
+style = "bg:surface1 fg:teal"
+shell = ["bash"]
+use_stdin = false

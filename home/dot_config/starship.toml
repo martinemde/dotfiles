@@ -26,6 +26,7 @@ $docker_context\
 $time\
 [ ](fg:surface1)\
 $cmd_duration\
+${custom.cost}\
 $line_break\
 $character"""
 
@@ -195,3 +196,11 @@ format = "[ $duration](fg:yellow) "
 disabled = false
 show_notifications = false
 min_time_to_notify = 45000
+
+# Cost accrued so far today (9:30–5:30 workday, weekdays only)
+[custom.cost]
+command = "cost-so-far"
+when = true
+format = '[$output](fg:green)'
+shell = ["bash"]
+use_stdin = false
