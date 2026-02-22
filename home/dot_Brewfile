@@ -1,7 +1,7 @@
 # vim: ft=ruby
 brew "automake" # build tool
 brew "bison" # parser generator
-brew "ccusage"  # CPU monitor
+brew "ccusage" # CPU monitor
 brew "cloc" # code counter
 brew "cmake" # build tool
 brew "colima" # Docker runtime
@@ -38,7 +38,7 @@ brew "mas" # Mac App Store CLI
 brew "mosh" # mobile shell
 brew "mermaid-cli" # diagram generator
 brew "mupdf" # PDF viewer
-brew "neovide" # GUI neovim
+brew "neovim", args: ["HEAD"] # editor
 brew "nvm" # Node version manager
 brew "openssl@3" # crypto library
 brew "overmind" # process manager
