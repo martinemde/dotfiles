@@ -99,3 +99,5 @@ CLAUDE.local.md
 
 .claude/file-suggestions.cache
 
+.bk.yaml
+
