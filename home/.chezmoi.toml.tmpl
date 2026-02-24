@@ -19,7 +19,8 @@
 [data]
 hosttype = {{ $hosttype | quote }}
 
-{{- $gitSigningKey := "" }}
+{{- /* Cache signing key after first init so re-init and SSH sessions skip 1Password */ -}}
+{{- $gitSigningKey := dig "git" "signingkey" "" . }}
 {{- $awsProfile := "" }}
 {{- if lookPath "op" }}
   {{- $gitSigningKeyRef := "op://Private/GitHub SSH Signing Key/public key" }}
@@ -27,7 +28,9 @@ hosttype = {{ $hosttype | quote }}
     {{- $awsProfile = promptStringOnce . "aws.profile" "AWS Profile" "bedrock-users" }}
     {{- $gitSigningKeyRef = "op://Employee/GitHub SSH Signing Key/public key" }}
   {{- end -}}
-  {{- $gitSigningKey = onepasswordRead $gitSigningKeyRef }}
+  {{- if not $gitSigningKey -}}
+    {{- $gitSigningKey = onepasswordRead $gitSigningKeyRef }}
+  {{- end -}}
 {{- end }}
 [data.git]
 # Git user configuration - prompted during initialization

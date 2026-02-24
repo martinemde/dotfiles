@@ -3,7 +3,10 @@ Include {{ .chezmoi.homeDir }}/.config/colima/ssh_config
 
 {{ end -}}
 Host *
+  HashKnownHosts yes
 {{- if eq .chezmoi.os "darwin" }}
+
+# Use 1Password SSH agent only when not in an SSH session
+Match exec "test -z \"$SSH_CONNECTION\""
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 {{- end }}
-  HashKnownHosts yes
