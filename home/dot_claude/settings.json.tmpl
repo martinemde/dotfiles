@@ -68,8 +68,6 @@
   },
 {{- if .aws.profile }}
   "model": "us.anthropic.claude-opus-4-6-v1",
-{{- else }}
-  "model": "opus-4-6",
 {{- end }}
   "hooks": {
     "UserPromptSubmit": [
