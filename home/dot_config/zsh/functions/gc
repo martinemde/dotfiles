@@ -1,7 +1,15 @@
 #!/usr/bin/env zsh
-local repo=${1#*github.com}
-repo=${repo#[/:]}  # Remove leading / or :
-local dir="$HOME/src/$repo"
+local url="$1"
+local repo
 
-dir=${dir%.git}
-gh repo clone "$1" "$dir" -- --recursive && z "$dir"
+# Handle org/repo shorthand (no host, no protocol, exactly one slash)
+if [[ "$url" != *://* && "$url" != *:* && "$url" == */* && "$url" != */*/* ]]; then
+  repo="$url"
+  url="https://github.com/$url"
+else
+  repo=${url#*github.com}
+  repo=${repo#[/:]}  # Remove leading / or :
+fi
+
+local dir="$HOME/src/${repo%.git}"
+gh repo clone "$url" "$dir" -- --recursive && z "$dir"
