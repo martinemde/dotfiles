@@ -27,14 +27,13 @@ brew "graphviz" # graph visualization
 brew "htop" # process monitor
 brew "imagemagick" # image processing
 brew "kcat" # Kafka tool
-brew "lbzip2" # parallel bzip2
 brew "libffi" # FFI library
 brew "librdkafka" # Kafka library
 brew "libsodium" # crypto library
 brew "libyaml" # YAML library
 brew "luarocks" # Lua package manager
-brew "mailhog", restart_service: :changed # mail testing
 brew "mas" # Mac App Store CLI
+brew "mise" # tool version manager
 brew "mosh" # mobile shell
 brew "mermaid-cli" # diagram generator
 brew "mupdf" # PDF viewer
@@ -66,8 +65,6 @@ cask "amethyst" # window manager
 cask "betterdisplay" # display manager
 cask "colemak-dh" # keyboard layout
 cask "copilot-cli" # coding agent
-cask "cursor" # text editor
-cask "ghostty@tip" # terminal emulator
 cask "keymapp" # key mapper
 cask "loopback" # audio router
 cask "maccy" # clipboard
