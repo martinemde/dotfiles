@@ -150,26 +150,20 @@ render_to_temp() {
     skip "neovim not installed"
   fi
 
-  # Test each lua file individually for syntax
-  local lua_files=(
-    "home/dot_config/nvim/lua/config/autocmds.lua"
-    "home/dot_config/nvim/lua/config/keymaps.lua"
-    "home/dot_config/nvim/lua/config/lazy.lua"
-    "home/dot_config/nvim/lua/config/options.lua"
-  )
-
-  for lua_file in "${lua_files[@]}"; do
-    if [ -f "$lua_file" ]; then
-      # Use luac if available, otherwise use nvim
-      if command -v luac >/dev/null 2>&1; then
-        run luac -p "$lua_file"
-        [ "$status" -eq 0 ]
-      else
-        run nvim --headless -u NONE -c "luafile $lua_file" +qall
-        [ "$status" -eq 0 ]
-      fi
+  # Discover all lua files under the nvim config directory
+  local found=0
+  while IFS= read -r -d '' lua_file; do
+    found=1
+    if command -v luac >/dev/null 2>&1; then
+      run luac -p "$lua_file"
+      [ "$status" -eq 0 ]
+    else
+      run nvim --headless -u NONE -c "luafile $lua_file" +qall
+      [ "$status" -eq 0 ]
     fi
-  done
+  done < <(find home/dot_config/nvim/lua -name '*.lua' -print0)
+
+  [ "$found" -eq 1 ]
 }
 
 @test "vimrc has valid vim syntax" {

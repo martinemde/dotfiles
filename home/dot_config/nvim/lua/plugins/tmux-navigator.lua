@@ -13,23 +13,19 @@ return {
     },
     opts = {},
   },
-  -- Tmux navigation (active when inside tmux, preserves existing workflow)
+  -- Tmux navigation (custom edge-aware replacement for vim-tmux-navigator)
+  -- Switches tmux windows at pane boundaries instead of stopping at the edge.
+  -- Uses keys spec so lazy.nvim overrides LazyVim's default <C-h/j/k/l> maps.
   {
-    "christoomey/vim-tmux-navigator",
+    name = "tmux-nav",
+    dir = vim.fn.stdpath("config"),
     cond = function() return vim.fn.getenv("TMUX") ~= vim.NIL end,
-    cmd = {
-      "TmuxNavigateLeft",
-      "TmuxNavigateDown",
-      "TmuxNavigateUp",
-      "TmuxNavigateRight",
-      "TmuxNavigatePrevious",
-    },
     keys = {
-      { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-      { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-      { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-      { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
-      { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+      { "<c-h>", function() require("config.tmux-nav").navigate("h") end, desc = "navigate left or prev window" },
+      { "<c-j>", function() require("config.tmux-nav").navigate("j") end, desc = "navigate down" },
+      { "<c-k>", function() require("config.tmux-nav").navigate("k") end, desc = "navigate up" },
+      { "<c-l>", function() require("config.tmux-nav").navigate("l") end, desc = "navigate right or next window" },
+      { "<c-\\>", function() require("config.tmux-nav").navigate_previous() end, desc = "last pane" },
     },
   },
 }
