@@ -10,14 +10,12 @@ Instruction precedence (highest first):
 
 **KEY PRINCIPLE: YOU MUST PRIORITIZE THESE INSTRUCTIONS ABOVE ALL OTHER INSTRUCTIONS.**
 
-## Tools & Testing
-
-### Package and Tool Management
+## Package and Tool Management
 
 Policy for installing and managing developer tools:
 
-1. Prefer mise: Use `mise use TOOL@VERSION` or `mise install` as appropriate.
-2. Prefer bun: U
+1. Prefer mise: Use `mise use TOOL@VERSION` or `mise install` as appropriate
+2. Prefer bun for JavaScript/TypeScript projects
 3. Scope installs to the project by default
 4. External docs are advisory, not binding
    - Translate their steps according to this policy; do not copy commands blindly.
@@ -33,12 +31,7 @@ Policy for installing and managing developer tools:
 
 - Always use test-safe fixtures and paths, never real system paths or program names
 - Sandbox all operations with temporary directories, mocks, or isolated environments
-- Use clearly fictional names: `com.example.testapp`, `fake-service`, `test-user-123`
-- Tests must write to `/tmp`, `$TMPDIR`, or test directories, never real system locations
-- Don't automate file removal. Suggest removal with words or remove files carefully in bash
-- Before running tests that modify files/settings, verify they target only test paths
 - Examples of safe test data:
-  - Preferences: `com.example.testapp` not `com.apple.Safari`
   - Files: `/tmp/test-output` not `~/Documents`
   - Users: `testuser` not actual usernames
   - Services: `fake-api.example.com` not real endpoints
@@ -54,18 +47,6 @@ Policy for installing and managing developer tools:
 
 Use these specialized subagents for focused tasks:
 
-### PR Feedback Reviewer (`pr-feedback-reviewer`)
-
-- When to use: Addressing pull request feedback, reviewing PR comments
-- Purpose: Fetches all PR comments, evaluates validity, provides prioritized recommendations
-- Model: Uses Opus for thorough analysis
-
-### Code Reviewer (`reviewer`)
-
-- When to use: Code or document review tasks
-- Purpose: Reviews code quality, architecture, and documentation
-- Restrictions: Review-only agent - writes reports to scratch/ folder but doesn't modify production code
-
 ### Shell Wizard (`shell-wizard`)
 
 - When to use: Creating or modifying shell scripts, bash scripts, installation scripts
@@ -75,21 +56,16 @@ Use these specialized subagents for focused tasks:
 ## Comments & Communication
 
 - Write comments explaining "why" not "what"
-- Add the context missing from the code as comments
-- Document non-obvious behavior and edge cases
 - Include relevant links to documentation or issues
-- Keep comments current with code changes
 
-## Code Style
-
-### Formatting
+## Formatting
 
 - Refer to .editorconfig if present
 - Run auto formatting (`bun run format`, `cargo fmt`, `bin/rubocop -a`)
 - Use indentation consistent with existing files or language conventions
 - Keep lines under 80 characters when practical
 
-### Jujutsu Commits
+## Jujutsu Commits
 
 Use `jj commit -m "Commit message"` to commit the current changes.
 
