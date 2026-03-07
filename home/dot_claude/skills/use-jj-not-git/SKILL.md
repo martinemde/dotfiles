@@ -1,6 +1,6 @@
 ---
 name: use-jj-not-git
-description: Guidance for using Jujutsu (jj) for version control. Use this skill when you would use git in order to make and edit commits properly, or for help to understand jj commands or concepts (working copy, changes, conflicts, operation log, bookmarks, revsets), troubleshoot jj issues, configure jj settings, understand jj workflows, translate Git commands to jj, or work with jj repositories. Also trigger when users mention "jujutsu", version control, or commits.
+description: Use `jj commit` to commit without loading this skill. Use this skill when doing more with Jujutsu (jj) than just committing (working copy, changes, conflicts, operation log, bookmarks, revsets), troubleshoot jj issues, configure jj settings, understand jj workflows, translate Git commands to jj, or work with jj repositories. Also trigger when users mention "jujutsu", version control, or commits.
 ---
 
 # Jujutsu (jj) Commit Guide
