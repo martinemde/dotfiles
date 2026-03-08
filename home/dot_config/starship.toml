@@ -5,7 +5,6 @@
 # Dark surface backgrounds with colored text foregrounds for a cohesive, subtle look
 
 format = """
-[](base)\
 $os\
 $user\
 $directory\
@@ -20,11 +19,8 @@ $java\
 $kotlin\
 $haskell\
 $python\
-[ ](bg:base fg:surface0)\
 $docker_context\
-[](bg:surface0 fg:surface1)\
 $time\
-[ ](fg:surface1)\
 $cmd_duration\
 ${custom.cost}\
 $line_break\
@@ -62,7 +58,7 @@ crust = "#11111b"
 
 [os]
 disabled = false
-style = "bg:base fg:mauve"
+style = "fg:mauve"
 
 [os.symbols]
 Windows = ""
@@ -88,12 +84,12 @@ RedHatEnterprise = "󱄛"
 
 [username]
 show_always = true
-style_user = "bg:base fg:mauve"
-style_root = "bg:base fg:red"
+style_user = "fg:mauve"
+style_root = "fg:red"
 format = '[ $user]($style)'
 
 [directory]
-style = "bg:base fg:sky"
+style = "fg:sky"
 format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = ""
@@ -109,9 +105,9 @@ truncate_to_repo = false
 
 # Custom jj (Jujutsu) module - replaces git_branch/git_status
 [custom.jj]
-format = '[](fg:surface0 bg:base)[$output](fg:sapphire bg:surface0)[](bg:base fg:surface0)'
+format = '[$output]($style)'
 command = "jj-prompt"
-style = "bg:surface0"
+style = "fg:sapphire"
 ignore_timeout = false
 shell = ["bash"]
 use_stdin = false
@@ -120,63 +116,63 @@ require_repo = true
 
 [c]
 symbol = " "
-style = "fg:green bg:base"
+style = "fg:green"
 format = '[ $symbol($version)]($style)'
 
 [rust]
 symbol = " "
-style = "fg:peach bg:base"
+style = "fg:peach"
 format = '[ $symbol($version)]($style)'
 
 [ruby]
 symbol = " "
-style = "fg:red bg:base"
+style = "fg:red"
 format = '[ $symbol($version)]($style)'
 
 [golang]
 symbol = " "
-style = "fg:sky bg:base"
+style = "fg:sky"
 format = '[ $symbol($version)]($style)'
 
 [nodejs]
 symbol = " "
-format = '[ $symbol($version)](fg:green bg:base)'
+format = '[ $symbol($version)](fg:green)'
 
 [php]
 symbol = " "
-style = "fg:lavender bg:base"
+style = "fg:lavender"
 format = '[ $symbol($version)]($style)'
 
 [java]
 symbol = " "
-style = "fg:red bg:base"
+style = "fg:red"
 format = '[ $symbol($version)]($style)'
 
 [kotlin]
 symbol = " "
-style = "fg:mauve bg:base"
+style = "fg:mauve"
 format = '[ $symbol($version)]($style)'
 
 [haskell]
 symbol = " "
-style = "fg:lavender bg:base"
+style = "fg:lavender"
 format = '[ $symbol($version)]($style)'
 
 [python]
 symbol = " "
-style = "fg:green bg:base"
+style = "fg:green"
 format = '[ $symbol($version)(\(#$virtualenv\))]($style)'
 
 [docker_context]
 symbol = " "
-style = "fg:sapphire bg:surface0"
+style = "fg:sapphire"
 format = '[ $symbol($context) ]($style)'
 
 [time]
 disabled = false
 time_format = "%R"
-style = "fg:lavender bg:surface1"
-format = '[ $time]($style)'
+style = "fg:lavender"
+format = '[  $time]($style)'
 
 [line_break]
 disabled = false
@@ -196,11 +192,3 @@ format = "[ $duration](fg:yellow) "
 disabled = false
 show_notifications = false
 min_time_to_notify = 45000
-
-# Cost accrued so far today (9:30–5:30 workday, weekdays only)
-[custom.cost]
-command = "cost-so-far"
-when = true
-format = '[$output](fg:green)'
-shell = ["bash"]
-use_stdin = false
