@@ -1,0 +1,5 @@
+# vim: ft=zsh
+
+# Re-source zshenv after macOS /etc/zprofile prepends Homebrew to PATH.
+# This ensures ~/.local/bin stays ahead of /opt/homebrew/bin.
+source ~/.zshenv

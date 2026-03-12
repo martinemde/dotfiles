@@ -2,9 +2,6 @@
 # Zsh Configuration
 # ============================================================================
 
-# Source zshenv again after macOS /etc/zprofile nukes PATH
-source ~/.zshenv
-
 # Stop here if this is e.g. cron or puma-dev (non-interactive)
 [[ ! -v TERM ]] && return 0
 

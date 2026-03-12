@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Wrapper for gh that works in jj (Jujutsu) workspaces.
+#
+# gh shells out to git, which expects a .git directory. In non-colocated
+# jj workspaces there is no .git, so gh fails with:
+#   fatal: not a git repository (or any of the parent directories): .git
+#
+# This wrapper detects jj workspaces and sets GIT_DIR to the backing
+# git repo before delegating to the real gh.
+
+set -euo pipefail
+
+if [ -z "${GIT_DIR:-}" ] && command -v jj >/dev/null 2>&1; then
+  git_root="$(jj git root 2>/dev/null)" || true
+  if [ -n "$git_root" ]; then
+    export GIT_DIR="$git_root"
+  fi
+fi
+
+{{- if eq .chezmoi.arch "arm64" }}
+exec /opt/homebrew/bin/gh "$@"
+{{- else }}
+exec /usr/local/bin/gh "$@"
+{{- end }}
