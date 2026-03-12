@@ -1,7 +1,6 @@
 ---
-description: Create a PR from the diff from trunk()
-disable-model-invocation: true
-arguments-hint: '<revision> [ready] - Create a draft or ready PR for the specified revision.'
+description: Use when asked to create a pull request (PR)
+arguments-hint: '[revision] [ready] - Create a draft or ready PR for the specified revision.'
 ---
 
 # Create Pull Request
@@ -10,10 +9,9 @@ Create a pull request using gh for a specified revision.
 
 Usage:
 
-- `/pr <revision>` - Create a draft PR for the specified revision
-- `/pr <revision> ready` - Create a ready-for-review PR
-
-Revision must be provided (bookmark, change ID, revset, or commit hash). The revision will be resolved to a bookmark for the PR.
+- `/pr` - Create a draft PR for the current diff from trunk / main
+- `/pr [revision]` - Create a draft PR for the specified revision
+- `/pr [revision] ready` - Create a ready-for-review PR
 
 When creating a pull request:
 
@@ -28,14 +26,14 @@ When creating a pull request:
 4. Consider whether the pending changes should be organized into smaller, easier
    to review commits. If so, use `jj split` or `jj squash` to reorganize before
    proceeding.
-5. Check for .github PR templates and follow them
+5. Check .github/ for PR templates and follow them
 6. **Invoke the `elements-of-style:writing-clearly-and-concisely` skill** before
    drafting any prose. This is mandatory.
 7. **Search episodic memory for design decisions**: Use `episodic-memory:search`
    to find conversations related to the files changed in this PR. Look for:
    - Design decisions and their rationale
    - Alternative approaches that were considered and rejected
-   - Tradeoffs discussed during implementation
+   - Trade-offs discussed during implementation
    - Requirements or constraints that shaped the solution
      Extract key decisions to include in the PR summary's "Design Decisions" section.
 8. Generate a PR title summarizing all commits in the changeset (not just the
