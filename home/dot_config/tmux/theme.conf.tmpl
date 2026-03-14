@@ -1,3 +1,11 @@
+{{- $os_icon := "🐧" -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $os_icon = "🧃" -}}
+{{- else if and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id") -}}
+{{-   if eq .chezmoi.osRelease.id "raspbian" -}}
+{{-     $os_icon = "🥧" -}}
+{{-   end -}}
+{{- end -}}
 # theme.conf — Catppuccin Mocha + Espresso status bar and pane styling
 
 # -- glyphs (edit these to change symbols) ------------------------------------
@@ -31,7 +39,7 @@ set -g status-left-length 40
 set -g status-right-length 40
 
 # session name in peach bold
-set -g status-left "#[fg=#fab387,bg=#11111b,bold] ❐ #S #[default]"
+set -g status-left "#[fg=#fab387,bg=#11111b,bold] {{ $os_icon }} #S #[default]"
 
 # right side: native tmux conditionals for indicators
 set -g status-right "#[fg=#9399b2,bg=#11111b] #{?client_prefix,#[fg=#fab387]⌨ ,  }#{?mouse,#[fg=#89b4fa]↗ ,  }#{?session_many_attached,#[fg=#cba6f7]⚇ ,}#{?pane_synchronized,#[fg=#f38ba8]⚏ ,} "
