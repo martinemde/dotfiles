@@ -4,6 +4,9 @@
 .chezmoiscripts/darwin_*
 Library/**
 {{ end }}
+{{ if ne .chezmoi.os "linux" }}
+.chezmoiscripts/linux_*
+{{ end }}
 {{- /* Skip 1Password-dependent secrets when SSH'd (biometric unavailable) */ -}}
 {{ if env "SSH_CONNECTION" }}
 .config/zsh/secrets.zsh
