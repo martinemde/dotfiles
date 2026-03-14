@@ -1,8 +1,8 @@
 {{- $os_icon := "🐧" -}}
 {{- if eq .chezmoi.os "darwin" -}}
 {{-   $os_icon = "🧃" -}}
-{{- else if and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id") -}}
-{{-   if eq .chezmoi.osRelease.id "raspbian" -}}
+{{- else if eq .chezmoi.os "linux" -}}
+{{-   if or (and (hasKey .chezmoi.osRelease "id") (eq .chezmoi.osRelease.id "raspbian")) (contains "rpi" .chezmoi.kernel.osrelease) -}}
 {{-     $os_icon = "🥧" -}}
 {{-   end -}}
 {{- end -}}
