@@ -67,5 +67,23 @@ defaults write com.apple.finder FXEnableRemoveFromICloudDriveWarning -bool false
 defaults write com.apple.mail NSFixedPitchFont -string "MonoLisa-Regular"
 defaults write com.apple.mail NSFixedPitchFontSize -int 13
 
+# Accessibility Zoom settings
+# Zoomed image moves: 0=continuously, 1=when pointer reaches edge, 2=keep pointer centered
+defaults write com.apple.universalaccess closeViewPanningMode -int 1
+# Don't restore zoom factor on startup
+defaults write com.apple.universalaccess closeViewRestoreZoomFactorOnStartup -bool false
+# Smooth images off
+defaults write com.apple.universalaccess closeViewSmoothImages -bool false
+# Flash screen when notification appears outside zoom view
+defaults write com.apple.universalaccess closeViewFlashScreenOnNotificationEnabled -bool true
+# Zoom each display independently
+defaults write com.apple.universalaccess closeViewZoomDisplayID -int 0
+# Don't show zoomed image while screen sharing
+defaults write com.apple.universalaccess closeViewZoomScreenShareEnabledKey -bool false
+# Fullscreen zoom mode: 0=fullscreen, 1=split, 2=PiP
+defaults write com.apple.universalaccess closeViewZoomMode -int 0
+# Enable ctrl+scroll wheel to zoom
+defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true
+
 # Set NoTunes to open Spotify
 defaults write digital.twisted.noTunes replacement /Applications/Spotify.app
