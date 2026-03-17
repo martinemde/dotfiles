@@ -4,19 +4,11 @@ add_newline = false
 
 # dir | (jj) | model | cost
 format = """
-[](base)\
-[](fg:#D97757 bg:base)\
+[](fg:#D97757)\
 $directory\
-[](fg:surface0 bg:base)\
 ${custom.jj}\
-[](bg:base fg:surface0)\
 ${env_var.CLAUDE_MODEL}\
-[](bg:base fg:surface0)\
 ${env_var.CLAUDE_CONTEXT}\
-[](bg:surface0 fg:surface1)\
-${env_var.CLAUDE_COST}\
-${custom.cost}\
-[](fg:surface1)
 ${env_var.CLAUDE_SUMMARY}\
 ${env_var.CLAUDE_SESSION_ID}\
 """
@@ -52,7 +44,7 @@ mantle = "#181825"
 crust = "#11111b"
 
 [directory]
-style = "bg:base fg:sky"
+style = "fg:sky"
 format = "[ $path ]($style)"
 truncation_length = 2
 truncate_to_repo = true
@@ -69,25 +61,19 @@ truncate_to_repo = true
 [custom.jj]
 command = "jj-prompt"
 when = true
-style = "bg:surface0"
-format = "[$output]($style)"
+format = "$output"
 shell = ["bash"]
 ignore_timeout = true
 
 [env_var.CLAUDE_MODEL]
 variable = "CLAUDE_MODEL"
 format = "[ $env_value ]($style)"
-style = "bg:base fg:sapphire"
+style = "fg:sapphire"
 
 [env_var.CLAUDE_CONTEXT]
 variable = "CLAUDE_CONTEXT"
 format = "[$env_value ]($style)"
-style = "bg:surface0 fg:peach"
-
-[env_var.CLAUDE_COST]
-variable = "CLAUDE_COST"
-format = "[$env_value]($style)"
-style = "bg:surface1 fg:green"
+style = "fg:peach"
 
 [env_var.CLAUDE_SUMMARY]
 variable = "CLAUDE_SUMMARY"
@@ -98,12 +84,3 @@ style = "fg:rosewater"
 style = "fg:overlay1"
 variable = "CLAUDE_SESSION_ID"
 format = "[$env_value]($style)"
-
-# Cost accrued so far today (9:30–5:30 workday, weekdays only)
-[custom.cost]
-command = "cost-so-far"
-when = true
-format = '[/$output]($style)'
-style = "bg:surface1 fg:teal"
-shell = ["bash"]
-use_stdin = false
