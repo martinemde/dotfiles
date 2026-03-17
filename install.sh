@@ -684,14 +684,6 @@ main() {
   # Execute the initialization command with proper argument handling
   set -- --apply --source="$script_dir" --working-tree="$script_dir"
 
-  # Add promptString arguments if environment variables are set
-  if [ -n "${GIT_USER_NAME:-}" ]; then
-    set -- "$@" --promptString "Git user.name=$GIT_USER_NAME"
-  fi
-  if [ -n "${GIT_USER_EMAIL:-}" ]; then
-    set -- "$@" --promptString "Git user.email=$GIT_USER_EMAIL"
-  fi
-
   # Add any additional passthrough arguments
   if [ -n "$CHEZMOI_ARGS" ]; then
     # shellcheck disable=SC2086

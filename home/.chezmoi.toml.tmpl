@@ -13,8 +13,16 @@
 # Variables defined here are available in all templates via the .data namespace.
 # These values can be referenced in template files throughout the dotfiles repo.
 
+{{- /* Non-interactive mode: auto-detect no TTY or set CHEZMOI_NONINTERACTIVE=1 */ -}}
+{{- $interactive := and (stdinIsATTY) (not (env "CHEZMOI_NONINTERACTIVE")) -}}
+
 {{- $choices := list "home" "work" -}}
-{{- $hosttype := promptChoiceOnce . "hosttype" "Which host" $choices "home" }}
+{{- $hosttype := "home" -}}
+{{- if $interactive -}}
+  {{- $hosttype = promptChoiceOnce . "hosttype" "Which host" $choices "home" -}}
+{{- else if env "CHEZMOI_HOSTTYPE" -}}
+  {{- $hosttype = env "CHEZMOI_HOSTTYPE" -}}
+{{- end }}
 
 [data]
 hosttype = {{ $hosttype | quote }}
@@ -25,10 +33,14 @@ hosttype = {{ $hosttype | quote }}
 {{- if lookPath "op" }}
   {{- $gitSigningKeyRef := "op://Private/GitHub SSH Signing Key/public key" }}
   {{- if eq $hosttype "work" -}}
-    {{- $awsProfile = promptStringOnce . "aws.profile" "AWS Profile" "bedrock-users" }}
+    {{- if $interactive -}}
+      {{- $awsProfile = promptStringOnce . "aws.profile" "AWS Profile" "bedrock-users" -}}
+    {{- else if env "CHEZMOI_AWS_PROFILE" -}}
+      {{- $awsProfile = env "CHEZMOI_AWS_PROFILE" -}}
+    {{- end }}
     {{- $gitSigningKeyRef = "op://Employee/GitHub SSH Signing Key/public key" }}
   {{- end -}}
-  {{- if not $gitSigningKey -}}
+  {{- if and (not $gitSigningKey) $interactive -}}
     {{- $gitSigningKey = onepasswordRead $gitSigningKeyRef }}
   {{- end -}}
 {{- end }}
