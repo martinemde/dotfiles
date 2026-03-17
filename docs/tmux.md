@@ -232,6 +232,11 @@ tmux attach-session -t development
 tmux list-sessions
 ```
 
+### Stacked panes
+
+Custom stacked pane implementation shrinks non-active panes to 1 line when more than 1 pane in same
+column.
+
 ## Troubleshooting
 
 ### Navigation Issues
