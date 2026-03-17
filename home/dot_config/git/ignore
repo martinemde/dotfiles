@@ -67,7 +67,6 @@ scratch
 .mise.local.toml
 mise.*.local.toml
 mise.local.toml
-mise.toml
 .mise/*.local.toml
 mise/*.local.toml
 
