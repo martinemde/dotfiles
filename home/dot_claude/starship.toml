@@ -6,9 +6,9 @@ add_newline = false
 format = """
 [](fg:#D97757)\
 $directory\
-${custom.jj}\
+${custom.jj}
 ${env_var.CLAUDE_MODEL}\
-${env_var.CLAUDE_CONTEXT}\
+${env_var.CLAUDE_CONTEXT}
 ${env_var.CLAUDE_SUMMARY}\
 ${env_var.CLAUDE_SESSION_ID}\
 """
@@ -67,7 +67,7 @@ ignore_timeout = true
 
 [env_var.CLAUDE_MODEL]
 variable = "CLAUDE_MODEL"
-format = "[ $env_value ]($style)"
+format = "[$env_value ]($style)"
 style = "fg:sapphire"
 
 [env_var.CLAUDE_CONTEXT]
