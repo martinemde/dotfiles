@@ -1,7 +1,7 @@
 #:schema https://mise.jdx.dev/schema/mise.json
 
 [tools]
-{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.arch "amd64") -}}
+{{ if eq .chezmoi.arch "amd64" -}}
 "aqua:technicalpickles/envsense" = "latest"
 "cargo:starship-jj" = "latest"
 {{ end -}}
