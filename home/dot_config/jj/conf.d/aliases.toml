@@ -25,7 +25,8 @@ jj config set --repo git.fetch '["upstream", "origin"]'
 # Push only to the fork by default
 jj config set --repo git.push origin
 # Track both remote bookmarks
-jj bookmark track main@upstream main@origin
+jj bookmark track main --remote upstream
+jj bookmark track main --remote origin
 # The upstream repository defines the trunk
 jj config set --repo 'revset-aliases."trunk()"' main@upstream
 """, ""]
