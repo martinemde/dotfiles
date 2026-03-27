@@ -8,6 +8,9 @@ chflags nohidden ~/Library
 # Disable holding a key for the special character menu
 defaults write -g ApplePressAndHoldEnabled -bool false
 
+# Disable icons in menus (text-only menu items)
+defaults write -g NSMenuEnableActionImages -bool NO
+
 # Make keys repeat really fast
 defaults write -g KeyRepeat -int 1
 
