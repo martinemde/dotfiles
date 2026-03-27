@@ -106,7 +106,9 @@
     }
   },
   "alwaysThinkingEnabled": true,
+{{- if eq .hosttype "work" }}
   "effortLevel": "high",
+{{- end }}
   "skipDangerousModePermissionPrompt": true,
   "gitAttribution": false
 }
