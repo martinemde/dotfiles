@@ -6,11 +6,13 @@ add_newline = false
 format = """
 [](fg:#D97757)\
 $directory\
-${custom.jj}
+${custom.jj}\
+$fill\
+${env_var.CLAUDE_SESSION_ID}
+${env_var.CLAUDE_CONTEXT}\
 ${env_var.CLAUDE_MODEL}\
-${env_var.CLAUDE_CONTEXT}
+$fill\
 ${env_var.CLAUDE_SUMMARY}\
-${env_var.CLAUDE_SESSION_ID}\
 """
 
 palette = 'catppuccin_mocha'
@@ -65,15 +67,18 @@ format = "$output"
 shell = ["bash"]
 ignore_timeout = true
 
+[fill]
+symbol = " "
+
 [env_var.CLAUDE_MODEL]
 variable = "CLAUDE_MODEL"
-format = "[$env_value ]($style)"
 style = "fg:sapphire"
+format = "[ $env_value ]($style)"
 
 [env_var.CLAUDE_CONTEXT]
-variable = "CLAUDE_CONTEXT"
-format = "[$env_value ]($style)"
 style = "fg:peach"
+variable = "CLAUDE_CONTEXT"
+format = "[$env_value]($style)"
 
 [env_var.CLAUDE_SUMMARY]
 variable = "CLAUDE_SUMMARY"
