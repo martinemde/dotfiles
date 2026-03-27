@@ -12,9 +12,6 @@ auto-update-channel = tip
 shell-integration = zsh
 shell-integration-features = cursor,sudo,title
 
-# Launch
-initial-command = /opt/homebrew/bin/tmux
-
 # OS
 mouse-hide-while-typing = true
 window-save-state = always
