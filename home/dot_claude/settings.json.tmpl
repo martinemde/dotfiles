@@ -13,12 +13,9 @@
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-6-v1[1m]",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-    "AWS_REGION": "us-west-2",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_SUBAGENT_MODEL": "us.anthropic.claude-opus-4-6-v1[1m]",
-    "CLAUDE_CODE_USE_BEDROCK": "true",
     "GUSTO_CLAUDE_SETUP": "true",
-    "AWS_PROFILE": {{ .aws.profile | quote }}
   },
   "includeCoAuthoredBy": true,
 {{- else }}
@@ -98,15 +95,32 @@
     "elements-of-style@superpowers-marketplace": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
+    "gusto-setup-wizard@gusto-claude-code": true,
     "superpowers@claude-plugins-official": true,
     "ci-cd-tools@pickled-claude-plugins": true,
     "playground@claude-plugins-official": true,
     "plugin-dev@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,
     "dev-tools@pickled-claude-plugins": true,
+    "ruby-lsp@claude-plugins-official": true,
+    "agent-meta@pickled-claude-plugins": true,
+    "second-brain@pickled-claude-plugins": true,
+    "stay-on-target@pickled-claude-plugins": true,
+    "tool-routing@pickled-claude-plugins": true,
+    "working-in-monorepos@pickled-claude-plugins": true
+
     "lua-lsp@claude-plugins-official": true
   },
+  "extraKnownMarketplaces": {
+    "pickled-claude-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "technicalpickles/pickled-claude-plugins"
+      }
+    }
+  },
   "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
   "gitAttribution": false
 }
