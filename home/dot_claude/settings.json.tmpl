@@ -1,21 +1,12 @@
-{{- /* Include work settings if AWS profile was configured during init (order intentionally maintained) */ -}}
 {
-{{- if .aws.profile }}
-  "awsAuthRefresh": "aws sso login --profile $AWS_PROFILE",
-{{- end }}
   "fileSuggestion": {
     "type": "command",
     "command": "~/.claude/file-suggestion.sh"
   },
   "cleanupPeriodDays": 365,
-{{- if .aws.profile }}
+{{- if eq .hosttype "work" }}
   "env": {
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-6-v1[1m]",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "us.anthropic.claude-opus-4-6-v1[1m]",
-    "GUSTO_CLAUDE_SETUP": "true",
+    "GUSTO_CLAUDE_SETUP": "true"
   },
   "includeCoAuthoredBy": true,
 {{- else }}
@@ -70,9 +61,6 @@
       "Bash(gh pr create:*)"
     ]
   },
-{{- if .aws.profile }}
-  "model": "us.anthropic.claude-opus-4-6-v1[1m]",
-{{- end }}
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -95,7 +83,6 @@
     "elements-of-style@superpowers-marketplace": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
-    "gusto-setup-wizard@gusto-claude-code": true,
     "superpowers@claude-plugins-official": true,
     "ci-cd-tools@pickled-claude-plugins": true,
     "playground@claude-plugins-official": true,
@@ -107,8 +94,7 @@
     "second-brain@pickled-claude-plugins": true,
     "stay-on-target@pickled-claude-plugins": true,
     "tool-routing@pickled-claude-plugins": true,
-    "working-in-monorepos@pickled-claude-plugins": true
-
+    "working-in-monorepos@pickled-claude-plugins": true,
     "lua-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {

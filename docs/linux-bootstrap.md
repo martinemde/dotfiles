@@ -13,7 +13,7 @@ These dotfiles were built for macOS. First-time `chezmoi init` on Linux hit hard
 
 ## What Changed
 
-- **`onepasswordRead` gated by `lookPath "op"`** -- when `op` is absent, git signing key defaults to empty string and AWS profile prompt is skipped
+- **`onepasswordRead` gated by `lookPath "op"`** -- when `op` is absent, git signing key defaults to empty string
 - **Git commit signing conditional** -- `gpgsign = true`, `signingkey`, and `[gpg]` sections only render when a signing key is configured
 - **Brew scripts renamed with `_darwin_`** -- chezmoi's OS filename convention skips them on Linux automatically
 - **Homebrew env vars wrapped in OS check** -- `PKG_CONFIG_PATH`, `LDFLAGS`, `CPPFLAGS` for `/opt/homebrew` only set on macOS

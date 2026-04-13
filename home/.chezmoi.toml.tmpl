@@ -29,15 +29,9 @@ hosttype = {{ $hosttype | quote }}
 
 {{- /* Cache signing key after first init so re-init and SSH sessions skip 1Password */ -}}
 {{- $gitSigningKey := dig "git" "signingkey" "" . }}
-{{- $awsProfile := "" }}
 {{- if lookPath "op" }}
   {{- $gitSigningKeyRef := "op://Private/GitHub SSH Signing Key/public key" }}
   {{- if eq $hosttype "work" -}}
-    {{- if $interactive -}}
-      {{- $awsProfile = promptStringOnce . "aws.profile" "AWS Profile" "bedrock-users" -}}
-    {{- else if env "CHEZMOI_AWS_PROFILE" -}}
-      {{- $awsProfile = env "CHEZMOI_AWS_PROFILE" -}}
-    {{- end }}
     {{- $gitSigningKeyRef = "op://Employee/GitHub SSH Signing Key/public key" }}
   {{- end -}}
   {{- if and (not $gitSigningKey) $interactive -}}
@@ -50,11 +44,6 @@ hosttype = {{ $hosttype | quote }}
 name = "Martin Emde"
 email = "me@martinemde.com"
 signingkey = {{ $gitSigningKey | quote }}
-
-[data.aws]
-# AWS configuration - prompted during initialization
-# Used for Claude Code settings on work machines
-profile = {{ $awsProfile | quote }}
 
 [diff]
 format = "git"
