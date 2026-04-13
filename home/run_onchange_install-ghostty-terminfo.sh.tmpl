@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Install Ghostty terminfo on all systems so TERM=xterm-ghostty works everywhere.
+# Needed when SSHing from Ghostty — without it, the remote host doesn't recognize
+# the terminal and handling breaks (double keystrokes, missing capabilities).
+#
+# terminfo-source hash: {{ include "dot_config/ghostty/xterm-ghostty.terminfo" | sha256sum }}
+
+[ -n "${DEBUG:-}" ] && set -o xtrace
+set -o errexit
+set -o nounset
+
+if ! command -v tic >/dev/null 2>&1; then
+    echo "tic not found, skipping ghostty terminfo installation"
+    exit 0
+fi
+
+tic -x "${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/xterm-ghostty.terminfo"
+echo "Ghostty terminfo installed to ~/.terminfo"
