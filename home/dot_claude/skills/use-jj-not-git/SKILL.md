@@ -64,6 +64,20 @@ jj bookmark advance                  # advance closest bookmark(s) to @
 
 Run `jj bookmark advance --help` for `--to` and other options.
 
+## Non-interactive Split
+
+Use `--tool true` to split specific files into their own commit without
+opening a diff editor. The `true` command exits 0, accepting the
+provided file selection automatically:
+
+```bash
+# Split specific files into a new commit
+jj split --tool true -m "Extract feature" -- \
+  'glob:"path/to/file1"' 'glob:"path/to/file2"'
+
+# Remaining changes stay in a follow-up working copy change
+```
+
 ## Quick Reference
 
 | Task                  | Command                    |
