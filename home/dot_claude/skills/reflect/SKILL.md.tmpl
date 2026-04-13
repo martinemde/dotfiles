@@ -1,0 +1,191 @@
+---
+name: reflect
+description: >-
+  Use at the end of a session to review what happened, surface friction
+  and codebase issues, and turn findings into fixes or tracked issues.
+  Invoked by the user directly or by /work-on at session close.
+argument-hint: "[@notes-file | general feedback text]"
+metadata:
+  author: @ivy
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash(ccstat:*)
+  - Bash(gh issue list:*)
+  - Bash(gh issue view:*)
+  - Bash(gh search issues:*)
+  - Bash(git diff:*)
+  - Bash(git remote get-url:*)
+---
+
+# Reflect: Metrics-Driven Session Retrospective
+
+Review a session using structured metrics and conversation analysis. Every finding becomes either a fix or a tracked issue. No memories. No skips.
+
+## Arguments
+
+```
+$ARGUMENTS
+```
+
+If arguments reference a file (starts with `@`), read that file as user notes.
+If arguments are plain text, treat as user-provided context or feedback about the session.
+If empty, run the retrospective using only metrics and conversation analysis.
+
+## Constraints
+
+- **Edit in chezmoi source, not home** — global dotfiles are managed by chezmoi. When fixing skills, hooks, shell config, or tool settings, edit in the chezmoi source directory, not the home directory. Destination edits get overwritten on next `chezmoi apply`.
+  - Chezmoi source root: `{{ .chezmoi.workingTree }}/`
+  - Global skills and agents: `{{ .chezmoi.workingTree }}/home/dot_claude/skills/`, `{{ .chezmoi.workingTree }}/home/dot_claude/agents/`
+  - Shell config: `{{ .chezmoi.workingTree }}/home/dot_zshrc.tmpl`
+  - Mise tools: `{{ .chezmoi.workingTree }}/home/dot_config/mise/config.toml`
+- **No memories** — do not write to MEMORY.md or create memory files under any circumstances
+- **Scope guard** — only surface codebase issues that were encountered during this session. Do not audit the broader codebase or propose improvements unrelated to the work that was done.
+
+## Instructions
+
+### 1. Gather Metrics
+
+Run session metrics:
+
+```bash
+ccstat --format json ${CLAUDE_SESSION_ID}
+```
+
+Parse the JSON output. Key fields:
+- `runtime_seconds`, `total_cost_usd`, `commits`
+- `models` — per-model turns and cost
+- `subagents` — count, failures, by_type
+- `tool_calls` — total, main_context, subagents, by_tool
+- `autonomy` — longest_stretch_seconds, stretches_over_2min, stretches_over_5min
+- `user` — messages, interruptions
+- `stop_reasons` — end_turn vs tool_use counts
+- `skills_invoked`
+
+Also estimate lines changed: run `git diff --stat HEAD~N..HEAD` where N is the `commits` count from the metrics JSON. If commits is 0, skip this step and note that no commits were made.
+
+### 2. Interpret Metrics
+
+Flag anomalies using judgment relative to the session's scope. Reference signals:
+
+| Metric | Signal | Likely cause |
+|--------|--------|-------------|
+| cost / commits | High ratio | Rework, false starts, or scope churn |
+| cost / lines changed | High ratio | Expensive output relative to what shipped |
+| user interruptions | > 3 | Agent wasn't autonomous enough or went off track |
+| subagent failures | > 0 | Infrastructure issue (worktree locks, permissions, timeouts) |
+| stretches_over_5min | 0 | Agent paused too much between phases instead of flowing |
+| end_turn / tool_use | > 0.3 ratio | Narrating instead of working |
+| skills invoked twice | Same skill 2x | First invocation likely failed |
+
+These are guidelines, not gates. A high cost/commit ratio is fine for a deep investigation session. Judge relative to what the session was trying to accomplish.
+
+### 3. Extract Findings
+
+Scan the conversation for two categories:
+
+**Session friction** (how the work went):
+- Mistakes repeated — the same class of error hit more than once
+- Assumptions that turned out wrong — and what the truth was
+- Where progress stalled and why — root causes, not symptoms
+- Approaches that worked well — especially non-obvious ones worth reinforcing
+- Corrections from the user — any time they redirected the agent
+
+**Codebase observations** (what the code revealed during the session):
+- Tech debt encountered — workarounds that slowed progress
+- Awkward or fragile architecture — patterns that caused friction
+- Missing tests or unclear interfaces — gaps that made verification hard
+- Lack of documentation or rationale — code with no explanation for why it exists or works the way it does
+- Improvement opportunities noticed but out of scope for this session
+
+Combine findings from conversation analysis, user notes (if provided), and metrics anomalies.
+
+Be specific. "The tests were flaky" is not useful. "The test for `parse_config` fails intermittently because it depends on file system ordering" is useful.
+
+### 4. Triage
+
+Classify every finding into exactly one of two buckets:
+
+| Bucket | Criteria | Action |
+|--------|----------|--------|
+| **Fix now** | <10 min, obvious change, no design decisions needed | Apply the fix, then `/commit` |
+| **Backlog** | Needs thought, research, or is part of a larger problem | File or update a GitHub issue |
+
+**Fix-now hierarchy** (prefer higher items):
+1. Skill or hook fix — directly improves agent workflows
+2. AGENTS.md or CLAUDE.md update — improves agent guidance
+3. Code improvement — small, targeted fix
+
+**No memories. No skips.** Every finding either gets fixed or gets tracked.
+
+**Repo targeting for backlog items:**
+
+Determine the target repo from `git remote get-url origin` for codebase issues. Dev environment issues (skills, hooks, dotfiles) target this dotfiles repo.
+
+Present findings to the user in this format:
+
+```markdown
+## Session Metrics
+
+| Metric | Value |
+|--------|-------|
+| Runtime | Xm Ys |
+| Cost | $X.XX |
+| Commits | N |
+| Lines changed | +N / -N |
+| Interruptions | N |
+| Subagent failures | N |
+
+## Anomalies
+
+- [anomaly description and interpretation]
+- ...
+
+## Findings
+
+### Fix Now
+- [ ] Finding — what to fix and where
+- ...
+
+### Backlog
+- [ ] [owner/repo] Issue title — one-line summary of the problem
+- ...
+```
+
+**Wait for user approval before executing any actions.**
+
+The user may:
+- Remove items they don't want actioned
+- Move items between buckets
+- Adjust issue titles or descriptions
+- Add context you missed
+
+### 5. Execute
+
+After the user approves:
+
+**Fix-now items:**
+1. Apply the fix
+2. Invoke `/commit` for each logical change
+
+**Backlog items:**
+
+For each item, determine the target repo, then:
+
+1. **Search for duplicates first:**
+   ```bash
+   gh search issues "keywords" --repo owner/repo --state open
+   ```
+
+2. **If duplicate found:**
+   - Read existing context: `gh issue view <number> --comments`
+   - Add new context from this session: `gh issue comment <number> --body "..."`
+   - Note the recurrence in your comment
+
+3. **If no duplicate:**
+   - Create a new issue: `gh issue create --repo owner/repo --title "..." --body "..."`
+
+**Report:** When done, summarize what was executed:
+- Fixes applied with commit SHAs
+- Issues filed or updated with URLs
