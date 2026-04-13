@@ -1,5 +1,4 @@
 #:schema https://mise.jdx.dev/schema/mise.json
-
 [tools]
 {{ if eq .chezmoi.arch "amd64" -}}
 "aqua:technicalpickles/envsense" = "latest"
@@ -49,3 +48,7 @@ uv = "latest"
 
 [settings]
 idiomatic_version_file_enable_tools = ["ruby"]
+
+[settings.github]
+use_git_credentials = true
+
