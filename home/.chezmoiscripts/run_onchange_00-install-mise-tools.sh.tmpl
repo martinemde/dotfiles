@@ -8,16 +8,37 @@ set -o nounset
 
 # Only run if mise is available
 if ! command -v mise >/dev/null 2>&1; then
-    echo "mise not found, skipping tool installation"
+    echo "WARNING: mise not found, skipping tool installation" >&2
+    echo "         Install mise first: https://mise.jdx.dev/getting-started.html" >&2
     exit 0
 fi
 
-echo "Installing global mise tools..."
-
-# Use gh auth to avoid GitHub API rate limits
+# Resolve a GitHub token before calling mise install. mise/aqua hit the
+# GitHub API for nearly every tool, and unauthenticated requests share a
+# stingy per-IP rate limit that gets exhausted within a handful of tools.
+# Once exhausted, every subsequent install fails with 403 and we have to
+# wait ~1h. Better to refuse upfront than to half-install and rate-limit.
 if [ -z "${GITHUB_TOKEN:-}" ] && command -v gh >/dev/null 2>&1; then
     GITHUB_TOKEN="$(gh auth token 2>/dev/null)" && export GITHUB_TOKEN
 fi
+
+if [ -z "${GITHUB_TOKEN:-}" ] && [ "${MISE_ALLOW_ANONYMOUS_GITHUB:-}" != "1" ]; then
+    cat >&2 <<'EOF'
+ERROR: No GITHUB_TOKEN available — refusing to run `mise install`.
+
+Anonymous GitHub API requests are rate-limited per IP and will fail
+partway through, leaving tools in an inconsistent state.
+
+Fix one of:
+  - Install gh and authenticate:  `gh auth login`  (then re-run apply)
+  - Export a token:               `export GITHUB_TOKEN=<your PAT>`
+  - Override (not recommended):   `export MISE_ALLOW_ANONYMOUS_GITHUB=1`
+
+EOF
+    exit 1
+fi
+
+echo "Installing global mise tools..."
 
 # Install all tools defined in global config
 mise install --yes
