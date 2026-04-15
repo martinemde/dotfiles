@@ -3,12 +3,12 @@
 
 # Znap: Fast, minimal zsh plugin manager with lazy loading
 # Purpose: Caches eval commands (mise, atuin, starship, zoxide) for faster shell startup
-# Updates: Weekly via Renovate tracking master branch
+# Updates: Weekly via Renovate tracking main branch
 # renovate: repo=marlonrichert/zsh-snap branch=main
 [".zsh/znap/zsh-snap"]
-type = "git-repo"
-url = "https://github.com/marlonrichert/zsh-snap.git"
-revision = "25754a45d9ceafe6d7d082c9ebe40a08cb85a4f0"
+type = "archive"
+url = "https://github.com/marlonrichert/zsh-snap/archive/25754a45d9ceafe6d7d082c9ebe40a08cb85a4f0.tar.gz"
+stripComponents = 1
 refreshPeriod = "168h"
 
 # zsh-autosuggestions: Fish-like command suggestions
@@ -16,9 +16,9 @@ refreshPeriod = "168h"
 # Updates: Weekly via Renovate tracking master branch
 # renovate: repo=zsh-users/zsh-autosuggestions branch=master
 [".zsh/plugins/zsh-autosuggestions"]
-type = "git-repo"
-url = "https://github.com/zsh-users/zsh-autosuggestions.git"
-revision = "85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5"
+type = "archive"
+url = "https://github.com/zsh-users/zsh-autosuggestions/archive/85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5.tar.gz"
+stripComponents = 1
 refreshPeriod = "168h"
 
 # zsh-syntax-highlighting: Real-time command validation
@@ -26,7 +26,7 @@ refreshPeriod = "168h"
 # Updates: Weekly via Renovate tracking master branch
 # renovate: repo=zsh-users/zsh-syntax-highlighting branch=master
 [".zsh/plugins/zsh-syntax-highlighting"]
-type = "git-repo"
-url = "https://github.com/zsh-users/zsh-syntax-highlighting.git"
-revision = "5eb677bb0fa9a3e60f0eff031dc13926e093df92"
+type = "archive"
+url = "https://github.com/zsh-users/zsh-syntax-highlighting/archive/5eb677bb0fa9a3e60f0eff031dc13926e093df92.tar.gz"
+stripComponents = 1
 refreshPeriod = "168h"

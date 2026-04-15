@@ -130,48 +130,48 @@
       depNameTemplate: 'ohmyzsh/ohmyzsh',
       packageNameTemplate: 'https://github.com/ohmyzsh/ohmyzsh',
     },
-    // Chezmoi external dependencies - zsh-autosuggestions git-repo revision pin
+    // Chezmoi external dependencies - zsh-autosuggestions archive tarball pin
     {
       customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternal\\.toml\\.tmpl$'],
+      fileMatch: ['^home/\\.chezmoiexternals/zsh\\.externals\\.toml$'],
       matchStrings: [
-        '\\["\\.zsh/plugins/zsh-autosuggestions"\\][^\\[]*url\\s*=\\s*"https://github\\.com/zsh-users/zsh-autosuggestions\\.git"[^\\[]*revision\\s*=\\s*"(?<currentDigest>[a-f0-9]{7,40})"',
+        'zsh-users/zsh-autosuggestions/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
       ],
       datasourceTemplate: 'git-refs',
       currentValueTemplate: 'master',
       depNameTemplate: 'zsh-users/zsh-autosuggestions',
       packageNameTemplate: 'https://github.com/zsh-users/zsh-autosuggestions',
     },
-    // Chezmoi external dependencies - zsh-syntax-highlighting git-repo revision pin
+    // Chezmoi external dependencies - zsh-syntax-highlighting archive tarball pin
     {
       customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternal\\.toml\\.tmpl$'],
+      fileMatch: ['^home/\\.chezmoiexternals/zsh\\.externals\\.toml$'],
       matchStrings: [
-        '\\["\\.zsh/plugins/zsh-syntax-highlighting"\\][^\\[]*url\\s*=\\s*"https://github\\.com/zsh-users/zsh-syntax-highlighting\\.git"[^\\[]*revision\\s*=\\s*"(?<currentDigest>[a-f0-9]{7,40})"',
+        'zsh-users/zsh-syntax-highlighting/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
       ],
       datasourceTemplate: 'git-refs',
       currentValueTemplate: 'master',
       depNameTemplate: 'zsh-users/zsh-syntax-highlighting',
       packageNameTemplate: 'https://github.com/zsh-users/zsh-syntax-highlighting',
     },
-    // Chezmoi external dependencies - gpakosz/.tmux git-repo revision pin
+    // Chezmoi external dependencies - tmux-plugins/tpm archive tarball pin
     {
       customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternal\\.toml\\.tmpl$'],
+      fileMatch: ['^home/\\.chezmoiexternals/tmux\\.externals\\.toml$'],
       matchStrings: [
-        '(?m)^\\s*revision\\s*=\\s*"(?<currentDigest>[a-f0-9]{7,40})"',
+        'tmux-plugins/tpm/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
       ],
       datasourceTemplate: 'git-refs',
       currentValueTemplate: 'master',
-      depNameTemplate: 'gpakosz/.tmux',
-      packageNameTemplate: 'https://github.com/gpakosz/.tmux',
+      depNameTemplate: 'tmux-plugins/tpm',
+      packageNameTemplate: 'https://github.com/tmux-plugins/tpm',
     },
-    // Chezmoi external dependencies - zsh-snap git-repo revision pin
+    // Chezmoi external dependencies - zsh-snap archive tarball pin
     {
       customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternal\\.toml\\.tmpl$'],
+      fileMatch: ['^home/\\.chezmoiexternals/zsh\\.externals\\.toml$'],
       matchStrings: [
-        '\\["\\.zsh/znap/zsh-snap"\\][^\\[]*url\\s*=\\s*"https://github\\.com/marlonrichert/zsh-snap\\.git"[^\\[]*revision\\s*=\\s*"(?<currentDigest>[a-f0-9]{7,40})"',
+        'marlonrichert/zsh-snap/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
       ],
       datasourceTemplate: 'git-refs',
       currentValueTemplate: 'main',

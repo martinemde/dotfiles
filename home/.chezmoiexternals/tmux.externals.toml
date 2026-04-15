@@ -6,7 +6,7 @@
 # Updates: Weekly via Renovate tracking master branch
 # renovate: repo=tmux-plugins/tpm branch=master
 [".config/tmux/plugins/tpm"]
-type = "git-repo"
-url = "https://github.com/tmux-plugins/tpm.git"
-revision = "99469c4a9b1ccf77fade25842dc7bafbc8ce9946"
+type = "archive"
+url = "https://github.com/tmux-plugins/tpm/archive/99469c4a9b1ccf77fade25842dc7bafbc8ce9946.tar.gz"
+stripComponents = 1
 refreshPeriod = "168h"
