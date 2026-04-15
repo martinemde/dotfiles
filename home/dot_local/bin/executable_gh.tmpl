@@ -17,8 +17,12 @@ if [ -z "${GIT_DIR:-}" ] && command -v jj >/dev/null 2>&1; then
   fi
 fi
 
-{{- if eq .chezmoi.arch "arm64" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   if eq .chezmoi.arch "arm64" }}
 exec /opt/homebrew/bin/gh "$@"
-{{- else }}
+{{-   else }}
 exec /usr/local/bin/gh "$@"
+{{-   end }}
+{{- else }}
+exec /usr/bin/gh "$@"
 {{- end }}
