@@ -4,10 +4,14 @@
     "command": "~/.claude/file-suggestion.sh"
   },
   "cleanupPeriodDays": 365,
-{{- if eq .hosttype "work" }}
   "env": {
-    "GUSTO_CLAUDE_SETUP": "true"
+{{- if eq .hosttype "work" }},
+    "ENABLE_CLAUDEAI_MCP_SERVERS": "false",
+    "GUSTO_CLAUDE_SETUP": "true",
+{{- end }}
+    "CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS": "1"
   },
+{{- if eq .hosttype "work" }}
   "includeCoAuthoredBy": true,
 {{- else }}
   "includeCoAuthoredBy": false,
@@ -58,7 +62,8 @@
       "Bash(jj git push*--bookmark *)",
       "Bash(git push:*)",
       "Bash(gh pr merge:*)",
-      "Bash(gh pr create:*)"
+      "Bash(gh pr create:*)",
+      "Bash(gh issue create:*)"
     ]
   },
   "hooks": {
@@ -110,5 +115,8 @@
   "effortLevel": "high",
 {{- end }}
   "skipDangerousModePermissionPrompt": true,
-  "gitAttribution": false
+  "editorMode": "vim",
+  "useAutoModeDuringPlan": true,
+  "gitAttribution": false,
+  "skipAutoPermissionPrompt": true
 }
