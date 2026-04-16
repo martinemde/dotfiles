@@ -10,8 +10,9 @@
 ## Discipline
 
 - Use `jj` for all version control
-- Use `jj new -m "planned work"` to make a space for new work
-- Commit early and often, esp before starting new work. It's easier to squash than split
-- Tests, auto-formatting and linting should be passing before committing
+- Start each new piece of work with `jj new -m "planned work"`. This both finalizes the current change (it becomes `@-`) and creates a fresh working copy on top — there is no separate "commit" step
+- Do **not** run `jj commit`. In this workflow it is redundant with `jj new` and leads to empty-commit loops. Mark boundaries at the *start* of new work, not the end
+- Prefer small, focused changes — it's easier to squash than split. When in doubt, run `jj new` sooner
+- Before starting new work with `jj new`, ensure the current change is in a good state: tests, auto-formatting, and linting passing
 - Ensure tests are isolated from real-world effects
 - Use tool-specific diff/plan or `--dry-run` before applying changes
