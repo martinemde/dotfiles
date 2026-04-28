@@ -5,7 +5,7 @@
   },
   "cleanupPeriodDays": 365,
   "env": {
-{{- if eq .hosttype "work" }},
+{{- if eq .hosttype "work" }}
     "ENABLE_CLAUDEAI_MCP_SERVERS": "false",
     "GUSTO_CLAUDE_SETUP": "true",
 {{- end }}
@@ -64,8 +64,10 @@
       "Bash(gh pr merge:*)",
       "Bash(gh pr create:*)",
       "Bash(gh issue create:*)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
+  "model": "opus[1m]",
   "hooks": {
     "UserPromptSubmit": [
       {
