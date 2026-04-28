@@ -18,6 +18,9 @@ compinit
 
 # Load dynamic tool completions
 (( $+commands[jj] )) && source <(jj util completion zsh)
-(( $+commands[rv] )) && znap fpath _rv 'rv shell completions zsh'
+# Note: rv completions are generated once into site-functions by the brew
+# bundle script (see run_onchange_darwin_brew_bundle). Using `znap fpath`
+# here regenerated and recompiled _rv on every startup, which raced across
+# concurrent shells (zellij panes) and produced _rv.zwc chmod errors.
 
 # vi: ft=zsh

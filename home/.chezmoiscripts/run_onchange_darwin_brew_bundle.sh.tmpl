@@ -4,3 +4,12 @@ set -euo pipefail
 
 # {{ include "dot_Brewfile" | sha256sum }}
 brew bundle check --global --no-upgrade || brew bundle install --global --no-upgrade
+
+# Generate rv completions (installed to site-functions, loaded by compinit).
+# Generating once here avoids znap regenerating/recompiling _rv on every shell
+# startup, which raced across concurrent shells and caused _rv.zwc chmod errors.
+if command -v rv >/dev/null 2>&1; then
+    ZSH_SITE="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/site-functions"
+    mkdir -p "$ZSH_SITE"
+    rv shell completions zsh > "$ZSH_SITE/_rv"
+fi
