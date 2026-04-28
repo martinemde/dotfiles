@@ -397,6 +397,12 @@ plugins {
 // Plugins to load in the background when a new session starts
 load_plugins {
     autolock
+    "file:~/.config/zellij/plugins/zjframes.wasm" {
+        hide_frame_for_single_pane       "true"
+        hide_frame_except_for_search     "true"
+        hide_frame_except_for_scroll     "true"
+        hide_frame_except_for_fullscreen "true"
+    }
 }
 web_client {
     font "monospace"

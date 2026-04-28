@@ -9,3 +9,19 @@
 type = "file"
 url = "https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm"
 refreshPeriod = "168h"
+
+# zjstatus: Themable status bar for zellij (loaded via default layout)
+# https://github.com/dj95/zjstatus
+# renovate: datasource=github-releases depName=dj95/zjstatus
+[".config/zellij/plugins/zjstatus.wasm"]
+type = "file"
+url = "https://github.com/dj95/zjstatus/releases/download/v0.23.0/zjstatus.wasm"
+refreshPeriod = "168h"
+
+# zjframes: Pane-frame toggling, loaded in the background via config.kdl load_plugins
+# https://github.com/dj95/zjstatus (zjframes)
+# renovate: datasource=github-releases depName=dj95/zjstatus
+[".config/zellij/plugins/zjframes.wasm"]
+type = "file"
+url = "https://github.com/dj95/zjstatus/releases/download/v0.23.0/zjframes.wasm"
+refreshPeriod = "168h"
