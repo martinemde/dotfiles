@@ -3,6 +3,11 @@ keybinds clear-defaults=true {
         bind "Ctrl space" { SwitchToMode "normal"; }
     }
     normal {
+        // Enter passthrough + autolock check for snappy mode switching
+        bind "Enter" {
+            WriteChars "\u{000D}";
+            MessagePlugin "autolock" {};
+        }
         // Ctrl+space as prefix key to access sub-modes
         bind "Ctrl space" { SwitchToMode "tmux"; }
     }
