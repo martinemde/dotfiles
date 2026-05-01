@@ -35,9 +35,8 @@ alias vim='nvim'
 alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 {{ end -}}
 
-# 1Password-authenticated commands
-{{- if lookPath "codex" }}
-alias codex='OPENAI_API_KEY=$(op read "op://Personal/openai-codex/credential") command codex'
+{{- if lookPath "bunx" }}
+alias codex='bunx -y @openai/codex'
 {{- end }}
 
 # vi: ft=zsh
