@@ -1,10 +1,3 @@
 # Zellij Plugins
 # Managed via chezmoi externals with Renovate automation
 
-# zellij-autolock: Auto-locks Zellij when editor is focused
-# Purpose: Enables seamless Ctrl+hjkl navigation between Neovim and Zellij panes
-# renovate: datasource=github-releases depName=fresh2dev/zellij-autolock
-[".config/zellij/plugins/zellij-autolock.wasm"]
-type = "file"
-url = "https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm"
-refreshPeriod = "168h"

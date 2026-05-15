@@ -2,17 +2,8 @@ keybinds clear-defaults=true {
     locked {
         bind "Ctrl g" { SwitchToMode "normal"; }
         bind "Ctrl space" { SwitchToMode "normal"; }
-        bind "Alt z" {
-            MessagePlugin "autolock" {payload "disable";};
-            SwitchToMode "normal";
-        }
     }
     normal {
-        // Enter passthrough + autolock check for snappy mode switching
-        bind "Enter" {
-            WriteChars "\u{000D}";
-            MessagePlugin "autolock" {};
-        }
         // Ctrl+g as prefix key to access sub-modes (like tmux Ctrl+b)
         bind "Ctrl g" { SwitchToMode "tmux"; }
         bind "Ctrl space" { SwitchToMode "tmux"; }
@@ -252,18 +243,6 @@ keybinds clear-defaults=true {
     }
     renamepane {
         bind "esc" { UndoRenamePane; SwitchToMode "pane"; }
-    }
-    // Autolock toggle
-    shared_except "locked" {
-        bind "Alt z" {
-            MessagePlugin "autolock" {payload "disable";};
-            SwitchToMode "locked";
-        }
-    }
-    shared {
-        bind "Alt Shift z" {
-            MessagePlugin "autolock" {payload "enable";};
-        }
     }
 }
 
