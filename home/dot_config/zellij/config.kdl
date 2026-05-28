@@ -1,14 +1,12 @@
 keybinds clear-defaults=true {
     locked {
-        bind "Ctrl g" { SwitchToMode "normal"; }
         bind "Ctrl space" { SwitchToMode "normal"; }
     }
     normal {
-        // Ctrl+g as prefix key to access sub-modes (like tmux Ctrl+b)
-        bind "Ctrl g" { SwitchToMode "tmux"; }
+        // Ctrl+space as prefix key to access sub-modes
         bind "Ctrl space" { SwitchToMode "tmux"; }
     }
-    // Command palette mode (accessed via Ctrl+g prefix from Normal)
+    // Command palette mode (accessed via Ctrl+space prefix from Normal)
     tmux {
         bind "p" { SwitchToMode "pane"; }
         bind "t" { SwitchToMode "tab"; }
@@ -16,7 +14,6 @@ keybinds clear-defaults=true {
         bind "s" { SwitchToMode "scroll"; }
         bind "r" { SwitchToMode "resize"; }
         bind "o" { SwitchToMode "session"; }
-        bind "Ctrl g" { SwitchToMode "locked"; }
         bind "esc" { SwitchToMode "normal"; }
         bind "enter" { SwitchToMode "normal"; }
     }
