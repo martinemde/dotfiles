@@ -144,6 +144,7 @@ keybinds clear-defaults=true {
             }
             SwitchToMode "normal"
         }
+        bind "q" { Quit; }
         bind "s" {
             LaunchOrFocusPlugin "zellij:share" {
                 floating true
@@ -182,7 +183,6 @@ keybinds clear-defaults=true {
         bind "Ctrl j" { MoveFocus "down"; }
         bind "Ctrl k" { MoveFocus "up"; }
         bind "Ctrl l" { MoveFocusOrTab "right"; }
-        bind "Ctrl q" { Quit; }
     }
     // Sub-mode triggers only in sub-modes (not normal, not locked)
     shared_except "locked" "normal" "tmux" "entersearch" "renametab" "renamepane" "move" {
