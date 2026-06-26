@@ -12,7 +12,7 @@ Personal dotfiles managed by Chezmoi across macOS, Linux, and containers. Priori
 
 ```bash
 # Clone and install dotfiles
-git clone https://github.com/ivy/dotfiles.git && cd dotfiles && ./install.sh
+git clone https://github.com/martinemde/dotfiles.git && cd dotfiles && ./install.sh
 
 # Force reinstall tools if needed
 REINSTALL_TOOLS=true ./install.sh

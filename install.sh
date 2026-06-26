@@ -10,7 +10,7 @@
 #   - Uses cosign to verify downloaded binaries
 #
 # HOW TO USE:
-#   1. Clone this repository: git clone https://github.com/ivy/dotfiles.git
+#   1. Clone this repository: git clone https://github.com/martinemde/dotfiles.git
 #   2. Run the installer: ./install.sh
 #   3. The script will:
 #      - Install Chezmoi to ~/.local/bin
@@ -26,7 +26,7 @@
 #   DEBUG: Enable debug output
 #
 # EXAMPLE USAGE:
-#   $ git clone https://github.com/ivy/dotfiles.git
+#   $ git clone https://github.com/martinemde/dotfiles.git
 #   $ cd dotfiles
 #   $ ./install.sh
 #   Installing Chezmoi to /home/user/.local/bin...
