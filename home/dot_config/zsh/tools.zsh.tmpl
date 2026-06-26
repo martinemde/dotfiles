@@ -10,8 +10,10 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # 1Password CLI plugins (aliases like gh to use op)
 [[ -f "$XDG_CONFIG_HOME/op/plugins.sh" ]] && source "$XDG_CONFIG_HOME/op/plugins.sh"
 
-# mise manages its own hooks, run directly (don't cache)
-eval "$(mise activate zsh)"
+# Shim mode (--shims) puts ~/.local/share/mise/shims on PATH so tools resolve
+# through mise in subprocesses and non-interactive shells. Gusto's scope doctor
+# (bundler-shims check) requires this; plain hook mode doesn't expose the shims dir.
+eval "$(mise activate zsh --shims)"
 
 # disable rv temporarily, it causes issues with gems
 # znap eval rv 'rv shell init zsh' # rv - ruby manager

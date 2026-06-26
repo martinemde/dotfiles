@@ -59,8 +59,10 @@ export SKIP_ZSH_AUTOSUGGESTIONS=1
 
 # mise - version manager for languages and tools
 {{- if lookPath "mise" }}
-# mise manages its own hooks, run directly (don't cache)
-eval "$(mise activate zsh)"
+# Shim mode (--shims) puts ~/.local/share/mise/shims on PATH so tools resolve
+# through mise in subprocesses and non-interactive shells. Gusto's scope doctor
+# (bundler-shims check) requires this; plain hook mode doesn't expose the shims dir.
+eval "$(mise activate zsh --shims)"
 {{- end }}
 
 # vi: ft=zsh
