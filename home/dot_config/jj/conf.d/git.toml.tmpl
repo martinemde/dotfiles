@@ -4,9 +4,6 @@
 [git]
 abandon-unreachable-commits = true
 colocate = true
-{{ if .git.signingkey -}}
-sign-on-push = true
-{{ end -}}
 subprocess = true
 write-change-id-header = true
 private-commits = "unready()"

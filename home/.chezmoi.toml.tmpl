@@ -27,23 +27,11 @@
 [data]
 hosttype = {{ $hosttype | quote }}
 
-{{- /* Cache signing key after first init so re-init and SSH sessions skip 1Password */ -}}
-{{- $gitSigningKey := dig "git" "signingkey" "" . }}
-{{- if lookPath "op" }}
-  {{- $gitSigningKeyRef := "op://Private/GitHub SSH Signing Key/public key" }}
-  {{- if eq $hosttype "work" -}}
-    {{- $gitSigningKeyRef = "op://Employee/GitHub SSH Signing Key/public key" }}
-  {{- end -}}
-  {{- if and (not $gitSigningKey) $interactive -}}
-    {{- $gitSigningKey = onepasswordRead $gitSigningKeyRef }}
-  {{- end -}}
-{{- end }}
 [data.git]
 # Git user configuration - prompted during initialization
 # Used in git config templates and other version control settings
 name = "Martin Emde"
 email = "me@martinemde.com"
-signingkey = {{ $gitSigningKey | quote }}
 
 [diff]
 format = "git"

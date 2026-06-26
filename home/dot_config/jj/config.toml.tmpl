@@ -9,12 +9,5 @@
 name = "{{ .git.name }}"
 email = "{{ .git.email }}"
 
-{{ if .git.signingkey -}}
-[signing]
-backend = "ssh"
-behavior = "drop"
-key = "{{ .git.signingkey }}"
-
-{{ end -}}
 [templates]
 git_push_bookmark = '"martinemde/" ++ change_id.short()'
