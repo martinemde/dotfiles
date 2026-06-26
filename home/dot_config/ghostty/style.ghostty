@@ -1,8 +1,8 @@
 ## Font Configuration
 # font-family = Kelmscott Mono
-font-family = MonoLisa Nerd Font SemiBold
+font-family = MonoLisaCode
 font-size = 10
-font-feature = +calt,+liga,+dlig,+zero,+ss02,+ss10,+ss11,+ss12,+ss13,+ss14,+ss15,+ss16
+# font-feature = +calt,+liga,+dlig,+zero,+ss02,+ss10,+ss11,+ss12,+ss13,+ss14,+ss15,+ss16
 font-synthetic-style = false
 # font-thicken = true
 
