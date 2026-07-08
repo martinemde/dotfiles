@@ -1,3 +1,11 @@
 # Zellij Plugins
 # Managed via chezmoi externals with Renovate automation
 
+# zellij-autolock: Auto-lock plugin for Zellij
+# Purpose: Locks Zellij (passes keys through) while interactive programs run (e.g. nvim, fzf) so their keybindings aren't captured
+# Updates: Weekly via Renovate tracking GitHub releases
+# renovate: depName=fresh2dev/zellij-autolock
+[".config/zellij/plugins/zellij-autolock.wasm"]
+type = "file"
+url = "https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm"
+refreshPeriod = "168h"

@@ -178,5 +178,15 @@
       depNameTemplate: 'marlonrichert/zsh-snap',
       packageNameTemplate: 'https://github.com/marlonrichert/zsh-snap',
     },
+    // Chezmoi external dependencies - zellij-autolock release asset pin
+    {
+      customType: 'regex',
+      fileMatch: ['^home/\\.chezmoiexternals/zellij\\.externals\\.toml$'],
+      matchStrings: [
+        'zellij-autolock/releases/download/(?<currentValue>v?[0-9.]+)/zellij-autolock\\.wasm',
+      ],
+      datasourceTemplate: 'github-releases',
+      depNameTemplate: 'fresh2dev/zellij-autolock',
+    },
   ],
 }
