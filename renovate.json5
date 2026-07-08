@@ -91,7 +91,7 @@
     {
       customType: 'regex',
       fileMatch: ['^home/dot_config/dotfiles/cli-versions\\.toml$'],
-      matchStrings: ['(?m)^cosign\\s*=\\s*"(?<currentValue>v?[^"]+)"'],
+      matchStrings: ['(?:^|\\n)cosign\\s*=\\s*"(?<currentValue>v?[^"]+)"'],
       depNameTemplate: 'sigstore/cosign',
       datasourceTemplate: 'github-releases',
     },

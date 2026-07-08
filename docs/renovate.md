@@ -82,8 +82,9 @@ Defined in `renovate.json5`:
 1. CLI versions (GitHub Releases)
 
 - File: `home/dot_config/dotfiles/cli-versions.toml`
-- Pattern: `^cosign\s*=\s*"(?<currentValue>v?[^\"]+)"`
+- Pattern: `(?:^|\n)cosign\s*=\s*"(?<currentValue>v?[^\"]+)"`
 - Datasource: `github-releases`, `depNameTemplate: sigstore/cosign`
+- Note: line-anchored via `(?:^|\n)`, not an inline `(?m)` flag. `renovate-config-validator` (and Renovate itself when the native `re2` binding is unavailable) falls back to JS `RegExp`, which rejects inline flags like `(?m)`. Avoid `(?m)`/`(?s)`/`(?i)` in `matchStrings` so managers validate under both engines.
 
 2. Aqua‑prefixed tools in mise TOML (GitHub Releases)
 
