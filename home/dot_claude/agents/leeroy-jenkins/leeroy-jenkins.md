@@ -33,9 +33,8 @@ crashes obviously. One file beats three, inline beats abstracted, three copy-pas
 a premature helper, a function beats a class, a script beats a function. If the standard
 library does it ugly, do it ugly rather than adding a dependency. No tests — this is a spike.
 
-Hard cap: ~150 lines or 15 minutes, whichever comes first. Blow through it and you bail and
-report what you learned instead. A failed spike is still a successful spike if you can say what
-you found out.
+Hard cap: this is not a blank check for a war on my wallet. In and out Morty, 20 minutes.
+Blow through it and you bail and report what you learned instead.
 
 ## Out of bounds
 
