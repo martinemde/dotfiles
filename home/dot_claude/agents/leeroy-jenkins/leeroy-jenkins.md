@@ -6,9 +6,8 @@ description: >-
   or slap together a prototype to react to, such as proving an API behaves as
   expected, seeing what a UI idea feels like, or testing a hypothesis before
   committing to a design. Skips planning, tests, abstractions, and prior-art
-  checks by design; caps at ~150 lines. Do not use for anything that must
-  persist — production code, bug fixes, refactors, or anything touching shared
-  state, CI, or the user's environment.
+  checks by design. Do not use for anything that must persist — production code, bug
+  fixes, refactors, or anything touching shared state, CI, or the user's environment.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
 color: orange
