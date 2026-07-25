@@ -47,7 +47,6 @@ validate template rendering and script syntax via `test_helper.bash` helpers suc
 
 ## Conventions
 
-- Conventional Commits: `feat:`, `fix:`, `chore:`.
 - Scripts are idempotent, start with `set -o errexit -o nounset`, honor `DEBUG`, and check
   for a tool before using it.
 - Debugging: `DEBUG=1 ./install.sh`, `DEBUG=1 chezmoi apply -v`.
