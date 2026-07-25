@@ -1,161 +1,61 @@
-# CLAUDE.md
+# AGENTS.md
 
-Guidance for Claude Code when working with this dotfiles repository.
+Personal dotfiles managed by Chezmoi across macOS, Linux, and containers. Installation and
+per-tool notes live in `README.md` and `docs/`.
 
-## Overview
+## Edit source files, not installed files
 
-Personal dotfiles managed by Chezmoi across macOS, Linux, and containers. Prioritizes stability, portability, and reliability.
+Chezmoi copies `home/` to `~/`. Edits to `~/` are overwritten on the next `chezmoi apply`,
+so always work in `home/dot_config/nvim/...`, never `~/.config/nvim/...`. This applies to
+anything under `home/`, including the Claude config in `home/dot_claude/`.
 
-## Installation and Setup
+Preview with `chezmoi diff`, apply with `chezmoi apply [target_path]`.
 
-### Initial Installation
+## Gotchas
 
-```bash
-# Clone and install dotfiles
-git clone https://github.com/martinemde/dotfiles.git && cd dotfiles && ./install.sh
+- `sourceDir = "{{ .chezmoi.workingTree }}"` — the source state is the repo root itself, not
+  a copy under `~/.local/share/chezmoi`. `chezmoi edit` and `chezmoi apply` operate on the
+  checkout you're already in.
+- Prettier is managed through the root `package.json` rather than mise, so that its plugins
+  can be installed alongside it. `bun run format` / `bun run format:check`.
+- `.prettierignore` excludes `.tmpl` files — Go template syntax isn't valid in most target
+  languages, so formatting them corrupts them.
+- Use `bun` for Node package operations, never `npm` or `yarn`.
+- `run_onchange_*` scripts re-execute when their rendered content changes, so a script that
+  interpolates a version string reruns on version bumps. That's the mechanism for triggering
+  reinstalls; incidental whitespace edits trigger it too.
+- `home/dot_config/zsh/functions/` holds autoloaded zsh functions, one function per file
+  named after the function.
+- `private_` prefixed files are encrypted in the source state and hold credentials.
+- The installer verifies GitHub release signatures with cosign by default and falls back to
+  checksums; `VERIFY_SIGNATURES=false` skips both. Downloads added to `install.sh` are
+  expected to go through that path rather than a bare `curl`.
 
-# Force reinstall tools if needed
-REINSTALL_TOOLS=true ./install.sh
+## Packages, images, and versions
 
-# Pass arguments to chezmoi init
-./install.sh -- --force          # Force overwrite existing files
-./install.sh -- --one-shot       # Use chezmoi one-shot mode
-```
-
-### Environment Variables
-
-- `REINSTALL_TOOLS=true` - Force tool reinstallation
-- `BIN_DIR=/custom/path` - Binary install dir (default: `~/.local/bin`)
-- `DEBUG=1` - Debug output
-- `VERIFY_SIGNATURES=false` - Disable signature verification
-
-## Subagent Routing: Packages, Images, Versions
-
-**Invoke Package Manager subagent before editing:**
-
-- Docker Compose (image tags/digests)
-- Devcontainer images/features
-- Mise tool declarations (.mise.toml, home/dot_config/mise/config.toml)
-- Homebrew/cask/mas packages
-- Python requirements (home/dot_config/dotfiles/requirements.txt)
-- Chezmoi externals (home/.chezmoiexternal.toml.tmpl)
-- Version manifests (home/dot_config/dotfiles/\*.toml)
-- GitHub Actions versions/digests
-
-Why: Enforces immutable pins (versions/digests/SHAs) and maintains Renovate automation. Direct edits risk drift, broken automation, or security issues. See doc/renovate.md.
-
-## Architecture
-
-### Chezmoi Structure
-
-- **Source**: Repository root (`sourceDir = "{{ .chezmoi.workingTree }}"`)
-- **Templates**: `.tmpl` files processed by template engine
-- **Scripts**: `run_onchange_*` execute on content change
-- **Dotfiles**: `dot_` prefix becomes `.` (e.g., `dot_zshrc` → `.zshrc`)
-
-### Key Directories
-
-- `home/` - Managed dotfiles/config
-- `home/dot_config/` - XDG config
-- `home/dot_config/zsh/functions/` - Zsh autoload functions (one function per file)
-- `home/dot_local/bin/` - User binaries
-- `home/private_Library/` - Private macOS files (Cursor, etc.)
-- `test/` - BATS tests
-- `bin/` - Utility scripts
-
-### Templates
-
-Go text/template syntax. Key variables: `.chezmoi.os`, `.chezmoi.workingTree`, `.packages.darwin.*`
-
-## CRITICAL: Edit Source Files Only
-
-**ALWAYS edit `home/` source files, NEVER `~/` installed target files.**
-
-- **DO**: `home/dot_config/nvim/...`
-- **DON'T**: `~/.config/nvim/...`
-
-Chezmoi copies `home/` to `~/`. Edits to `~/` are overwritten on next apply.
-
-Apply changes: `chezmoi diff` (preview), `chezmoi apply [target_path]` (apply)
+Anything that pins a version, digest, or SHA goes through the Package Manager agent or the
+`chezmoi` skill: Homebrew/cask/mas packages, mise tool declarations, Python requirements,
+Docker and devcontainer images, chezmoi externals, GitHub Actions, and the installer's
+version manifests. They enforce immutable pins and keep the matching Renovate rules in
+sync. See `docs/renovate.md`.
 
 ## Testing
 
-Run tests: `bats test/` (all), `bats test/file.bats` (specific), `bats -t test/` (verbose)
+`bats test/` for everything, `bats test/file.bats` for one file, `-t` for verbose. Tests
+validate template rendering and script syntax via `test_helper.bash` helpers such as
+`assert_valid_shell()` and `assert_script_structure()`.
 
-Uses BATS with `test_helper.bash` utilities. Validates templates and script syntax. Helpers: `assert_valid_shell()`, `assert_script_structure()`
+## Conventions
 
-## Development Workflow
+- Conventional Commits: `feat:`, `fix:`, `chore:`.
+- Scripts are idempotent, start with `set -o errexit -o nounset`, honor `DEBUG`, and check
+  for a tool before using it.
+- Debugging: `DEBUG=1 ./install.sh`, `DEBUG=1 chezmoi apply -v`.
 
-1. Edit `home/` files (`.tmpl` processed by Chezmoi)
-2. For packages/images/versions: consult Package Manager subagent first
-3. Preview: `chezmoi diff`, apply: `chezmoi apply`
-4. Commit with Conventional Commits: `feat:`, `fix:`, `chore:`
+## Documentation
 
-### Adding Dotfiles
-
-- Place in `home/` with `dot_` prefix
-- Use `dot_config/` for XDG dirs
-- Use `private_` for secrets
-
-### Script Guidelines
-
-- Idempotent with error handling (`set -o errexit -o nounset`)
-- Support DEBUG variable
-- Check tool availability first
-
-### Node.js Package Management
-
-- **ALWAYS use `bun` for package operations** (install, add, remove, run)
-- Never use `npm` or `yarn` commands
-- Examples: `bun install`, `bun add <package>`, `bun run <script>`
-
-### Formatting
-
-- **Prettier** is managed via root `package.json` (not mise) to enable plugin support
-- Run `bun run format` to format all files
-- Run `bun run format:check` to verify formatting
-- Configuration in `.prettierrc.json`
-- Exclusions in `.prettierignore` (especially `.tmpl` files)
-
-## Security
-
-**Signature Verification**: Installer uses cosign by default. Verifies GitHub releases; fallback to checksums. Disable with `VERIFY_SIGNATURES=false` (not recommended).
-
-**Private Files**: `private_` prefix excluded from public tracking. Chezmoi encrypts in source state. Contains API keys, personal data.
-
-## Troubleshooting
-
-**Common Issues**:
-
-- Tools not in PATH: Add `~/.local/bin` to PATH
-- Template errors: Check syntax/variables
-- Permissions: Run installer with proper permissions
-- Signature failures: Check connectivity or disable verification
-
-**Debug**: `DEBUG=1 ./install.sh` or `DEBUG=1 chezmoi apply -v`
-
-## Documentation Guidelines
-
-Documentation in `docs/` captures **why** decisions were made, not **what** the code does. Amend documentation on changes when solving a problem.
-
-### What to Include
-
-- **Problem being solved**: What issue prompted the change?
-- **Design decisions**: Why this approach over alternatives?
-- **Sources**: What influenced the design? (links, references)
-- **Trade-offs**: What was explicitly excluded or avoided?
-
-### What to Exclude
-
-- Feature documentation (that belongs in code comments or READMEs)
-- Implementation details (code is self-documenting)
-- Promotional language (this is just for me)
-- Basic usage instructions (unless design-relevant)
-- Redundant information available elsewhere (these aren't tool docs)
-
-### Style
-
-- Concise, technical markdown
-- Get straight to the point
-- Use lists and short paragraphs
-- Code examples only when illustrating design choices
+`docs/` records why a decision was made — the problem it solved, the alternatives rejected,
+the sources that influenced it, and what was deliberately left out. Amend it when a change
+alters one of those. Feature descriptions, usage instructions, and implementation detail
+belong in the code or `README.md` instead. These are notes to self, so keep them terse and
+skip the promotional register.

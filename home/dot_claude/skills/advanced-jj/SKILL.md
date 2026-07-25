@@ -2,21 +2,22 @@
 name: advanced-jj
 description: >-
   Reference for deeper Jujutsu (jj) topics beyond the everyday
-  describe/advance workflow covered in CLAUDE.md. Load when working with
-  conflicts, the operation log, bookmarks, revsets, fork/PR workflows,
-  colocated Git repos, multi-remote setups, divergent changes, or jj
-  config. Also the place to look up fileset glob syntax, non-interactive
-  `jj split`, and bookmark advancement.
+  describe/advance workflow. Load when working with conflicts, the
+  operation log, bookmarks, revsets, fork/PR workflows, colocated Git
+  repos, multi-remote setups, divergent changes, or jj config. Also the
+  place to look up fileset glob syntax, non-interactive `jj split`, and
+  bookmark advancement.
 ---
 
 # Advanced Jujutsu (jj)
 
-Everyday commit flow (describe, new, safety rules) lives in CLAUDE.md.
-This skill is the deeper reference — load it when you hit something the
-system prompt doesn't cover.
+The everyday flow and safety rules live in CLAUDE.md; describing and
+splitting changes lives in the `commit` skill. This is the deeper
+reference for what neither of those covers.
 
-Always verify behavior against `jj --help` and `jj <command> --help`
-before acting. Treat this skill as orientation, not ground truth.
+jj's CLI moves faster than these notes, so verify against `jj --help` and
+`jj <command> --help` before acting. Treat this skill as orientation, not
+ground truth.
 
 ## Mental Model
 

@@ -22,12 +22,13 @@ Review what happened in a session, surface friction and codebase issues, and tur
 
 Two buckets, nothing else:
 
-| Bucket | Criteria | Action |
-|--------|----------|--------|
-| **Fix now** | Small, obvious, no design decisions | Apply inline, `/commit` |
+| Bucket      | Criteria                                                | Action                        |
+| ----------- | ------------------------------------------------------- | ----------------------------- |
+| **Fix now** | Small, obvious, no design decisions                     | Apply inline, `/commit`       |
 | **Backlog** | Needs thought, research, or is part of a larger problem | File or update a GitHub issue |
 
 Backlog items target the right repo:
+
 - Dev environment friction (skills, hooks, dotfiles) goes to the dotfiles repo
 - Codebase friction goes to the repo being worked on
 
@@ -40,11 +41,11 @@ Before filing, `/reflect` searches for existing issues to avoid duplicates. If a
 
 ## Arguments
 
-| Input | Behavior |
-|-------|----------|
-| (empty) | Full retrospective using metrics and conversation analysis |
-| `@notes.md` | Incorporates the referenced file as user observations |
-| Plain text | Treats as user-provided context about the session |
+| Input       | Behavior                                                   |
+| ----------- | ---------------------------------------------------------- |
+| (empty)     | Full retrospective using metrics and conversation analysis |
+| `@notes.md` | Incorporates the referenced file as user observations      |
+| Plain text  | Treats as user-provided context about the session          |
 
 ## In the `/work-on` workflow
 

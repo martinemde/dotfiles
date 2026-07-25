@@ -30,6 +30,7 @@ allowed-tools:
 Orchestrate the full lifecycle of a GitHub issue — from understanding through PR — by composing skills, agents, and tasks into a tailored workflow based on issue complexity.
 
 ## Arguments
+
 ```
 $ARGUMENTS
 ```
@@ -48,16 +49,20 @@ Dirty worktree: !`git status --porcelain 2>/dev/null | head -5`
 
 ## Constraints
 
-- **Never skip the tier assessment.** Every issue gets classified before work begins.
-- **Only use skills that exist.** Check "Available skills" in pre-computed context. If a skill isn't listed, do the equivalent work inline or skip that step.
-- **Drive autonomously.** Assess, plan, and execute without pausing for confirmation. Only interrupt the user for genuine blockers (ambiguous requirements, failing tests with no clear fix).
-- **Commit incrementally.** Use `/commit` (if available) for each logical change. Don't batch everything into one commit at the end.
+- Classify the issue's tier before starting work — the whole workflow branches off it.
+- Only invoke skills that appear in the pre-computed context. When one is missing, do the
+  equivalent work inline or skip that step rather than calling a skill that doesn't exist.
+- Drive autonomously. Assess, plan, and execute without pausing for confirmation, and interrupt
+  only for genuine blockers: ambiguous requirements, or failing tests with no clear fix.
+- Commit incrementally with `/commit` for each logical change, rather than batching everything
+  into one commit at the end.
 
 ## Instructions
 
 ### Step 0: Fetch & Assess
 
 Fetch the issue:
+
 ```bash
 gh issue view [id or url] --json number,title,body,labels,comments,assignees,milestone
 ```
@@ -73,6 +78,7 @@ Based on the assessed tier and available skills, propose a workflow to the user.
 Each tier below shows the skill sequence. When proposing the workflow, use exact skill names with arguments — these become the task subjects in Step 2.
 
 #### Quick Fix
+
 ```
 1. /checkout <branch-name>
 2. Edit the file(s) directly
@@ -81,6 +87,7 @@ Each tier below shows the skill sequence. When proposing the workflow, use exact
 ```
 
 #### Small
+
 ```
 1. /checkout <branch-name>
 2. /gather-context <issue-ref> (light scope)
@@ -90,6 +97,7 @@ Each tier below shows the skill sequence. When proposing the workflow, use exact
 ```
 
 #### Medium
+
 ```
 1. /checkout <branch-name>
 2. /gather-context <issue-ref> (full scope)
@@ -104,6 +112,7 @@ Each tier below shows the skill sequence. When proposing the workflow, use exact
 ```
 
 #### Large
+
 ```
 1-6. Same as Medium
 7. TeamCreate for parallel execution
@@ -114,6 +123,7 @@ Each tier below shows the skill sequence. When proposing the workflow, use exact
 ```
 
 #### Epic
+
 ```
 1. /gather-context <issue-ref> (full scope)
 2. /think — epic decomposition strategy
@@ -124,6 +134,7 @@ Each tier below shows the skill sequence. When proposing the workflow, use exact
 ```
 
 Present the proposed workflow with:
+
 - The assessed tier and reasoning
 - The specific steps (naming which skills will be invoked)
 - Where human checkpoints occur
@@ -134,17 +145,20 @@ Then proceed immediately to building the task list — do not wait for user conf
 
 Create tasks via `TaskCreate` with dependencies.
 
-**Task naming rule**: Each task's subject MUST be the exact skill or command it will invoke — including arguments. This makes the task list a readable, executable runbook.
+Name each task by the exact skill or command it invokes, arguments included. That turns the task
+list into a runbook someone can read and execute.
 
 - **Skill tasks**: Use the exact invocation as the subject (e.g., `/checkout feat/123-add-dark-mode`)
 - **Implementation tasks**: Use a scoped imperative verb phrase naming the specific file or module (e.g., "Add dark-mode toggle to `theme.ts`"). Never use catch-all subjects like "Implement the feature" or "Make the changes."
 
 Each task should include:
+
 - Subject: exact skill invocation or scoped action
 - Description with enough context for the step
 - `addBlockedBy` for tasks that must complete first
 
 Example for a Medium tier:
+
 ```
 Task 1: /checkout feat/123-add-dark-mode
 Task 2: /gather-context #123                          (blockedBy: [1])
@@ -166,6 +180,7 @@ Task 11: /pr                                           (blockedBy: [10])
 (You, the `/work-on` orchestrator, may still update, add, or delete tasks as part of Step 4 adaptation — the rule above applies only to sub-skill side effects.)
 
 Work through the task list in order. For each task:
+
 1. Mark as `in_progress` via `TaskUpdate`
 2. Execute (invoke skill, spawn agent, or do work directly)
 3. Mark as `completed`
@@ -173,14 +188,14 @@ Work through the task list in order. For each task:
 
 **Autonomy boundary**:
 
-| Phase | Mode | Behavior |
-|-------|------|----------|
-| Research (`/checkout`, `/gather-context`) | Semi-autonomous | Agent works, surfaces findings to user |
-| Discussion (`/think`) | **Interactive** | Agent and user converge on approach together. Pass specific framing via args: the key decisions, tradeoffs, and open questions from `/gather-context`. |
-| Planning (`/plan`, `/review-plan`) | Semi-autonomous | Agent drafts, user approves via `ExitPlanMode` |
-| Execution | **Autonomous** | Agent implements, commits incrementally |
-| Review (`/simplify`, `/pr`) | Autonomous | Agent reviews and opens PR |
-| Retrospective (`/reflect`) | Interactive | Agent and user reflect on what worked |
+| Phase                                     | Mode            | Behavior                                                                                                                                               |
+| ----------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Research (`/checkout`, `/gather-context`) | Semi-autonomous | Agent works, surfaces findings to user                                                                                                                 |
+| Discussion (`/think`)                     | **Interactive** | Agent and user converge on approach together. Pass specific framing via args: the key decisions, tradeoffs, and open questions from `/gather-context`. |
+| Planning (`/plan`, `/review-plan`)        | Semi-autonomous | Agent drafts, user approves via `ExitPlanMode`                                                                                                         |
+| Execution                                 | **Autonomous**  | Agent implements, commits incrementally                                                                                                                |
+| Review (`/simplify`, `/pr`)               | Autonomous      | Agent reviews and opens PR                                                                                                                             |
+| Retrospective (`/reflect`)                | Interactive     | Agent and user reflect on what worked                                                                                                                  |
 
 **Escape hatch**: If the agent encounters a blocking issue it can't resolve during autonomous phases (unexpected test failures, missing dependencies, ambiguous requirements), it should flag the user and wait for guidance rather than guessing.
 
@@ -198,6 +213,7 @@ The task list is a living document, not a contract.
 ### Step 5: Close Out
 
 After the PR is open:
+
 1. Verify all tasks are marked completed (or deleted if unnecessary)
 2. If `/reflect` is available and the tier is Large or Epic, invoke it
 3. If the issue should be closed by the PR, confirm the PR description includes "Closes #N" or "Fixes #N"

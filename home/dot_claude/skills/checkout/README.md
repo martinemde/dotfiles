@@ -20,12 +20,14 @@ Three things go wrong when starting work without a structured workflow:
 ## How to use it
 
 **From an issue reference** — the agent fetches the issue title and derives a conventional bookmark name:
+
 ```
 /checkout #123
 → creates a new change on main with bookmark feat/123-add-dark-mode
 ```
 
 **With an explicit name** — used directly when you already know the bookmark name:
+
 ```
 /checkout refactor/auth-middleware
 ```

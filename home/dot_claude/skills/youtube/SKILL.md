@@ -71,7 +71,9 @@ Use **APA-style title capitalization** with creator:
 
 ### 5. Spawn Processing Agent
 
-**CRITICAL:** Do NOT read the transcript yourself. Use Task tool with `subagent_type: general-purpose`:
+Hand the transcript to a subagent rather than reading it — an hour of captions crowds out the rest
+of the session for no benefit, since the structured document is the only output that matters. Use
+the Task tool with `subagent_type: general-purpose`:
 
 ````
 ## Task: Convert Video Transcript to Structured Written Document

@@ -21,7 +21,8 @@ allowed-tools:
 
 # Reflect: Metrics-Driven Session Retrospective
 
-Review a session using structured metrics and conversation analysis. Every finding becomes either a fix or a tracked issue. No memories. No skips.
+Review a session using structured metrics and conversation analysis. Every finding leaves as either
+a fix or a tracked issue — a retrospective whose output is a list nobody acts on was wasted effort.
 
 ## Arguments
 
@@ -40,8 +41,9 @@ If empty, run the retrospective using only metrics and conversation analysis.
   - Global skills and agents: `{{ .chezmoi.workingTree }}/home/dot_claude/skills/`, `{{ .chezmoi.workingTree }}/home/dot_claude/agents/`
   - Shell config: `{{ .chezmoi.workingTree }}/home/dot_zshrc.tmpl`
   - Mise tools: `{{ .chezmoi.workingTree }}/home/dot_config/mise/config.toml`
-- **No memories** — do not write to MEMORY.md or create memory files under any circumstances
-- **Scope guard** — only surface codebase issues that were encountered during this session. Do not audit the broader codebase or propose improvements unrelated to the work that was done.
+- **No memories** — findings go to fixes or issues, never to MEMORY.md or any memory file
+- **Scope guard** — only surface codebase issues actually encountered during this session. Don't
+  audit the broader codebase or propose improvements unrelated to the work that was done.
 
 ## Instructions
 
@@ -117,7 +119,7 @@ Classify every finding into exactly one of two buckets:
 2. AGENTS.md or CLAUDE.md update — improves agent guidance
 3. Code improvement — small, targeted fix
 
-**No memories. No skips.** Every finding either gets fixed or gets tracked.
+Every finding lands in one bucket or the other. Nothing gets noted and left.
 
 **Repo targeting for backlog items:**
 

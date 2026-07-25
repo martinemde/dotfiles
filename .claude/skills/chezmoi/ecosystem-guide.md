@@ -234,6 +234,18 @@ services:
 
 **Renovate**: Built-in support for Docker images and devcontainer features
 
+**Resolving a tag to a digest**: keep the human-readable tag and append the immutable digest
+(`repo:tag@sha256:...`). To find it:
+
+```bash
+docker pull alpine:edge
+docker inspect --format='{{json .RepoDigests}}' alpine:edge | jq -r '.[]'
+```
+
+Prefer the platform-specific digest when the target platform is known (e.g. linux/amd64) —
+a multi-arch manifest digest resolves differently per host. Renovate bumps digests after the
+initial pin, so this is only needed when adding an image or changing its tag.
+
 **Pros**:
 
 - Complete isolation
