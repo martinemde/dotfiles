@@ -30,13 +30,13 @@ When you run `/work-on #123`, the agent:
 
 ### The tiers
 
-| Tier | Profile | Workflow |
-|------|---------|----------|
-| **Quick fix** | Single file, exact description | checkout → fix → commit → PR |
-| **Small** | Clear scope, few files | checkout → gather-context → fix → commit → PR |
-| **Medium** | Design choices needed | checkout → gather-context → **think** → plan → execute → PR |
-| **Large** | Cross-cutting, parallel workstreams | Medium + agent teams, worktree isolation |
-| **Epic** | Multi-PR, potentially multi-session | Decompose → run each sub-unit at appropriate tier |
+| Tier          | Profile                             | Workflow                                                    |
+| ------------- | ----------------------------------- | ----------------------------------------------------------- |
+| **Quick fix** | Single file, exact description      | checkout → fix → commit → PR                                |
+| **Small**     | Clear scope, few files              | checkout → gather-context → fix → commit → PR               |
+| **Medium**    | Design choices needed               | checkout → gather-context → **think** → plan → execute → PR |
+| **Large**     | Cross-cutting, parallel workstreams | Medium + agent teams, worktree isolation                    |
+| **Epic**      | Multi-PR, potentially multi-session | Decompose → run each sub-unit at appropriate tier           |
 
 The tier is assessed from signals: issue labels, body length, comment count, linked issues, design questions. When in doubt, the agent picks the higher tier — over-planning wastes minutes; under-planning wastes hours.
 
@@ -59,23 +59,28 @@ The human collaborates actively through research and planning. After [`/think`](
 Each skill in the workflow is independently useful and documented separately:
 
 **Research phase**
+
 - [`/checkout`](../checkout/README.md) — create a feature branch
 - [`/gather-context`](../gather-context/README.md) — parallel research across issue, codebase, and history
 
 **Planning phase**
+
 - [`/think`](../think/README.md) — converge on approach with the human
 - [`/plan`](../plan/README.md) — build a parallelized task graph
 - [`/review-plan`](../review-plan/README.md) — validate the plan before execution
 - [`/share-plan`](../share-plan/README.md) — publish the plan to the issue
 
 **Execution phase**
+
 - [`/commit`](../commit/README.md) — incremental commits during autonomous execution
 
 **Review phase**
+
 - [`/simplify`](../simplify/README.md) — code quality pass (built-in)
 - [`/pr`](../pr/README.md) — open the PR
 
 **Retrospective**
+
 - [`/reflect`](../reflect/README.md) — extract lessons for future sessions
 
 ## Supporting docs

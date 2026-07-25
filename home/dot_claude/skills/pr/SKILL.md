@@ -1,63 +1,71 @@
 ---
-description: Use when asked to create a pull request (PR)
-arguments-hint: '[revision] [ready] - Create a draft or ready PR for the specified revision.'
+name: pr
+description: Create a draft or ready pull request with gh for a jj revision — pushes the bookmark, reviews the full changeset, and drafts a title and body explaining why the change was made. Use when asked to open a PR.
+argument-hint: '[revision] [ready]'
 ---
 
 # Create Pull Request
 
-Create a pull request using gh for a specified revision.
+- `/pr` — draft PR for the current diff from trunk
+- `/pr [revision]` — draft PR for that revision
+- `/pr [revision] ready` — ready for review rather than draft
 
-Usage:
+## Push and get the bookmark
 
-- `/pr` - Create a draft PR for the current diff from trunk / main
-- `/pr [revision]` - Create a draft PR for the specified revision
-- `/pr [revision] ready` - Create a ready-for-review PR
+The command depends on what the revision already has:
 
-When creating a pull request:
+```bash
+jj git push --bookmark <name>                                     # remote-tracked bookmark
+jj bookmark track <name>@origin && jj git push --bookmark <name>  # local-only bookmark
+jj git push -c <revision>                                         # no bookmark: creates one
+```
 
-1. Push revision and get bookmark name:
-   - If revision has a remote-tracked bookmark: `jj git push --bookmark <name>`
-   - If revision has a local-only bookmark: track then push:
-     `jj bookmark track <name>@origin && jj git push --bookmark <name>`
-   - If revision has no bookmark: `jj git push -c <revision>` (creates and pushes)
-   - Retrieve the bookmark name from the output
-2. Run `jj log -r 'trunk()..<bookmark>'` to list commits between trunk and the bookmark
-3. Run `jj diff --from trunk() --to <bookmark> --stat` to review all changes in the PR
-4. Consider whether the pending changes should be organized into smaller, easier
-   to review commits. If so, use `jj split` or `jj squash` to reorganize before
-   proceeding.
-5. Check .github/ for PR templates and follow them
-6. **Invoke the `elements-of-style:writing-clearly-and-concisely` skill** before
-   drafting any prose. This is mandatory.
-7. **Search episodic memory for design decisions**: Use `episodic-memory:search`
-   to find conversations related to the files changed in this PR. Look for:
-   - Design decisions and their rationale
-   - Alternative approaches that were considered and rejected
-   - Trade-offs discussed during implementation
-   - Requirements or constraints that shaped the solution
-     Extract key decisions to include in the PR summary's "Design Decisions" section.
-8. Generate a PR title summarizing all commits in the changeset (not just the
-   most recent). The title reflects the overall change, not individual commits.
-9. Draft a PR summary explaining why the changes were made and their impact.
-   Focus on context and motivation, not implementation details. Include only
-   "Assisted-by" footer for attribution—no "Generated with Claude Code"
-   - Do not repeat information obvious from the diff
-   - Omit details like "added function X" or "modified file Y" unless
-     non-obvious reasoning justifies them
-   - Explain user-facing impact, architectural decisions, and tradeoffs
-   - If design decisions were found in episodic memory, include a "Design Decisions"
-     section highlighting key choices and their rationale
-   - Follow repository conventions
-10. **Self-review**: Review the PR changes as a code reviewer. Check for:
-    - Code smells or antipatterns
-    - Missing tests for new functionality
-    - Code repetition that should be refactored
-    - Lengthy or poorly-documented modules
-    - Report findings to the user; address any issues before proceeding
-11. Create the PR: `gh pr create --head <bookmark-name> --title "<title>"` using
-    a HEREDOC to pass the body. Add `--draft` unless `ready` was specified.
-12. **If a Jira card is detected**, transition it to "In Review":
-    - Check workspace name or bookmark for pattern like `PROJ-123` (e.g., `LDE-488`)
-    - If found: `acli jira workitem transition --key <KEY> --status "In Review"`
-    - If not found, skip this step silently
-13. Return the PR URL
+Take the bookmark name from the output.
+
+## Review the whole changeset
+
+```bash
+jj log -r 'trunk()..<bookmark>'                 # commits going in
+jj diff --from trunk() --to <bookmark> --stat    # everything changing
+```
+
+A PR is easier to review as several focused commits than one large one. If the changeset is mixed,
+reorganize with `jj split` or `jj squash` before opening it.
+
+Check `.github/` for a PR template and follow it if one exists.
+
+## Draft the title and body
+
+The title summarizes the whole changeset, not just the most recent commit.
+
+The body explains why the change was made and what it affects — context and motivation, not
+implementation. Don't restate what the diff already shows: "added function X" and "modified file
+Y" earn their place only when the reasoning behind them isn't obvious. Cover user-facing impact,
+architectural decisions, and trade-offs, following whatever conventions the repository already
+uses.
+
+Two skills help here when they're available in the session. Invoke
+`elements-of-style:writing-clearly-and-concisely` before drafting prose. Search
+`episodic-memory:search` for conversations touching the changed files, looking for design
+decisions and their rationale, alternatives that were considered and rejected, trade-offs, and
+constraints that shaped the solution — surface what you find as a "Design Decisions" section.
+
+Attribution gets an "Assisted-by" footer, not a "Generated with Claude Code" one.
+
+## Self-review before opening
+
+Read the changes as a reviewer would: code smells, missing tests for new behavior, repetition that
+wants refactoring, modules that grew too long or too undocumented. Report what you find and
+address it before opening the PR rather than after.
+
+## Open it
+
+```bash
+gh pr create --head <bookmark-name> --title "<title>"   # body via heredoc; --draft unless `ready`
+```
+
+If the workspace name or bookmark contains a Jira key (`PROJ-123`, e.g. `LDE-488`), move the card:
+`acli jira workitem transition --key <KEY> --status "In Review"`. No key, no step — skip it
+silently.
+
+Return the PR URL.

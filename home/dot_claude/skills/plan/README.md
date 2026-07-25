@@ -11,19 +11,22 @@ Structure a complex implementation as a task graph — identifying what can run 
 
 Claude Code plans linearly by default. Given a complex task, it will naturally sequence A → B → C even when B and C are completely independent — different files, different concerns, no shared state. The result is correct but slow: workstreams that could run concurrently are queued behind each other.
 
-The deeper problem is that Claude doesn't naturally *ask* the parallelization question. It's not in the default planning prompt. Without an explicit forcing function, you end up re-prompting the same parallelization instructions every time you tackle a large task.
+The deeper problem is that Claude doesn't naturally _ask_ the parallelization question. It's not in the default planning prompt. Without an explicit forcing function, you end up re-prompting the same parallelization instructions every time you tackle a large task.
 
-[`/plan`](../plan/README.md) is that forcing function. It enters structured planning mode, decomposes the work, and explicitly asks: *what is the minimal set of sequential constraints, and what can run in parallel?*
+[`/plan`](../plan/README.md) is that forcing function. It enters structured planning mode, decomposes the work, and explicitly asks: _what is the minimal set of sequential constraints, and what can run in parallel?_
 
 ## How to use it
 
 **Standard usage** — after [`/think`](../think/README.md) has converged on an approach:
+
 ```
 /plan
 ```
+
 The agent reads the context from the conversation and builds the task graph.
 
 **With focus** — when only part of the work needs planning:
+
 ```
 /plan the database migration, not the API layer
 ```
@@ -47,7 +50,7 @@ Changing your mind after approval is fine: the task list is a living document. T
 
 ## In the [`/work-on`](../work-on/README.md) workflow
 
-[`/plan`](../plan/README.md) runs after [`/think`](../think/README.md) settles the *what*, and before [`/review-plan`](../review-plan/README.md) validates the *how*. The sequence is:
+[`/plan`](../plan/README.md) runs after [`/think`](../think/README.md) settles the _what_, and before [`/review-plan`](../review-plan/README.md) validates the _how_. The sequence is:
 
 ```
 /think (decide approach)  →  /plan (structure execution)  →  /review-plan (validate plan)  →  execute

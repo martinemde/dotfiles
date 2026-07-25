@@ -51,6 +51,13 @@ Few-shot helps most when it communicates label space, distribution, and format �
 - Include edge cases (the `"mixed"` row in a sentiment set)
 - For classification, **test multiple orderings** — order can swing accuracy from random to SOTA (Lu et al.; Zhao et al. calibration showed up to +30 pp)
 
+Weigh this against the cost on frontier models: examples "constrain them to a certain
+exploration space" ([Anthropic, context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models)).
+For open-ended work, an expressive interface — named parameters, enumerated options, a stated
+output contract — steers better than a worked example and leaves room for a better answer than
+the one you demonstrated. Reach for few-shot when the target is a specific format or a
+classification boundary you can't describe as cleanly as you can show.
+
 ### 2.5 Match the reasoning scaffold to the task
 
 | Task shape                                     | Scaffold                                                          |
@@ -140,6 +147,8 @@ For open-ended tasks, LLM-as-judge approximates human preferences (MT-Bench) but
 - Contradictory constraints (`"comprehensive but under 50 words"`)
 - One prompt with multiple unrelated tasks
 - All-caps `"IMPORTANT"` spam instead of clear hierarchy
+- Restate the same rule in several layers — repetition reads as conflict, not emphasis
+- Over-constrain what the model is good at judging; state the intent and leave the application
 - Bury important constraints mid-context
 - Reach for CoT on every task
 - Treat one good output as proof of robustness

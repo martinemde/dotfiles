@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Create a parallelized implementation plan with task dependencies, sequencing, and agent team topology. Use after gathering context and reaching agreement on approach.
+description: Design an implementation as a task graph with explicit dependencies, parallel phases, and agent team topology. Use after gathering context and agreeing on an approach, when the work is large enough that sequencing it badly costs real time.
 argument-hint: "[context summary or focus area]"
 effort: high
 metadata:
@@ -22,11 +22,18 @@ allowed-tools:
   - TaskUpdate
 ---
 
-# Plan: Parallelized Implementation Design
+# Plan
 
-Create an implementation plan that maximizes throughput by identifying what work is independent, what depends on what, and how to structure agent teams for parallel execution.
+Turn work into a task graph that maximizes throughput — what's independent, what genuinely
+depends on what, and how to structure agents around it.
+
+This skill exists because planning drifts linear by default. A → B → C is the natural shape to
+write down even when B and C touch different files and share no state, and the result is correct
+but slower than it needs to be. So the question this skill keeps asking is: what is the minimal
+set of sequential constraints here?
 
 ## Arguments
+
 ```
 $ARGUMENTS
 ```
@@ -41,64 +48,45 @@ CLAUDE.md exists: !`test -f CLAUDE.md && echo "yes" || echo "no"`
 
 ## Constraints
 
-- **Always call `EnterPlanMode` before designing the plan.** This skill is plan-first.
-- Never use `git -C <path>` — it rewrites the command prefix, breaking `allowed-tools` pattern matching.
-- Focus on **parallelization and dependencies** — this is the skill's core value. Claude Code doesn't naturally optimize for these.
+- Call `EnterPlanMode` before designing the plan. This skill is plan-first.
+- Never use `git -C <path>` — it rewrites the command prefix and breaks `allowed-tools` matching.
 
-## Parallelization Mandate
+## 1. Enter plan mode
 
-**Linear plans are a failure mode.** This skill exists because sequential A → B → C wastes time when B and C are independent.
+Call `EnterPlanMode` immediately. Everything below happens inside it.
 
-Before presenting any plan, verify each of these holds:
+## 2. Understand the work
 
-1. Does every independent task have **no** `blockedBy`? It should be ready to run immediately.
-2. Does every `blockedBy` reflect a **real data dependency** — task B genuinely needs task A's output, not just ordering preference?
-3. Does at least one phase contain **multiple parallel tasks**? If not, state the specific reason all work is serialized — do not silently omit this.
-4. Are parallel phases **explicitly labeled** as `(parallel)` in the plan output?
+If `$ARGUMENTS` carries context from `/gather-context` or `/think`, use it. Otherwise explore:
+what files change, what the current code does and why, what tests exist and what patterns they
+follow.
 
-A plan where every task blocks the next is wrong. Find the parallelism before presenting.
+## 3. Decompose, then find the parallelism
 
-## Instructions
+Break the work into discrete tasks. For each, establish what must complete before it can start,
+what kind of agent suits it, whether it benefits from worktree isolation (it does if another task
+touches the same files), and whether a human should review before downstream work proceeds.
 
-### 1. Enter Plan Mode
+Then make a deliberate pass over dependencies, starting from the assumption that everything is
+independent. Group tasks by the files they touch — different groups are parallel candidates. For
+each pair, ask whether task B needs task A's _output_, or merely needs A to _exist_. Only the
+first is a real dependency. Add `blockedBy` only where that test fails, with a one-line reason.
 
-Call `EnterPlanMode` immediately. All remaining work happens in plan mode.
+Two rules of thumb worth applying: tests can often be written in parallel with implementation
+when they test the interface rather than the implementation, and review can start as soon as
+there's something to review rather than waiting for everything.
 
-### 2. Understand the Work
+A plan where every task blocks the next is almost always wrong. If this one genuinely is serial,
+say specifically why rather than leaving it unexplained.
 
-If `$ARGUMENTS` provides context from `/gather-context` or `/think`, use it. Otherwise, explore the codebase to understand:
-- What files need to change
-- What the current code does and why
-- What tests exist and what testing patterns to follow
-
-### 3. Decompose into Tasks
-
-Break the work into discrete, well-defined tasks. For each task, determine:
-
-| Property | Question |
-|----------|----------|
-| **Independence** | Can this task be done without waiting for another task's output? |
-| **Dependencies** | What must complete before this task can start? |
-| **Agent type** | What kind of agent is best suited? (Explore, general-purpose, reviewer, project-specific) |
-| **Isolation** | Does this task benefit from worktree isolation? (yes if it touches files another task also touches) |
-| **Checkpoint** | Should human review the output before downstream tasks proceed? |
-
-After listing all tasks, do an explicit **parallelization pass**. Start from the assumption that all tasks are independent — add `blockedBy` only when the test below fails:
-
-1. Group tasks by the files they touch. Tasks in different file groups are candidates for parallel execution.
-2. For each pair, ask: does task B need task A's *output* to start, or just task A to *exist*? Only the former is a real dependency.
-3. Tasks that survive this test keep no `blockedBy`. Tasks that fail get `blockedBy` with a one-line reason why.
-
-### 4. Design the Task Graph
-
-Structure tasks with explicit dependencies. Use this format:
+## 4. Structure the graph
 
 ```
 Phase 1 (parallel):
   Task A — [agent: general-purpose] implement feature X in src/foo.ts
   Task B — [agent: general-purpose] implement feature Y in src/bar.ts
 
-Phase 2 (sequential, blocked by Phase 1):
+Phase 2 (blocked by Phase 1):
   Task C — [agent: general-purpose] integrate A and B in src/index.ts
     blockedBy: [A, B]
 
@@ -108,75 +96,48 @@ Phase 3 (parallel):
     blockedBy: [C]
 ```
 
-**Parallelization principles**:
-- Tasks touching different files are usually independent
-- Tests can often be written in parallel with implementation (test the interface, not the implementation)
-- Review can start as soon as there's code to review — don't wait for everything
-- If two tasks must touch the same file, make one block the other or use worktree isolation
+Label parallel phases as `(parallel)` so the structure is legible at a glance.
 
-**Agent type selection**:
-- `Explore` — read-only research, validation, finding code patterns
-- `general-purpose` — implementation, writing code, running commands
-- `reviewer` — code review, plan review, validation
-- Project-specific agents — check pre-computed context for available agents
+Agent selection: `Explore` for read-only research and finding patterns, `general-purpose` for
+implementation, `reviewer` for code and plan review, plus any project-specific agents in the
+pre-computed context.
 
-### 5. Define Team Topology (if applicable)
+## 5. Team topology, for 3+ parallel tasks
 
-For work with 3+ parallel tasks, propose a team:
+Propose roles — the main session leads, coordinating and merging; workers take a workstream each;
+a reviewer covers completed work. Specify `isolation: "worktree"` for workers whose files
+overlap, and no isolation when they're fully separate.
 
-| Role | Agent type | Responsibilities |
-|------|-----------|-----------------|
-| Lead | (main session) | Coordinates, reviews, merges |
-| Worker 1 | general-purpose | Implements workstream A |
-| Worker 2 | general-purpose | Implements workstream B |
-| Reviewer | reviewer | Reviews completed work |
+## 6. Commit strategy
 
-Specify isolation strategy:
-- `isolation: "worktree"` for workers touching overlapping files
-- No isolation needed for workers on completely separate files
+What gets committed together (one logical change per commit), in what order (infrastructure
+before features), and whether this lands as one PR or granular commits.
 
-### 6. Define Commit Strategy
+## 7. Present it
 
-Plan the commit sequence:
-- What gets committed together (one logical change per commit)
-- Commit order (infrastructure before features, features before tests if tests depend on impl)
-- Whether to squash into one PR or keep granular commits
+Include an overview paragraph, the task graph, a table of parallel groups with why each group is
+independent, the team topology if applicable, the checkpoints where a human reviews, the commit
+strategy, and the assumptions that might be wrong.
 
-### 7. Present the Plan
+```
+| Phase | Tasks | Why parallel |
+|-------|-------|-------------|
+| 1     | A, B  | Touch different files (src/foo.ts, src/bar.ts) |
+| 3     | D, E  | Review and test are independent of each other |
+```
 
-Write the plan with:
+Before calling `ExitPlanMode`, re-check the dependency pass from step 3 against what you're about
+to present. Independent work sitting in a serial chain, or `blockedBy` without a real data
+dependency behind it, means the plan needs another pass first.
 
-1. **Overview** — one paragraph summary of what the plan achieves
-2. **Task graph** — tasks with dependencies, agents, and phases (as in step 4)
-3. **Parallelization summary** — a concise table listing each parallel group, the tasks in it, and why they are independent:
-   ```
-   | Phase | Tasks | Why parallel |
-   |-------|-------|-------------|
-   | 1     | A, B  | Touch different files (src/foo.ts, src/bar.ts) |
-   | 3     | D, E  | Review and test are independent of each other |
-   ```
-4. **Team topology** — agents, roles, isolation (if applicable)
-5. **Checkpoints** — where human review is needed before proceeding
-6. **Commit strategy** — what gets committed when
-7. **Risk flags** — assumptions that might be wrong, areas that might need adjustment
+## 8. Exit and instantiate
 
-### 8. Verify Before Presenting
+Call `ExitPlanMode` and await approval. Approval is the execution signal — your next action is
+creating the tasks, not a summary or a "shall I proceed?"
 
-Before calling `ExitPlanMode`, run through the [Parallelization Mandate](#parallelization-mandate) checklist. If any item fails:
-- Find the independent work and move it out of the serial chain
-- Remove `blockedBy` from tasks that don't have real data dependencies
-- Re-label phases to reflect the corrected structure
-
-A plan that fails the mandate should not be presented.
-
-### 9. Exit Plan Mode
-
-Call `ExitPlanMode` and await approval. The user's approval of the plan is the execution signal. Your next action after approval is Step 10 — not a summary, not "shall I proceed?", not a pause.
-
-### 10. Create Tasks (append, never replace)
-
-Once the plan is approved, instantiate the task graph as tasks. **If tasks already exist** (e.g., workflow tasks from `/work-on`), append implementation tasks — never clear or replace the existing list.
-
-1. Call `TaskList` to discover existing tasks
-2. Create each implementation task via `TaskCreate` with proper `addBlockedBy`/`addBlocks` relationships
-3. If an existing task is a placeholder for plan work (e.g., "Implement per plan"), call `TaskUpdate` to mark it `completed` and wire your first implementation task with `addBlockedBy` pointing to that placeholder's upstream dependencies
+Then build the task graph. Call `TaskList` first: tasks may already exist (workflow tasks from
+`/work-on`, for instance), and implementation tasks get **appended** to those rather than
+replacing them. Create each via `TaskCreate` with its `addBlockedBy`/`addBlocks` relationships.
+Where an existing task is a placeholder for this plan's work ("Implement per plan"), mark it
+completed with `TaskUpdate` and wire your first real task to that placeholder's upstream
+dependencies.

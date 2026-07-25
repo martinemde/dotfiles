@@ -18,15 +18,19 @@ Research a problem thoroughly before proposing solutions. Parallel exploration a
 ## How to use it
 
 **From an issue reference:**
+
 ```
 /gather-context #123
 ```
+
 Fetches the issue, comments, and linked references, then spawns parallel agents to explore the codebase and history.
 
 **From a description (no issue):**
+
 ```
 /gather-context "the dark mode toggle doesn't persist across page reloads"
 ```
+
 Skips issue fetching; goes straight to codebase and history exploration using the description as search context.
 
 ## Scope: light vs. full
@@ -50,6 +54,6 @@ The output is structured for consumption by [`/think`](../think/README.md) and [
 
 ## In the [`/work-on`](../work-on/README.md) workflow
 
-[`/gather-context`](../gather-context/README.md) runs after [`/checkout`](../checkout/README.md) and before [`/think`](../think/README.md). Its output is the factual foundation that makes [`/think`](../think/README.md) productive — instead of discussing what the problem *might* be, the conversation starts from what the code and history *actually say*. The open questions section is passed directly to [`/think`](../think/README.md) as the framing for discussion.
+[`/gather-context`](../gather-context/README.md) runs after [`/checkout`](../checkout/README.md) and before [`/think`](../think/README.md). Its output is the factual foundation that makes [`/think`](../think/README.md) productive — instead of discussing what the problem _might_ be, the conversation starts from what the code and history _actually say_. The open questions section is passed directly to [`/think`](../think/README.md) as the framing for discussion.
 
 [`/gather-context`](../gather-context/README.md) is also useful standalone for investigation work that isn't headed toward a PR — debugging, code review, or just understanding an unfamiliar part of the codebase.

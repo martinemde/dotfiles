@@ -44,6 +44,7 @@ gh issue list --milestone "..." --json number,title,body --limit 5
 ```
 
 Adapt to the conventions you observe:
+
 - **User story format** ("As an X, I can Y") vs. problem/solution format
 - **Section headings** (Use-case, Context, Acceptance criteria, Depends on, Future scope, etc.)
 - **Tone** (terse vs. explanatory)
@@ -65,6 +66,7 @@ If the repo has no issues yet, use a sensible default: user story + acceptance c
 - **Notes:** Non-obvious constraints, gotchas, or pointers for whoever picks it up. Not a design doc.
 
 **What to leave out:**
+
 - File paths, function names, or code snippets (that's implementation)
 - "How to build it" sections (let the implementer decide)
 - Over-specified acceptance criteria that constrain the solution
@@ -85,11 +87,13 @@ ISSUE
 ```
 
 **Create:**
+
 ```bash
 gh issue create --title "..." --body-file /tmp/issue-body.md --milestone "..."
 ```
 
 **Update:**
+
 ```bash
 gh issue edit NNN --body-file /tmp/issue-body.md
 ```
@@ -104,20 +108,9 @@ When `triage` is specified:
 2. Flag: missing acceptance criteria, vague scope, no dependencies listed, duplicates
 3. Suggest edits — don't apply them without confirmation
 
-## Examples
+## The failure mode to watch for
 
-```
-/project-manager create auto-generate PR body from agent session context
-/project-manager #64 add a note about graceful fallback
-/project-manager create --all flag for multi-repo PR creation, depends on #64 and #65
-/project-manager triage milestone "1. Crew Ships Code"
-/project-manager                          → infer from conversation context
-```
-
-## Anti-patterns
-
-- Writing implementation plans disguised as issues
-- Listing file paths or function signatures in acceptance criteria
-- Creating issues with no user story or problem statement
-- Skipping the format-learning step and using a generic template
-- Over-specifying: "use a map[string]bool" is implementation, not acceptance criteria
+Every way this goes wrong is the same way: an implementation plan wearing an issue's clothes. File
+paths in the acceptance criteria, a function signature in the use-case, "use a `map[string]bool`"
+where an observable behavior belongs. The test is whether the implementer could reasonably solve it
+differently than you would have. If not, the issue is over-specified.

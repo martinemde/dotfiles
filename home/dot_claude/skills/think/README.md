@@ -12,6 +12,7 @@ A thought partner that pressure-tests assumptions, surfaces constraints, evaluat
 Some decisions look obvious in the moment and turn out to be wrong in practice. The most common failure: a technically correct solution to the wrong interpretation of the problem. [`/think`](../think/README.md) exists to catch these before they become code.
 
 It's not a brainstorming tool. It's an adversarial collaborator. It will:
+
 - Challenge the framing of the problem, not just the proposed solution
 - Flag when a proposal drifts from the project's stated vision or principles
 - Name trade-offs that are easy to miss when you're invested in an approach
@@ -25,7 +26,7 @@ The key anti-pattern it prevents: the agent agreeing with your framing because y
 
 It runs after [`/gather-context`](../gather-context/README.md) builds the factual foundation. This is important: instead of speculating about what the code might say, the conversation starts from what it actually says. The open questions surfaced during context gathering become the framing for [`/think`](../think/README.md).
 
-The invocation from [`/work-on`](../work-on/README.md) passes specific args — the key decisions to make, trade-offs to evaluate, and open questions that need resolution. This constrains [`/think`](../think/README.md) toward convergence rather than open-ended exploration. The goal isn't a comprehensive analysis; it's a *decision* that both the human and agent understand well enough to execute against.
+The invocation from [`/work-on`](../work-on/README.md) passes specific args — the key decisions to make, trade-offs to evaluate, and open questions that need resolution. This constrains [`/think`](../think/README.md) toward convergence rather than open-ended exploration. The goal isn't a comprehensive analysis; it's a _decision_ that both the human and agent understand well enough to execute against.
 
 Once [`/think`](../think/README.md) produces that decision, execution begins. The agent doesn't loop back for approval during implementation unless it hits a genuine blocker.
 

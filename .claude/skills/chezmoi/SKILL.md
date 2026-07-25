@@ -5,44 +5,17 @@ description: Use this skill when managing packages, external dependencies, binar
 
 # Managing Chezmoi Packages
 
-This skill handles all aspects of package and dependency management in chezmoi dotfiles repositories, with emphasis on security, reproducibility, and automated updates.
+Adding a dependency here means three things, not one: picking the right ecosystem, pinning it
+to something immutable, and making sure Renovate can see the pin. Skip the third and the pin
+quietly rots — which is worse than no pin, because it looks maintained.
 
-## Core Principles
+## Pick the ecosystem first
 
-1. **Version Pinning**: Always pin to immutable references (commit SHAs, specific versions, digests)
-2. **Renovate Automation**: Ensure all dependencies have corresponding Renovate rules
-3. **Organization**: Group externals by primary program using `.chezmoiexternals/` directory
-4. **Minimal Edits**: Make focused changes without unrelated modifications
-5. **Preview First**: Show proposed changes before applying
+The wrong manifest usually works on the machine you're sitting at and diverges elsewhere, so
+resolve this before editing anything. `./ecosystem-guide.md` covers the trade-offs; the short
+version:
 
-## When to Use This Skill
-
-Invoke this skill when the user requests:
-
-- Adding/updating/removing packages or tools
-- Managing chezmoi external dependencies
-- Pinning versions or updating SHAs
-- Organizing external files by program
-- Setting up Renovate automation for dependencies
-- Choosing between package ecosystems (Homebrew, mise, etc.)
-
-## Workflow
-
-### 1. Identify the Request
-
-Determine what the user wants:
-
-- **Add**: New package or external dependency
-- **Update**: Change version/SHA of existing package
-- **Remove**: Delete package or external
-- **Organize**: Migrate externals to `.chezmoiexternals/` structure
-- **Pin**: Add immutable version/SHA reference
-
-### 2. Select the Ecosystem
-
-Choose the appropriate package manager (see `./ecosystem-guide.md` for details):
-
-| Use Case                  | Ecosystem         | Location                                                 |
+| Use case                  | Ecosystem         | Location                                                 |
 | ------------------------- | ----------------- | -------------------------------------------------------- |
 | macOS packages (Homebrew) | brew/cask/mas     | `home/.chezmoidata/packages.yaml`                        |
 | CLI developer tools       | mise (Aqua)       | `.mise.toml` or `home/dot_config/mise/config.toml`       |
@@ -51,124 +24,55 @@ Choose the appropriate package manager (see `./ecosystem-guide.md` for details):
 | External files/repos      | chezmoi externals | `home/.chezmoiexternals/*.toml[.tmpl]`                   |
 | Install script CLIs       | cli-versions      | `home/dot_config/dotfiles/cli-versions.toml`             |
 
-### 3. For Chezmoi Externals: Use .chezmoiexternals/ Directory
+## Pin immutably
 
-**IMPORTANT**: Organize externals by primary program using the `.chezmoiexternals/` directory structure.
-
-#### Directory Structure
-
-```
-home/.chezmoiexternals/
-├── zsh.externals.toml      # Zsh plugins and tools
-├── bat.externals.toml      # Bat themes and syntaxes
-├── tmux.externals.toml     # Tmux configurations
-└── nvim.externals.toml     # Neovim plugins
-```
-
-#### How It Works
-
-- Files in `home/.chezmoiexternals/` are treated as `.chezmoiexternal.<format>` files
-- Each file defines externals for a specific program
-- Use `.tmpl` suffix for templating support (OS conditionals, variables)
-- Paths in each file are relative to the home directory
-
-#### Example: zsh.externals.toml
-
-```toml
-{{ if lookPath "zsh" }}
-# Zsh plugins and tools
-[".zsh/znap/zsh-snap"]
-type = "git-repo"
-url = "https://github.com/marlonrichert/zsh-snap.git"
-revision = "25754a45d9ceafe6d7d082c9ebe40a08cb85a4f0"
-refreshPeriod = "168h"
-
-[".zsh/plugins/zsh-autosuggestions"]
-
-{{ end }}type = "git-repo"
-url = "https://github.com/zsh-users/zsh-autosuggestions.git"
-revision = "85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5"
-refreshPeriod = "168h"
-```
-
-### 4. External Types and Patterns
-
-Chezmoi supports four external types (detailed in `./externals-reference.md`):
-
-#### git-repo
-
-For complete Git repositories (plugins, frameworks):
-
-```toml
-[".zsh/plugins/plugin-name"]
-type = "git-repo"
-url = "https://github.com/user/repo.git"
-revision = "<commit-sha>"                # MUST pin to SHA
-refreshPeriod = "168h"
-```
-
-#### file
-
-For single files (themes, configs):
-
-```toml
-[".config/tool/theme.tmTheme"]
-type = "file"
-url = "https://github.com/user/repo/raw/<commit-sha>/file.ext"
-refreshPeriod = "168h"
-```
-
-#### archive-file
-
-For extracting single binary from release archive:
-
-```toml
-[".local/bin/tool"]
-type = "archive-file"
-url = "https://github.com/user/repo/releases/download/v1.2.3/tool.tar.gz"
-executable = true
-path = "tool"
-checksum = "sha256:abc123..."
-```
-
-#### archive
-
-For extracting entire archive into directory:
-
-```toml
-[".config/tool"]
-type = "archive"
-url = "https://github.com/user/repo/archive/<commit-sha>.tar.gz"
-exact = true
-stripComponents = 1
-refreshPeriod = "168h"
-```
-
-### 5. Version Pinning Requirements
-
-**CRITICAL**: Always use immutable references:
-
-| Type           | Pinning Method           | Example                              |
+| Type           | Pinning method           | Example                              |
 | -------------- | ------------------------ | ------------------------------------ |
 | Git repo       | Commit SHA in `revision` | `revision = "abc123..."`             |
 | GitHub file    | Commit SHA in URL path   | `raw/<sha>/file.ext`                 |
 | Release binary | Version tag + checksum   | `v1.2.3` + `checksum = "sha256:..."` |
 | Docker image   | Digest                   | `image:tag@sha256:...`               |
 
-**NEVER use**:
+`latest` tags, bare branch names, version ranges, and URLs without a SHA or checksum all
+resolve to something different tomorrow. `./externals-reference.md` has the full type
+specifications and field semantics.
 
-- `latest` tags
-- Mutable branch names without SHA pinning
-- Version ranges or wildcards
-- URLs without commit SHAs or checksums
+## Externals live in `.chezmoiexternals/`, grouped by program
 
-### 6. Ensure Renovate Integration
+Files in `home/.chezmoiexternals/` are each treated as a `.chezmoiexternal.<format>` file, so
+one file per program keeps a zsh plugin bump from touching the neovim entries:
 
-For each external dependency, verify or add corresponding Renovate rule in `renovate.json5`.
+```
+home/.chezmoiexternals/
+├── zsh.externals.toml
+├── bat.externals.toml
+├── tmux.externals.toml
+└── nvim.externals.toml
+```
 
-See `./renovate-integration.md` for detailed patterns.
+Paths inside each file are relative to home. Add `.tmpl` when the file needs OS conditionals
+or template variables. Wrap program-specific groups in a `{{ if lookPath "zsh" }}` guard so a
+machine without the tool doesn't download its plugins.
 
-**Quick reference**:
+Add a `# renovate:` annotation above each entry that needs one — it's what the custom manager
+matches against:
+
+```toml
+# renovate: repo=marlonrichert/zsh-snap branch=main
+[".zsh/znap/zsh-snap"]
+type = "git-repo"
+url = "https://github.com/marlonrichert/zsh-snap.git"
+revision = "25754a45d9ceafe6d7d082c9ebe40a08cb85a4f0"
+refreshPeriod = "168h"
+```
+
+`refreshPeriod` trades freshness against startup cost; 168h (weekly) is the default here.
+
+## Wire up Renovate
+
+Check `renovate.json5` for a manager whose `fileMatch` and `matchStrings` already cover the
+file and format you used. Homebrew and Docker have built-in datasources and need nothing.
+Externals and the version manifests need a custom manager:
 
 ```json5
 {
@@ -181,203 +85,50 @@ See `./renovate-integration.md` for detailed patterns.
 }
 ```
 
-### 7. Apply Changes
+`./renovate-integration.md` has the patterns per ecosystem and how to debug a manager that
+isn't matching.
 
-#### For .chezmoiexternals/ files
-
-1. **Create or update** the appropriate `.externals.toml` file
-2. **Add comments** explaining each dependency
-3. **Include Renovate annotations** for tracking:
-   ```toml
-   # renovate: repo=user/repo branch=main
-   [".path/to/dependency"]
-   type = "git-repo"
-   url = "https://github.com/user/repo.git"
-   revision = "<commit-sha>"
-   ```
-
-#### For packages.yaml
-
-1. **Edit** `home/.chezmoidata/packages.yaml`
-2. **Add to appropriate section** (darwin/linux, brews/casks/mas)
-3. **Follow existing patterns**
-
-### 8. Verification Commands
-
-**Preview changes**:
+## Verify
 
 ```bash
-chezmoi diff
+chezmoi diff                                          # preview before applying
+gh api repos/USER/REPO/commits/BRANCH --jq .sha       # current SHA for a branch
+gh api repos/USER/REPO/releases/latest --jq .tag_name # latest release tag
+curl -fsSL https://github.com/USER/REPO/raw/SHA/path  # file exists at that SHA
+chezmoi update --force                                # force externals to re-download
 ```
 
-**Check external URLs**:
+Preview with `chezmoi diff` before applying, and don't run a package manager's install or
+upgrade without the user asking for it.
+
+## Migrating from a single `.chezmoiexternal.toml`
+
+The trap is that other files reference the old path — `run_onchange_` scripts commonly
+`{{ include ".chezmoiexternal.toml" }}` to hash it and trigger on change. Search before
+moving anything:
 
 ```bash
-# Verify latest commit SHA
-gh api repos/USER/REPO/commits/BRANCH --jq .sha
-
-# Check latest release tag
-gh api repos/USER/REPO/releases/latest --jq .tag_name
-
-# Verify file exists at SHA
-curl -fsSL https://github.com/USER/REPO/raw/SHA/path/to/file
+grep -r "\.chezmoiexternal\.toml" home/
 ```
 
-**Apply changes**:
-
-```bash
-chezmoi apply
-```
-
-**Test external updates**:
-
-```bash
-chezmoi update --force
-```
-
-## Common Workflows
-
-### Adding a New Zsh Plugin
-
-```bash
-# 1. Get latest commit SHA
-gh api repos/zsh-users/zsh-history-substring-search/commits/master --jq .sha
-
-# 2. Add to home/.chezmoiexternals/zsh.externals.toml
-# 3. Add Renovate rule to renovate.json5
-# 4. Preview and apply
-chezmoi diff
-chezmoi apply
-```
-
-### Adding a Homebrew Package
-
-```bash
-# 1. Edit home/.chezmoidata/packages.yaml
-# 2. Add to appropriate section (brews/casks)
-# 3. Renovate will track automatically (homebrew datasource)
-```
-
-### Migrating Existing Externals to .chezmoiexternals/
-
-1. **Identify program groupings** in `home/.chezmoiexternal.toml`
-2. **Search for references** to the old file before migration:
-   ```bash
-   grep -r "\.chezmoiexternal\.toml\.tmpl" home/
-   ```
-   Common references to fix:
-   - Scripts using `{{ include ".chezmoiexternal.toml" }}` for hashing
-   - Documentation or comments mentioning the file
-3. **Create program-specific files** in `home/.chezmoiexternals/`
-4. **Move related externals** to appropriate file
-5. **Update any references** found in step 2 to point to new files (e.g., `.chezmoiexternals/bat.externals.toml`)
-6. **Keep conditionals** (e.g., `{{ if lookPath "zsh" }}`)
-7. **Verify with** `chezmoi diff` (will error if references are broken)
-8. **Remove old file** only after all references are updated and `chezmoi diff` succeeds
-
-### Updating External to Latest SHA
-
-```bash
-# 1. Fetch current SHA
-gh api repos/USER/REPO/commits/BRANCH --jq .sha
-
-# 2. Update revision in .chezmoiexternals/*.toml
-# 3. Apply
-chezmoi apply
-```
-
-## Output Format
-
-When making changes, provide:
-
-```
-Decision:
-- Ecosystem: <brew|mise|python|docker|chezmoi-external|cli-versions>
-- Rationale: <1-2 sentences>
-- Organization: <which .chezmoiexternals/ file or other manifest>
-
-Files To Edit:
-- <path1>
-- <path2>
-
-Proposed Changes:
-<concise diff-like hunks showing additions/modifications>
-
-Renovate Integration:
-- Rule Status: <exists|needs-addition|needs-update>
-- Pattern: <brief description of regex or datasource>
-
-Verification Commands:
-- chezmoi diff
-- <optional gh api commands to verify versions>
-
-Next Steps:
-- [ ] Review proposed changes
-- [ ] Preview with chezmoi diff
-- [ ] Apply with chezmoi apply
-```
-
-## Important Constraints
-
-- **Never execute** package managers without explicit permission
-- **Always preview** with `chezmoi diff` before applying
-- **Use minimal edits**: Change only what's necessary
-- **Maintain comments**: Explain why each dependency exists
-- **Follow patterns**: Match existing style and structure
-- **Version pinning**: No mutable references
-
-## Platform-Specific Handling
-
-Use Go templates for platform-specific externals:
-
-```toml
-{{ if eq .chezmoi.os "darwin" }}
-[".local/bin/tool-mac"]
-
-{{ else if eq .chezmoi.os "linux" }}
-type = "archive-file"
-url = "https://github.com/user/tool/releases/download/v1.0.0/tool-darwin-{{ .chezmoi.arch }}.tar.gz"
-executable = true
-[".local/bin/tool-linux"]
-
-{{ end }}type = "archive-file"
-url = "https://github.com/user/tool/releases/download/v1.0.0/tool-linux-{{ .chezmoi.arch }}.tar.gz"
-executable = true
-```
+Then create the per-program files, move entries across keeping their conditionals, update
+every reference found above, and confirm `chezmoi diff` succeeds — it errors on a broken
+`include`. Delete the old file last.
 
 ## Troubleshooting
 
-**External fails to download**:
+**External won't download** — check the URL with `curl -fsSL`, confirm the SHA exists with
+`gh api repos/USER/REPO/commits/SHA`, then `chezmoi apply -v` for chezmoi's own reasoning.
 
-- Verify URL accessibility: `curl -fsSL <url>`
-- Check commit SHA exists: `gh api repos/USER/REPO/commits/SHA`
-- Review chezmoi logs: `chezmoi apply -v`
+**Renovate isn't detecting it** — the usual causes are a `fileMatch` glob that misses the
+file, a `matchStrings` regex written against a slightly different format than what's in the
+file, or a missing `# renovate:` annotation.
 
-**Renovate not detecting dependency**:
+**Checksum mismatch** — recompute with `curl -fsSL <url> | shasum -a 256` and confirm the URL
+points at the version you think it does.
 
-- Verify regex pattern matches your format
-- Check fileMatch glob is correct
-- Test regex: use online regex tester with actual file content
-- Ensure annotations are present if required
+## Reference files
 
-**Checksum mismatch**:
-
-- Download file and compute SHA: `curl -fsSL <url> | shasum -a 256`
-- Update checksum in external definition
-- Verify URL points to correct version
-
-## Best Practices
-
-1. **Group by program**: Use `.chezmoiexternals/PROGRAM.externals.toml`
-2. **Document dependencies**: Add comments explaining purpose
-3. **Annotate for Renovate**: Include `# renovate:` comments
-4. **Use templates**: Leverage `{{ if }}` for conditional installs
-5. **Set refreshPeriod**: Balance freshness vs. performance (168h = weekly)
-6. **Test on clean machine**: Verify externals work from scratch
-7. **Pin everything**: No mutable references, ever
-
-## Reference Documentation
-
-- `./externals-reference.md` - Complete external type specifications
-- `./renovate-integration.md` - Renovate automation patterns
-- `./ecosystem-guide.md` - Package manager selection guide
+- `./ecosystem-guide.md` — which ecosystem to use and why, with the trade-offs of each
+- `./externals-reference.md` — the four external types, every field, and pinning per type
+- `./renovate-integration.md` — custom manager patterns and debugging non-matching managers

@@ -35,4 +35,4 @@ This isn't aesthetic preference. An issue that's a wall of text gets skimmed; th
 /plan → /review-plan (approved) → /share-plan → execution
 ```
 
-Publishing before execution means the issue reflects the *intended* implementation, not a post-hoc rationalization. If the implementation diverges from the plan (as it often does), the issue shows what was planned and the PR diff shows what actually happened.
+Publishing before execution means the issue reflects the _intended_ implementation, not a post-hoc rationalization. If the implementation diverges from the plan (as it often does), the issue shows what was planned and the PR diff shows what actually happened.

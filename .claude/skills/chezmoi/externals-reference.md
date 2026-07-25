@@ -26,7 +26,7 @@ Clones or updates a Git repository to a target directory.
 
 **Optional fields**:
 
-- `revision` - Specific commit SHA, tag, or branch (CRITICAL: always use commit SHA)
+- `revision` - Commit SHA, tag, or branch; use a commit SHA (see Version Pinning Strategies)
 - `clone.args` - Additional git clone arguments
 - `pull.args` - Additional git pull arguments
 - `refreshPeriod` - How often to check for updates (e.g., "168h")
@@ -292,7 +292,8 @@ executable = true
 
 ### Git Repositories
 
-**ALWAYS use commit SHA** in `revision`:
+Pin `revision` to a commit SHA. A tag can be moved and a branch changes under you, so
+neither reproduces the same tree twice:
 
 ```toml
 # CORRECT

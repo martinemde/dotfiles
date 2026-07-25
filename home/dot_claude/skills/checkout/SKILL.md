@@ -22,6 +22,7 @@ allowed-tools:
 # Checkout: Start a New Change for an Issue
 
 ## Arguments
+
 ```
 $ARGUMENTS
 ```
@@ -36,7 +37,6 @@ Log: !`jj log -r 'ancestors(@, 5)' --no-graph -T 'change_id.shortest() ++ " " ++
 
 ## Constraints
 
-- Use `jj` for all version control operations, never `git`.
 - Do not abandon changes or discard work without user confirmation.
 
 ## Instructions
@@ -45,11 +45,11 @@ Log: !`jj log -r 'ancestors(@, 5)' --no-graph -T 'change_id.shortest() ++ " " ++
 
 Determine what `$ARGUMENTS` contains:
 
-| Pattern | Action |
-|---------|--------|
-| `#123` or issue URL | Fetch issue title, derive bookmark name |
-| Bookmark name (e.g., `feat/dark-mode`) | Use directly |
-| Empty | Ask what to work on |
+| Pattern                                | Action                                  |
+| -------------------------------------- | --------------------------------------- |
+| `#123` or issue URL                    | Fetch issue title, derive bookmark name |
+| Bookmark name (e.g., `feat/dark-mode`) | Use directly                            |
+| Empty                                  | Ask what to work on                     |
 
 ### 2. Derive Bookmark Name (from issue)
 
@@ -67,12 +67,12 @@ Check pre-computed context for the current working copy state.
 
 In jj, the working copy `@` is always a change being edited. Before starting new work, assess:
 
-| Situation | Action |
-|-----------|--------|
-| Working copy is empty (no diff) | Safe to proceed — `jj new` will leave an empty change behind (auto-abandoned) |
-| Working copy has changes with a description | Suggest `jj commit` first to finalize, then proceed |
-| Working copy has changes without a description | Suggest `jj commit -m "..."` or `jj describe -m "..."` first |
-| Conflicts exist (`jj st` shows conflicts) | Inform user and wait for guidance |
+| Situation                                      | Action                                                                        |
+| ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| Working copy is empty (no diff)                | Safe to proceed — `jj new` will leave an empty change behind (auto-abandoned) |
+| Working copy has changes with a description    | Suggest `jj commit` first to finalize, then proceed                           |
+| Working copy has changes without a description | Suggest `jj commit -m "..."` or `jj describe -m "..."` first                  |
+| Conflicts exist (`jj st` shows conflicts)      | Inform user and wait for guidance                                             |
 
 Do not silently abandon or squash work.
 
