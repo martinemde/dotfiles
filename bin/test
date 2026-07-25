@@ -2,8 +2,10 @@
 #
 # test -- Test Suite Runner
 #
-# Simple test runner for bats tests.
-# Run './bin/setup' first to install dependencies.
+# Runs the standalone checks first, then the bats suite. The standalone checks
+# need nothing but a POSIX shell, so they still run in environments where bats
+# is unavailable (containers, minimal CI images). Run './bin/setup' to install
+# the full toolchain.
 #
 
 [ -n "${DEBUG:-}" ] && set -o xtrace
@@ -13,5 +15,26 @@ set -o nounset
 # Change to project root directory
 cd "$(dirname "$0")/.."
 
-# Run tests
-exec bats ./**/*.bats
+status=0
+
+# ------------------------------------------------------------------------------
+# Standalone checks (no bats required)
+# ------------------------------------------------------------------------------
+
+echo "==> Frontmatter validation"
+./bin/check-frontmatter || status=1
+echo
+
+# ------------------------------------------------------------------------------
+# bats suite
+# ------------------------------------------------------------------------------
+
+if command -v bats >/dev/null 2>&1; then
+  echo "==> bats"
+  bats ./test/*.bats || status=1
+else
+  echo "==> bats not installed, skipping ./test/*.bats" >&2
+  echo "    Install it with './bin/setup' or your package manager." >&2
+fi
+
+exit "$status"

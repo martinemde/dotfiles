@@ -1,5 +1,5 @@
 ---
-name: managing-chezmoi-packages
+name: chezmoi
 description: Use this skill when managing packages, external dependencies, binaries, or CLI tools in a chezmoi dotfiles repository. Handles adding/updating/removing packages in .chezmoidata/packages.yaml, creating .chezmoiexternals/ organized files, pinning versions with Renovate automation, and selecting the correct package ecosystem (Homebrew, mise, Python, Docker, chezmoi externals).
 ---
 

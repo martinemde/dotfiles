@@ -1,9 +1,9 @@
 ---
 name: project-manager
 description: Use when creating, updating, or triaging GitHub issues. Writes issues from a product perspective — user stories, acceptance criteria, context, and dependencies — without prescribing implementation.
-argument-hint: "[create | update #NNN | triage] [description or context]"
+argument-hint: '[create | update #NNN | triage] [description or context]'
 metadata:
-  author: @ivy
+  author: '@ivy'
 allowed-tools:
   - Read
   - Glob

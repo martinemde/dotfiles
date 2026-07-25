@@ -1,11 +1,11 @@
 ---
 name: review-plan
 description: Validate an implementation plan by checking for gaps, ambiguity, incorrect assumptions, and missing dependencies. Use after creating a plan and before execution.
-argument-hint: "[focus areas for review]"
+argument-hint: '[focus areas for review]'
 context: fork
 agent: reviewer
 metadata:
-  author: @ivy
+  author: '@ivy'
 ---
 
 # Review Plan: Validate Before Executing

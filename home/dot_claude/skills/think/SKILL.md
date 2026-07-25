@@ -1,9 +1,9 @@
 ---
 name: think
 description: Pressure-test a decision — surface constraints, expose trade-offs, and recommend a path. Use proactively when the user explores ideas, directions, or priorities without a clear problem or urgency, and for trade-off analysis. Checks proposals against docs/vision.md and docs/core-principles.md when the project has them.
-argument-hint: "[problem, question, or decision to think through]"
+argument-hint: '[problem, question, or decision to think through]'
 metadata:
-  author: @ivy
+  author: '@ivy'
 allowed-tools:
   - Read
   - Glob

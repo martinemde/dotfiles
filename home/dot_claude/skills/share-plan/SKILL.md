@@ -1,9 +1,9 @@
 ---
 name: share-plan
 description: Use when sharing an implementation plan to a GitHub issue. Formats plans with collapsible details sections so issues are scannable but comprehensive.
-argument-hint: "[#issue-number | new] [plan source or context]"
+argument-hint: '[#issue-number | new] [plan source or context]'
 metadata:
-  author: @ivy
+  author: '@ivy'
 allowed-tools:
   - Read
   - Glob

@@ -41,9 +41,19 @@ sync. See `docs/renovate.md`.
 
 ## Testing
 
-`bats test/` for everything, `bats test/file.bats` for one file, `-t` for verbose. Tests
+`bin/test` for everything, `bats test/file.bats` for one file, `-t` for verbose. Tests
 validate template rendering and script syntax via `test_helper.bash` helpers such as
 `assert_valid_shell()` and `assert_script_structure()`.
+
+`bin/test` runs the standalone checks in `bin/` first, then the bats suite, reporting a
+missing bats as a skip rather than a failure — the standalone checks need only a POSIX
+shell, so they still run in containers and minimal CI images.
+
+`bin/check-frontmatter` is one of those checks. It validates the frontmatter of every
+skill and agent under `home/dot_claude/` and `.claude/`, which Claude Code otherwise
+fails on silently. Run it on a single file while editing: `bin/check-frontmatter
+home/dot_claude/skills/plan/SKILL.md`. See `docs/testing.md` for what it enforces and
+how to extend the key allowlists.
 
 ## Conventions
 
