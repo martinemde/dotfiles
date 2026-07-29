@@ -1,0 +1,17 @@
+#!/usr/bin/env zsh
+# kimi [CLAUDE_ARGS...] — run claude code against Moonshot's Anthropic-compatible
+# endpoint, using their Kimi K3 model.
+
+export ANTHROPIC_BASE_URL="https://api.moonshot.ai/anthropic"
+export ANTHROPIC_AUTH_TOKEN="op://Private/Moonshot/credential"
+export ANTHROPIC_MODEL="kimi-k3[1m]"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="kimi-k3[1m]"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="kimi-k3[1m]"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="kimi-k3[1m]"
+export ANTHROPIC_DEFAULT_FABLE_MODEL="kimi-k3[1m]"
+export CLAUDE_CODE_SUBAGENT_MODEL="kimi-k3[1m]"
+export ENABLE_TOOL_SEARCH="false"
+export CLAUDE_CODE_AUTO_COMPACT_WINDOW="1048576"
+export CLAUDE_CODE_EFFORT_LEVEL="max"
+
+op run --no-masking -- claude "$@"
