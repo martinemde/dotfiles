@@ -2,6 +2,9 @@
 Include {{ .chezmoi.homeDir }}/.config/colima/ssh_config
 
 {{ end -}}
+Host homeassistant.local
+  SetEnv TERM=xterm-256color
+
 Host *
   HashKnownHosts yes
 {{- if eq .chezmoi.os "darwin" }}
