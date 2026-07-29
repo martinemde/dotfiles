@@ -2,11 +2,11 @@
 
 We're working together as a pair. Casual, direct, humor welcome — treat me like a friend.
 
-Lead with how you'll verify a change, not just what the change is. Observe before
-speculating: state what you actually see, and frame a guess as a question to investigate
-rather than a premise to build on. After repeated failures, stop and reassess out loud
-instead of trying a fourth variation. Surface a better alternative early if you see one, then
-commit to the best approach once the intent is clear. When genuinely in doubt, ask.
+Lead with how you'll verify a change, not just what the change is. After repeated failures,
+stop and reassess out loud instead of trying a fourth variation.
+
+Prefer `mise use TOOL@VERSION` for tool installs and `bun` for JavaScript/TypeScript, scoped
+to the project by default.
 
 ## Working in Repos
 
@@ -22,6 +22,10 @@ Prefer small focused changes — squashing is easier than splitting. Get tests, 
 green before moving off a unit of work, and keep tests isolated from real-world effects with
 mocks or sandboxes. Preview with diff, plan, or `--dry-run` before applying.
 
+Never let a jj command open an editor — it hangs the session. Pass `-m` to `jj desc`, name
+files explicitly for `jj split`, `jj squash`, and `jj resolve`, and pass `--tool true` where a
+diff editor would otherwise open.
+
 The `commit` skill covers describing a change; `advanced-jj` covers conflicts, revsets,
 bookmarks, the operation log, and multi-remote setups.
 
@@ -30,9 +34,8 @@ bookmarks, the operation log, and multi-remote setups.
 jj commits continuously and rewrites history freely, so the usual "it's still just local"
 safety net doesn't exist. These need an explicit request from me before you do them:
 
-- Rewriting or abandoning changes you didn't create. `jj abandon` is `git reset --hard` for a
-  single change. Re-describing the current change is not in this category — that's just
-  naming your own work, and it's fine on any mutable change.
+- Rewriting or abandoning changes you didn't create — `jj abandon` is `git reset --hard` for a
+  single change. Re-describing your own work doesn't count; that's fine on any mutable change.
 - `jj op restore`, which rewinds the operation log and can undo unrelated prior operations
   across the whole repo.
 - Overriding immutability with `--ignore-immutable`. jj already refuses to rewrite pushed or
@@ -43,16 +46,7 @@ safety net doesn't exist. These need an explicit request from me before you do t
 - Changing jj or git config.
 - `jj git push` at all, unless I asked for it.
 
-Two mechanical hazards worth knowing:
-
 **Secrets get committed by default.** Modified files land in `@` with no staging step to catch
 them. When you notice something that smells like credentials (`.env`, `credentials.json`, key
 files), add it to `.gitignore` and `jj file untrack <file>`. If something sensitive has to be
 committed locally, describe it as `private: <description>` so it's visible before any push.
-
-**Interactive editors hang the session.** Pass `-m` to `jj desc`, name files explicitly for
-`jj split`, `jj squash`, and `jj resolve`, and pass `--tool true` to `jj commit` or
-`jj squash` when they'd otherwise open a diff editor.
-
-To fix something in an earlier commit, don't rewrite it in place: `jj new <target>`, make the
-fix, then `jj squash --into <target> --tool true`.

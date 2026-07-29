@@ -49,6 +49,17 @@ jj split --tool true -m "Extract feature" -- \
 
 Remaining changes stay in a follow-up working copy change.
 
+## Fixing an Earlier Change
+
+Don't rewrite an earlier change in place. Build the fix on top of it, then
+fold it in:
+
+```bash
+jj new <target>                              # new change on top of the target
+# make the fix
+jj squash --into <target> --tool true        # fold it back, no diff editor
+```
+
 ## Advancing Bookmarks
 
 After finalizing work, move the nearest ancestor bookmark forward:
