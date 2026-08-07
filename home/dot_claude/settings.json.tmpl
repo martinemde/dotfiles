@@ -16,7 +16,6 @@
 {{- else }}
   "includeCoAuthoredBy": false,
 {{- end }}
-  "model": "opus-5[1m]",
   "permissions": {
     "allow": [
       "Bash(ls:*)",
@@ -61,16 +60,8 @@
     "ask": [],
     "defaultMode": "auto"
   },
+  "model": "opus[1m]",
   "disableClaudeAiConnectors": true,
-  "autoMode": {
-    "environment": [
-      "$defaults",
-      "Source control: github.com/gusto and github.com/guideline-app and all repos under it, and the Gusto GitHub org and all repos under it (e.g. the web repo)"
-    ]
-  },
-  "claudeMdExcludes": [
-    "**/workspace/**/CLAUDE.md"
-  ],
   "hooks": {
     "PreToolUse": [
       {
@@ -107,9 +98,18 @@
 {{- end }}
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
+  "claudeMdExcludes": [
+    "**/workspace/**/CLAUDE.md"
+  ],
   "editorMode": "vim",
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
   "useAutoModeDuringPlan": true,
+  "autoMode": {
+    "environment": [
+      "$defaults",
+      "Source control: github.com/gusto and github.com/guideline-app and all repos under it, and the Gusto GitHub org and all repos under it (e.g. the web repo)"
+    ]
+  },
   "gitAttribution": false
 }
