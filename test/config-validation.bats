@@ -234,10 +234,15 @@ render_to_temp() {
     skip "git not installed"
   fi
 
-  local file="home/dot_config/git/config"
+  local file="home/dot_config/git/config.tmpl"
+
+  # Render template
+  run render_template "$file"
+  [ "$status" -eq 0 ]
 
   # Validate git config file syntax
-  run git config --file "$file" --list
+  echo "$output" > "$TEST_TMPDIR/gitconfig"
+  run git config --file "$TEST_TMPDIR/gitconfig" --list
   [ "$status" -eq 0 ]
 }
 
