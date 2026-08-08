@@ -27,7 +27,6 @@ The `test/config-validation.bats` suite validates configuration files by loading
 4. **Version Control**
    - Git configs: `git config --file --list`
    - Git delta configs
-   - Git LLM-specific configs
 
 5. **Tool Configurations**
    - TOML files: mise, atuin, jj, starship, gitleaks

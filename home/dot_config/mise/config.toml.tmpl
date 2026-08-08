@@ -1,8 +1,5 @@
 #:schema https://mise.jdx.dev/schema/mise.json
 [tools]
-{{ if eq .chezmoi.arch "amd64" -}}
-"aqua:technicalpickles/envsense" = "latest"
-{{ end -}}
 "aqua:ajeetdsouza/zoxide" = "latest"
 "aqua:ast-grep/ast-grep" = "latest"
 "aqua:atuinsh/atuin" = "latest"
@@ -55,4 +52,3 @@ use_git_credentials = true
 
 [settings.ruby]
 compile = false
-

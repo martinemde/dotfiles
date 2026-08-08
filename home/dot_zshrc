@@ -6,15 +6,6 @@
 [[ ! -v TERM ]] && return 0
 
 # ----------------------------------------------------------------------------
-# LLM Agent Detection - MUST BE EARLY
-# ----------------------------------------------------------------------------
-if command -v envsense >/dev/null 2>&1 && envsense check agent >/dev/null 2>&1; then
-  export LLM_AGENT_MODE=1
-  [[ -f "$XDG_CONFIG_HOME/zsh/llm.zsh" ]] && source "$XDG_CONFIG_HOME/zsh/llm.zsh"
-  return  # Skip all human-friendly configuration below
-fi
-
-# ----------------------------------------------------------------------------
 # Load Znap Plugin Manager
 # ----------------------------------------------------------------------------
 # Note: Znap is used for caching eval commands only. Plugins are managed by chezmoi.
@@ -23,31 +14,28 @@ source ~/.zsh/znap/zsh-snap/znap.zsh
 # ----------------------------------------------------------------------------
 # Plugins
 # ----------------------------------------------------------------------------
-# Skip plugins if in LLM agent mode
-if [[ -z "${SKIP_ZSH_AUTOSUGGESTIONS:-}" ]]; then
-  # Pre-configure zsh-autosuggestions before loading for maximum speed
-  export ZSH_AUTOSUGGEST_USE_ASYNC=1
-  export ZSH_AUTOSUGGEST_MANUAL_REBIND=1
-  export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-  export ZSH_AUTOSUGGEST_HISTORY_IGNORE="?(#c50,)"  # Ignore commands > 50 chars
-  export ZSH_AUTOSUGGEST_COMPLETION_IGNORE="* --help"
-  export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+# Pre-configure zsh-autosuggestions before loading for maximum speed
+export ZSH_AUTOSUGGEST_USE_ASYNC=1
+export ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+export ZSH_AUTOSUGGEST_HISTORY_IGNORE="?(#c50,)"  # Ignore commands > 50 chars
+export ZSH_AUTOSUGGEST_COMPLETION_IGNORE="* --help"
+export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
-  # Catppuccin theme support - optimized for Ghostty + tmux
-  if [[ "${TERM}" == "xterm-ghostty" ]] || [[ -n "${TMUX}" ]]; then
-    export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-  else
-    export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'
-  fi
-
-  # Load zsh-autosuggestions from local path (managed by chezmoi)
-  source ~/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
-
-  # Speed hack: only fetch suggestions for commands > 2 chars
-  _zsh_autosuggest_should_fetch() {
-    (( ${#BUFFER} > 2 ))
-  }
+# Catppuccin theme support - optimized for Ghostty + tmux
+if [[ "${TERM}" == "xterm-ghostty" ]] || [[ -n "${TMUX}" ]]; then
+  export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+else
+  export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'
 fi
+
+# Load zsh-autosuggestions from local path (managed by chezmoi)
+source ~/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+
+# Speed hack: only fetch suggestions for commands > 2 chars
+_zsh_autosuggest_should_fetch() {
+  (( ${#BUFFER} > 2 ))
+}
 
 # ----------------------------------------------------------------------------
 # Completion System
@@ -119,57 +107,54 @@ source "$XDG_CONFIG_HOME/shell/osc8-hyperlinks.sh"
 # ----------------------------------------------------------------------------
 # Zsh Syntax Highlighting (MUST BE LOADED LAST)
 # ----------------------------------------------------------------------------
-# Skip syntax highlighting if in LLM agent mode
-if [[ -z "${SKIP_ZSH_SYNTAX_HIGHLIGHTING:-}" ]]; then
-  # Configure highlighters BEFORE loading
-  typeset -gA ZSH_HIGHLIGHT_HIGHLIGHTERS=(
-    main 1
-    brackets 1
-    pattern 1
-    cursor 0
-    root 0
-  )
+# Configure highlighters BEFORE loading
+typeset -gA ZSH_HIGHLIGHT_HIGHLIGHTERS=(
+  main 1
+  brackets 1
+  pattern 1
+  cursor 0
+  root 0
+)
 
-  export ZSH_HIGHLIGHT_MAXLENGTH=20000
+export ZSH_HIGHLIGHT_MAXLENGTH=20000
 
-  # Catppuccin-compatible highlighting styles
-  typeset -gA ZSH_HIGHLIGHT_STYLES=(
-    'builtin'                  'fg=blue'
-    'command'                  'fg=green'
-    'precommand'               'fg=green,underline'
-    'alias'                    'fg=cyan'
-    'function'                 'fg=cyan'
-    'path'                     'fg=white,underline'
-    'path_prefix'              'fg=white'
-    'path_approx'              'fg=yellow'
-    'single-hyphen-option'     'fg=magenta'
-    'double-hyphen-option'     'fg=magenta'
-    'single-quoted-argument'   'fg=yellow'
-    'double-quoted-argument'   'fg=yellow'
-    'dollar-quoted-argument'   'fg=yellow'
-    'back-quoted-argument'     'fg=magenta'
-    'globbing'                 'fg=cyan,bold'
-    'assign'                   'fg=white'
-    'parameter'                'fg=yellow'
-    'unknown-token'            'fg=red,bold'
-    'reserved-word'            'fg=magenta'
-    'commandseparator'         'fg=white'
-    'bracket-level-1'          'fg=blue,bold'
-    'bracket-level-2'          'fg=green,bold'
-    'bracket-level-3'          'fg=magenta,bold'
-    'bracket-level-4'          'fg=yellow,bold'
-    'bracket-error'            'fg=red,bold'
-  )
+# Catppuccin-compatible highlighting styles
+typeset -gA ZSH_HIGHLIGHT_STYLES=(
+  'builtin'                  'fg=blue'
+  'command'                  'fg=green'
+  'precommand'               'fg=green,underline'
+  'alias'                    'fg=cyan'
+  'function'                 'fg=cyan'
+  'path'                     'fg=white,underline'
+  'path_prefix'              'fg=white'
+  'path_approx'              'fg=yellow'
+  'single-hyphen-option'     'fg=magenta'
+  'double-hyphen-option'     'fg=magenta'
+  'single-quoted-argument'   'fg=yellow'
+  'double-quoted-argument'   'fg=yellow'
+  'dollar-quoted-argument'   'fg=yellow'
+  'back-quoted-argument'     'fg=magenta'
+  'globbing'                 'fg=cyan,bold'
+  'assign'                   'fg=white'
+  'parameter'                'fg=yellow'
+  'unknown-token'            'fg=red,bold'
+  'reserved-word'            'fg=magenta'
+  'commandseparator'         'fg=white'
+  'bracket-level-1'          'fg=blue,bold'
+  'bracket-level-2'          'fg=green,bold'
+  'bracket-level-3'          'fg=magenta,bold'
+  'bracket-level-4'          'fg=yellow,bold'
+  'bracket-error'            'fg=red,bold'
+)
 
-  # Custom patterns for dangerous commands
-  typeset -gA ZSH_HIGHLIGHT_PATTERNS=(
-    'rm -rf *'                 'fg=white,bold,bg=red'
-    'sudo *'                   'fg=white,bold,bg=red'
-  )
+# Custom patterns for dangerous commands
+typeset -gA ZSH_HIGHLIGHT_PATTERNS=(
+  'rm -rf *'                 'fg=white,bold,bg=red'
+  'sudo *'                   'fg=white,bold,bg=red'
+)
 
-  # Load zsh-syntax-highlighting from local path (managed by chezmoi)
-  source ~/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
-fi
+# Load zsh-syntax-highlighting from local path (managed by chezmoi)
+source ~/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
 
 # ----------------------------------------------------------------------------
 # Local Configuration

@@ -19,7 +19,6 @@ The configuration follows a minimalist, performance-focused approach:
 - **Lazy-loaded Tools**: Cached initialization for mise, atuin, starship (10x faster)
 - **Fast Reload**: Custom `reload!` function for quick shell restarts
 - **Smart Project Navigation**: Intelligent repository discovery with the `c` function
-- **LLM Agent Mode**: Automatic detection and optimization for AI coding assistants
 
 ## Configuration Files
 
@@ -117,7 +116,7 @@ Plugins are loaded via znap for consistent management:
 - **zsh-autosuggestions**: Command suggestions from history
 - **zsh-syntax-highlighting**: Real-time syntax highlighting (loaded last)
 
-Both plugins are pre-configured for optimal performance and are skipped in LLM agent mode.
+Both plugins are pre-configured for optimal performance.
 
 ### Vi Mode
 
@@ -196,27 +195,6 @@ The function checks organizations in this order:
 2. User from `gh config get user` (GitHub CLI)
 3. Organizations from `GITHUB_ORGS` (comma-delimited)
 4. System username as final fallback
-
-### LLM Agent Mode
-
-The configuration automatically detects LLM agent environments (Claude Code, Cursor, etc.) using [envsense](https://github.com/martykan/envsense):
-
-```bash
-if envsense check agent >/dev/null 2>&1; then
-  export LLM_AGENT_MODE=1
-  source "$XDG_CONFIG_HOME/zsh/llm.zsh"
-  return
-fi
-```
-
-When detected, the shell:
-
-- Skips interactive features (autosuggestions, syntax highlighting)
-- Uses simple prompts without colors
-- Disables pagers and fancy aliases
-- Optimizes for machine-readable output
-
-See `home/dot_config/zsh/llm.zsh` for LLM mode configuration.
 
 ### Git-safe PATH
 

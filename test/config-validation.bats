@@ -108,23 +108,6 @@ render_to_temp() {
   [ "$status" -eq 0 ]
 }
 
-@test "zsh llm.zsh template renders and has valid syntax" {
-  if ! command -v zsh >/dev/null 2>&1; then
-    skip "zsh not installed"
-  fi
-
-  local file="home/dot_config/zsh/llm.zsh.tmpl"
-
-  # Render template
-  run render_template "$file"
-  [ "$status" -eq 0 ]
-
-  # Check syntax
-  echo "$output" > "$TEST_TMPDIR/llm.zsh"
-  run zsh -n "$TEST_TMPDIR/llm.zsh"
-  [ "$status" -eq 0 ]
-}
-
 @test "osc8-hyperlinks.sh has valid bash syntax" {
   local file="home/dot_config/shell/osc8-hyperlinks.sh"
 
@@ -253,17 +236,6 @@ render_to_temp() {
   fi
 
   local file="home/dot_config/git/delta.gitconfig"
-
-  run git config --file "$file" --list
-  [ "$status" -eq 0 ]
-}
-
-@test "git llm config can be parsed" {
-  if ! command -v git >/dev/null 2>&1; then
-    skip "git not installed"
-  fi
-
-  local file="home/dot_config/git/config-llm"
 
   run git config --file "$file" --list
   [ "$status" -eq 0 ]
