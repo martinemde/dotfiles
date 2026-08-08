@@ -397,6 +397,51 @@ render_to_temp() {
   fi
 }
 
+@test "claude settings.json has valid JSON syntax" {
+  local file="home/dot_claude/settings.json.tmpl"
+
+  run render_template "$file"
+  [ "$status" -eq 0 ]
+
+  local rendered="$TEST_TMPDIR/claude-settings.json"
+  echo "$output" > "$rendered"
+
+  if command -v jq >/dev/null 2>&1; then
+    run jq empty "$rendered"
+    [ "$status" -eq 0 ]
+  elif command -v python3 >/dev/null 2>&1; then
+    run python3 -c "import json; json.load(open('$rendered'))"
+    [ "$status" -eq 0 ]
+  else
+    skip "no JSON parser available"
+  fi
+}
+
+@test "claude settings.json has valid JSON syntax on non-work hosts" {
+  # hosttype gates three blocks, and those blocks carry the commas, so a
+  # personal host can render invalid JSON while a work host renders fine.
+  # Force the else branches by rewriting the conditions before rendering.
+  local file="home/dot_claude/settings.json.tmpl"
+  local rendered="$TEST_TMPDIR/claude-settings-personal.json"
+
+  sed 's/eq \.hosttype "work"/eq "personal" "work"/' "$file" |
+    chezmoi execute-template >"$rendered"
+
+  if command -v jq >/dev/null 2>&1; then
+    run jq empty "$rendered"
+    [ "$status" -eq 0 ]
+  elif command -v python3 >/dev/null 2>&1; then
+    run python3 -c "import json; json.load(open('$rendered'))"
+    [ "$status" -eq 0 ]
+  else
+    skip "no JSON parser available"
+  fi
+
+  # The else branches must actually have been taken.
+  run grep -c 'GUSTO_CLAUDE_SETUP\|effortLevel' "$rendered"
+  [ "$output" -eq 0 ]
+}
+
 # ==============================================================================
 # Linter/Formatter Configuration Tests
 # ==============================================================================
