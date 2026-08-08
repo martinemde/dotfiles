@@ -305,15 +305,22 @@ render_to_temp() {
 }
 
 @test "jj config.toml has valid TOML syntax" {
+  local file="home/dot_config/jj/config.toml.tmpl"
+
+  # Render template
+  run render_template "$file"
+  [ "$status" -eq 0 ]
+
+  local rendered="$TEST_TMPDIR/jj-config.toml"
+  echo "$output" > "$rendered"
+
   # Note: tomlq may have issues with certain multiline strings containing [[
   # Use python3's tomllib as the canonical TOML parser
   if command -v python3 >/dev/null 2>&1; then
-    local file="home/dot_config/jj/config.toml"
-    run python3 -c "import tomllib; tomllib.load(open('$file', 'rb'))"
+    run python3 -c "import tomllib; tomllib.load(open('$rendered', 'rb'))"
     [ "$status" -eq 0 ]
   elif command -v tomlq >/dev/null 2>&1; then
-    local file="home/dot_config/jj/config.toml"
-    run tomlq '.' "$file"
+    run tomlq '.' "$rendered"
     [ "$status" -eq 0 ]
   else
     skip "no TOML parser available"
