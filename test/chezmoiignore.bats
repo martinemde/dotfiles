@@ -2,7 +2,7 @@
 
 load test_helper
 
-@test "private_Library is excluded on non-darwin platforms" {
+@test "Library is excluded on non-darwin platforms" {
     local ignore_file="home/.chezmoiignore"
 
     # Test that the template renders correctly on different platforms
@@ -17,7 +17,7 @@ EOF
 
     run chezmoi execute-template --config "$TEST_TMPDIR/darwin-config.toml" --file "$TEST_SOURCE_DIR/.chezmoiignore"
     [ "$status" -eq 0 ]
-    [[ "$output" != *"private_Library/private_Application Support/private_Cursor/User/"* ]]
+    [[ "$output" != *"Library/**"* ]]
 
     # Test on linux - should exclude the files
     cat >"$TEST_TMPDIR/linux-config.toml" <<EOF
@@ -27,5 +27,5 @@ EOF
 
     run chezmoi execute-template --config "$TEST_TMPDIR/linux-config.toml" --file "$TEST_SOURCE_DIR/.chezmoiignore"
     [ "$status" -eq 0 ]
-    [[ "$output" == *"private_Library/private_Application Support/private_Cursor/User/"* ]]
+    [[ "$output" == *"Library/**"* ]]
 }
