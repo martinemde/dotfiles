@@ -1,9 +1,11 @@
 #!/bin/bash
-# TEMPORARY PROBE - delete after測 test
+# TEMPORARY PROBE - deleted immediately after this test
 set -o nounset
 echo "PROBE: calling chezmoi execute-template from inside a run_before script..."
 if out=$(chezmoi execute-template < "{{ .chezmoi.sourceDir }}/dot_config/jj/config.toml.tmpl" 2>&1); then
-    echo "PROBE: SUCCESS - no deadlock. rendered ${#out} bytes"
+    echo "PROBE: SUCCESS - no deadlock, rendered ${#out} bytes"
 else
     echo "PROBE: FAILED - $out"
 fi
+# Abort here so the rest of the apply (brew bundle etc.) does not run.
+exit 1

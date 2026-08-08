@@ -277,11 +277,15 @@ render_to_temp() {
     skip "mise not installed"
   fi
 
-  local file="home/dot_config/mise/config.toml"
+  local file="home/dot_config/mise/config.toml.tmpl"
 
-  # mise can validate its own config
-  # We'll use a simple approach: try to read settings from the file
-  run mise settings --file "$file"
+  # Render template
+  run render_template "$file"
+  [ "$status" -eq 0 ]
+
+  # `mise settings` takes no --file; `mise config get` reads a specific file
+  echo "$output" > "$TEST_TMPDIR/mise-config.toml"
+  run mise config get --file "$TEST_TMPDIR/mise-config.toml"
   [ "$status" -eq 0 ]
 }
 
