@@ -6,7 +6,7 @@ This guide explains how Renovate is configured in this repository, how the custo
 
 - Renovate config lives at `renovate.json5` and runs weekly (before 9am Monday), opening labeled PRs (`deps`, `automated`) with low concurrency.
 - We pin everything important to immutable versions or digests for reproducibility and supply‑chain safety.
-- Standard managers are enabled (pip, mise, docker-compose, devcontainer, actions) and custom regex managers were added for Chezmoi externals and select version files.
+- Standard managers are enabled (pip, mise, docker-compose, devcontainer, actions) and custom regex managers cover Chezmoi externals, Pi extensions, and select version files.
 - Renovate updates these pins automatically and groups safe updates for fast review/automerge.
 
 ---
@@ -28,6 +28,7 @@ Enabled managers and file discovery:
 - `docker-compose`: `home/dot_config/docker-compose/*.yml`
 - `devcontainer`: `.devcontainer/devcontainer.json`
 - `github-actions`: `.github/workflows/*.yml` (with digest pinning)
+- `custom.regex`: bespoke pins including `home/dot_pi/private_agent/settings.json`
 
 Grouping and automerge rules:
 
@@ -37,6 +38,7 @@ Grouping and automerge rules:
 - `pip_requirements`: grouped as `python-tools` (no automerge)
 - `npm`: grouped as `node-tools` (no automerge)
 - `mise`: grouped as `mise-tools` (no automerge)
+- Pi extensions: grouped as `pi-extensions` (no automerge)
 
 Why: high-signal, low-risk updates (actions/devcontainer/digests) are auto‑merged to keep things current; others require review.
 
@@ -60,6 +62,10 @@ These files purposely centralize versions so Renovate can update them automatica
 
 - `home/dot_config/dotfiles/package.json`
   - Pinned versions for Node.js CLI tools (installed globally via npm). Updated by Renovate's npm manager.
+
+- `home/dot_pi/private_agent/settings.json`
+  - Pins Pi extension packages as `npm:<package>@<version>`.
+  - Pi's extension updater skips exact npm pins, so Renovate is the intentional upgrade path.
 
 - `.devcontainer/devcontainer.json`
   - Base image and all features pinned to immutable `@sha256:` digests. Updated by `devcontainer` manager.
@@ -102,7 +108,14 @@ Defined in `renovate.json5`:
   - Pattern: `^(?<depName>[^@\n]+)@(?<currentValue>[^\n#]+)`
   - Datasource: `npm`
 
-4. Chezmoi externals pinned to SHAs (Git Refs)
+4. Pi extension packages (npm)
+
+- File: `home/dot_pi/private_agent/settings.json`
+- Pattern: `"npm:(?<depName>...)@(?<currentValue>...)"`
+- Datasource: `npm`
+- Package rule: group as `pi-extensions`; never automerge
+
+5. Chezmoi externals pinned to SHAs (Git Refs)
 
 - File: `home/.chezmoiexternal.toml.tmpl`
 - Datasource: `git-refs` with `currentValueTemplate: "master"` (we track the upstream default branch and replace our pinned SHA when the branch moves).
@@ -127,6 +140,7 @@ Note: When adding new externals, add a matching regex rule so Renovate can keep 
 - Mise tools: PRs update `.mise.toml` and `home/dot_config/mise/config.toml` pins.
 - CLI versions: PRs update `cli-versions.toml` (e.g., `cosign`).
 - Chezmoi externals: PRs replace commit SHAs in tarball URLs or `revision = "..."`.
+- Pi extensions: PRs update exact npm pins in `home/dot_pi/private_agent/settings.json`.
 
 ---
 

@@ -1,0 +1,6 @@
+name = "package-manager"
+description = "Manage dependency and container versions with immutable pins and Renovate coverage."
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Read .agents/agents/package-manager.md and follow its Markdown body as your complete operating instructions. Ignore that file's YAML frontmatter. Load the managing-chezmoi-packages skill before making dependency, image, or version edits.
+"""

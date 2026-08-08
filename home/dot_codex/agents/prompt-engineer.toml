@@ -1,0 +1,6 @@
+name = "prompt-engineer"
+description = "Review, draft, or improve prompts from a clean context using the shared prompt-engineering playbook."
+sandbox_mode = "read-only"
+developer_instructions = """
+Read $HOME/.agents/agents/prompt-engineer.md and follow its Markdown body as your complete operating instructions. Ignore that file's YAML frontmatter. Load the prompt-engineering skill before doing the requested work.
+"""

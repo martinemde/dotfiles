@@ -1,0 +1,22 @@
+{
+  "theme": "dark",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-sol",
+  "defaultThinkingLevel": "xhigh",
+  "editorPaddingX": 0,
+  "terminal": {
+    "showTerminalProgress": false
+  },
+  "steeringMode": "all",
+  "followUpMode": "all",
+  "transport": "auto",
+  "showCacheMissNotices": true,
+  "collapseChangelog": true,
+  "quietStartup": true,
+  "enableInstallTelemetry": false,
+  "defaultProjectTrust": "ask",
+  "compaction": {
+    "enabled": true
+  },
+  "packages": ["npm:pi-subagents@0.44.0", "npm:pi-web-access@0.19.0"]
+}

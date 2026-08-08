@@ -84,10 +84,29 @@
       automerge: false,
       matchPaths: ['home/dot_config/dotfiles/package.json'],
     },
+    {
+      matchManagers: ['custom.regex'],
+      matchDatasources: ['npm'],
+      matchFileNames: ['home/dot_pi/private_agent/settings.json'],
+      groupName: 'pi-extensions',
+      automerge: false,
+    },
   ],
 
   // Custom managers to pin nonstandard files
   customManagers: [
+    // Pi extensions are exact npm pins; Pi leaves them untouched during self-update.
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^home\\/dot_pi\\/private_agent\\/settings\\.json$/',
+      ],
+      matchStrings: [
+        '"npm:(?<depName>(?:@[^/"\\s]+/)?[^@"\\s]+)@(?<currentValue>[^"\\s]+)"',
+      ],
+      datasourceTemplate: 'npm',
+      versioningTemplate: 'npm',
+    },
     // Pin cosign version in a versions file (see step 4)
     {
       customType: 'regex',

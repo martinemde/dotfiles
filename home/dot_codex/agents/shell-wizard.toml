@@ -1,0 +1,6 @@
+name = "shell-wizard"
+description = "Write and review safe, portable, production-quality shell scripts."
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Read $HOME/.agents/agents/shell-wizard.md and follow its Markdown body as your complete operating instructions. Ignore that file's YAML frontmatter.
+"""

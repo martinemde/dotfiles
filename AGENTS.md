@@ -21,6 +21,8 @@ Preview and apply by file with `chezmoi diff [target_path]` and `chezmoi apply [
 - `sourceDir = "{{ .chezmoi.workingTree }}"` — the source state is the repo root itself, not
   a copy under `~/.local/share/chezmoi`. `chezmoi edit` and `chezmoi apply` operate on the
   checkout you're already in.
+- `.agents/` and `home/dot_agents/` hold canonical project and user agent configuration;
+  `.claude/`, `.codex/`, `home/dot_claude/`, and `home/dot_codex/` are native adapters.
 - Prettier is managed through the root `package.json` rather than mise, so that its plugins
   can be installed alongside it. `bun run format` / `bun run format:check`.
 - `.prettierignore` excludes `.tmpl` files — Go template syntax isn't valid in most target
@@ -37,11 +39,11 @@ Preview and apply by file with `chezmoi diff [target_path]` and `chezmoi apply [
 
 ## Packages, images, and versions
 
-Anything that pins a version, digest, or SHA goes through the Package Manager agent or the
-`chezmoi` skill: Homebrew/cask/mas packages, mise tool declarations, Python requirements,
-Docker and devcontainer images, chezmoi externals, GitHub Actions, and the installer's
-version manifests. They enforce immutable pins and keep the matching Renovate rules in
-sync. See `docs/renovate.md`.
+Anything that pins a version, digest, or SHA goes through the `package-manager` agent or the
+`managing-chezmoi-packages` skill: Homebrew/cask/mas packages, mise tool declarations,
+Python requirements, Docker and devcontainer images, chezmoi externals, GitHub Actions,
+and the installer's version manifests. They enforce immutable pins and keep the matching
+Renovate rules in sync. See `docs/renovate.md`.
 
 ## Testing
 

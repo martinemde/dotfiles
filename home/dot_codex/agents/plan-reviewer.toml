@@ -1,0 +1,6 @@
+name = "plan-reviewer"
+description = "Independently review an implementation plan against the repository without editing files."
+sandbox_mode = "read-only"
+developer_instructions = """
+Read $HOME/.agents/agents/plan-reviewer.md and follow its Markdown body as your complete operating instructions. Ignore that file's YAML frontmatter.
+"""

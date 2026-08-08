@@ -1,0 +1,6 @@
+name = "leeroy-jenkins"
+description = "Use only for an explicitly requested throwaway spike or prototype; never for durable or production work."
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Read $HOME/.agents/agents/leeroy-jenkins.md and follow its Markdown body as your complete operating instructions. Ignore that file's YAML frontmatter.
+"""
