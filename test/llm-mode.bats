@@ -81,7 +81,7 @@ render_llm_zsh() {
 }
 
 @test "git config-llm template has valid syntax" {
-    local git_config="home/dot_config/git/config-llm.tmpl"
+    local git_config="home/dot_config/git/config-llm"
 
     # Test that the file exists
     [ -f "$git_config" ]
@@ -92,7 +92,7 @@ render_llm_zsh() {
 }
 
 @test "git config-llm disables pagers" {
-    local git_config="home/dot_config/git/config-llm.tmpl"
+    local git_config="home/dot_config/git/config-llm"
 
     # Check core pager is set to cat
     run grep "pager = cat" "$git_config"
@@ -106,7 +106,7 @@ render_llm_zsh() {
 }
 
 @test "git config-llm disables colors" {
-    local git_config="home/dot_config/git/config-llm.tmpl"
+    local git_config="home/dot_config/git/config-llm"
 
     # Check color.ui is disabled
     run grep "ui = false" "$git_config"
