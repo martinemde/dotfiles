@@ -208,8 +208,9 @@ render_to_temp() {
 
   local file="home/dot_config/kitty/kitty.conf"
 
-  # Kitty has a debug-config option that validates config
-  run kitty --config "$file" --debug-config
+  # kitty 0.46 has no --debug-config flag; load_config parses the file and
+  # reports errors without opening a window
+  run kitty +runpy "from kitty.config import load_config; load_config('$file')"
   [ "$status" -eq 0 ]
 }
 
