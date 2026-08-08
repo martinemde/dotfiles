@@ -2,19 +2,38 @@
 
 load test_helper
 
-@test "llm.zsh has valid shell syntax" {
-    local llm_config="home/dot_config/zsh/llm.zsh"
+# Helper to render a template file
+render_template() {
+    local file="$1"
+    chezmoi execute-template --file "$file"
+}
 
-    # Test that the file exists
+# llm.zsh is a template, so it must be rendered before it can be sourced
+render_llm_zsh() {
+    local rendered="$TEST_TMPDIR/llm.zsh"
+    render_template "home/dot_config/zsh/llm.zsh.tmpl" > "$rendered"
+    echo "$rendered"
+}
+
+@test "llm.zsh has valid shell syntax" {
+    local llm_config="home/dot_config/zsh/llm.zsh.tmpl"
+
+    # Test that the template exists
     [ -f "$llm_config" ]
 
-    # Test syntax is valid
-    run zsh -n "$llm_config"
+    # Test it renders
+    run render_template "$llm_config"
+    [ "$status" -eq 0 ]
+
+    # Test rendered syntax is valid
+    echo "$output" > "$TEST_TMPDIR/llm.zsh"
+    run zsh -n "$TEST_TMPDIR/llm.zsh"
     [ "$status" -eq 0 ]
 }
 
 @test "llm.zsh sets simple prompt" {
-    local llm_config="home/dot_config/zsh/llm.zsh"
+    local llm_config
+    llm_config="$(render_llm_zsh)"
 
     # Source the file and check PS1 is set
     run zsh -c "source $llm_config && echo \$PS1"
@@ -23,7 +42,8 @@ load test_helper
 }
 
 @test "llm.zsh sets NO_COLOR environment variable" {
-    local llm_config="home/dot_config/zsh/llm.zsh"
+    local llm_config
+    llm_config="$(render_llm_zsh)"
 
     # Source the file and check NO_COLOR is set
     run zsh -c "source $llm_config && echo \$NO_COLOR"
@@ -32,7 +52,8 @@ load test_helper
 }
 
 @test "llm.zsh sets simple pagers" {
-    local llm_config="home/dot_config/zsh/llm.zsh"
+    local llm_config
+    llm_config="$(render_llm_zsh)"
 
     # Source and check pager variables
     run zsh -c "source $llm_config && echo \$PAGER"
@@ -45,7 +66,8 @@ load test_helper
 }
 
 @test "llm.zsh sets skip flags for fancy features" {
-    local llm_config="home/dot_config/zsh/llm.zsh"
+    local llm_config
+    llm_config="$(render_llm_zsh)"
 
     # Check SKIP_ZSH_SYNTAX_HIGHLIGHTING is set
     run zsh -c "source $llm_config && echo \$SKIP_ZSH_SYNTAX_HIGHLIGHTING"
