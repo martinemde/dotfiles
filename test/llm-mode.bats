@@ -132,8 +132,8 @@ render_llm_zsh() {
     [ "$status" -eq 0 ]
 }
 
-@test ".zshrc template contains LLM detection logic" {
-    local zshrc="home/dot_zshrc.tmpl"
+@test ".zshrc contains LLM detection logic" {
+    local zshrc="home/dot_zshrc"
 
     # Check for envsense detection
     run grep "envsense check agent" "$zshrc"
@@ -148,16 +148,16 @@ render_llm_zsh() {
     [ "$status" -eq 0 ]
 }
 
-@test ".zshrc template has conditional skip for autosuggestions" {
-    local zshrc="home/dot_zshrc.tmpl"
+@test ".zshrc has conditional skip for autosuggestions" {
+    local zshrc="home/dot_zshrc"
 
     # Check for SKIP_ZSH_AUTOSUGGESTIONS conditional
     run grep 'if \[\[ -z "\${SKIP_ZSH_AUTOSUGGESTIONS:-}" \]\]' "$zshrc"
     [ "$status" -eq 0 ]
 }
 
-@test ".zshrc template has conditional skip for syntax highlighting" {
-    local zshrc="home/dot_zshrc.tmpl"
+@test ".zshrc has conditional skip for syntax highlighting" {
+    local zshrc="home/dot_zshrc"
 
     # Check for SKIP_ZSH_SYNTAX_HIGHLIGHTING conditional
     run grep 'if \[\[ -z "\${SKIP_ZSH_SYNTAX_HIGHLIGHTING:-}" \]\]' "$zshrc"
