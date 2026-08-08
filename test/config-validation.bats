@@ -318,8 +318,9 @@ render_to_temp() {
 
   local file="home/dot_config/starship.toml"
 
-  # Starship can validate its config
-  STARSHIP_CONFIG="$file" run starship config
+  # `starship config` opens the file in $EDITOR and blocks forever without a
+  # TTY; print-config parses and dumps it instead
+  STARSHIP_CONFIG="$file" run starship print-config
   [ "$status" -eq 0 ]
 }
 
