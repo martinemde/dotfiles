@@ -165,6 +165,11 @@ gh pr create --head "$branch" --title "$title" --body "$body" && gh pr merge $br
 
 'user(x)' = 'author(x) | committer(x)'
 
+# Wishing Well commits are work I asked an agent for, not a colleague's
+# history, so exempt them from the not-mine-is-immutable rule.
+'wish()' = 'author_email(exact:"wish@gusto.com") | author_email(substring:"cloud-wishing-well")'
+'immutable_heads()' = 'builtin_immutable_heads() | heads(~mine() & ~wish())'
+
 # Private and WIP commits that should never be pushed anywhere.
 'wip()' = 'description(glob:"wip:*")'
 'private()' = 'description(glob:"private:*")'
