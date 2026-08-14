@@ -18,5 +18,9 @@
   "compaction": {
     "enabled": true
   },
-  "packages": ["npm:pi-subagents@0.44.0", "npm:pi-web-access@0.19.0"]
+  "packages": [
+    "npm:pi-subagents@0.44.0",
+    "npm:pi-web-access@0.19.0",
+    "npm:@czottmann/pi-automode@1.11.0"
+  ]
 }
