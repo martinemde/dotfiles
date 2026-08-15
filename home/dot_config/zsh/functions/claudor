@@ -1,11 +1,11 @@
 #!/usr/bin/env zsh
-# openclaude [MODEL] [CLAUDE_ARGS...] — run claude code against OpenRouter's
+# claudor [MODEL] [CLAUDE_ARGS...] — run claude code against OpenRouter's
 # Anthropic-compatible endpoint. https://openrouter.ai/docs/cookbook/coding-agents/claude-code-integration
 #
-# MODEL defaults to real Claude via OpenRouter's passthrough route; pass any
-# OpenRouter model id (e.g. `openclaude moonshotai/kimi-k3`) to use it instead.
+# MODEL defaults to Kimi K3; pass any OpenRouter model id (e.g.
+# `claudor ~anthropic/claude-opus-latest`) to use it instead.
 
-local model="~anthropic/claude-opus-latest"
+local model="moonshotai/kimi-k3"
 if [[ $# -gt 0 && "$1" != -* ]]; then
   model="$1"
   shift
