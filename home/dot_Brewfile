@@ -66,7 +66,6 @@ cask "betterdisplay" # display manager
 cask "colemak-dh" # keyboard layout
 cask "copilot-cli" # coding agent
 cask "keymapp" # key mapper
-cask "loopback" # audio router
 cask "maccy" # clipboard
 cask "meld" # diff tool
 cask "ngrok" # tunneling tool
