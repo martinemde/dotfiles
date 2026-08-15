@@ -17,11 +17,3 @@ refreshPeriod = "168h"
 type = "file"
 url = "https://github.com/dj95/zjstatus/releases/download/v0.23.0/zjstatus.wasm"
 refreshPeriod = "168h"
-
-# zjframes: Pane-frame toggling, loaded in the background via config.kdl load_plugins
-# https://github.com/dj95/zjstatus (zjframes)
-# renovate: datasource=github-releases depName=dj95/zjstatus
-[".config/zellij/plugins/zjframes.wasm"]
-type = "file"
-url = "https://github.com/dj95/zjstatus/releases/download/v0.23.0/zjframes.wasm"
-refreshPeriod = "168h"
