@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Run after the mise configuration and tools have been applied.
+
 # bun version hash: {{ include "dot_config/mise/config.toml.tmpl" | regexFind "bun = \"[^\"]*\"" | sha256sum }}
 # node tools manifest hash: {{ include "dot_config/dotfiles/package.json" | sha256sum }}
 
@@ -13,20 +15,23 @@ if ! command -v mise >/dev/null 2>&1; then
     exit 0
 fi
 
-# Only run if bun is available via mise
-if ! mise which bun >/dev/null 2>&1; then
+# Resolve tools directly because mise shims are not active in the bootstrap
+# process yet.
+BUN=""
+if ! BUN="$(mise which bun 2>/dev/null)"; then
     echo "bun not available via mise, skipping Node.js tools installation"
     exit 0
 fi
 
-# Only run if jq is available
-if ! which jq >/dev/null 2>&1; then
+JQ=""
+if JQ="$(command -v jq 2>/dev/null)"; then
+    :
+elif JQ="$(mise which jq 2>/dev/null)"; then
+    :
+else
     echo "jq not available, skipping Node.js tools installation"
     exit 0
 fi
-
-# Get tool paths once
-BUN="$(mise which bun)"
 
 echo "Installing Node.js tools..."
 
@@ -36,7 +41,7 @@ if [ -f "$MANIFEST" ]; then
     echo "Installing pinned tools from $MANIFEST using bun..."
     
     # Extract pkg@version pairs from devDependencies
-    jq -r '.devDependencies // {} | to_entries[] | "\(.key)@\(.value)"' "$MANIFEST" | while read -r spec; do
+    "$JQ" -r '.devDependencies // {} | to_entries[] | "\(.key)@\(.value)"' "$MANIFEST" | while read -r spec; do
         echo "Installing $spec..."
         # Use bun to install globally
         "$BUN" add --global "$spec"

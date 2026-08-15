@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Run after managed files so ~/.config/mise/config.toml exists on first apply.
+
 # mise config hash: {{ include "dot_config/mise/config.toml.tmpl" | sha256sum }}
 
 [ -n "${DEBUG:-}" ] && set -o xtrace
@@ -43,11 +45,14 @@ echo "Installing global mise tools..."
 # Install all tools defined in global config
 mise install --yes
 
-# Generate bun completions (installed to site-functions, loaded by compinit)
-if command -v bun >/dev/null 2>&1; then
+# Generate bun completions (installed to site-functions, loaded by compinit).
+# The bootstrap shell has not activated mise shims yet, so use the resolved
+# binary directly.
+BUN=""
+if BUN="$(mise which bun 2>/dev/null)"; then
     ZSH_SITE="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/site-functions"
     mkdir -p "$ZSH_SITE"
-    bun completions > "$ZSH_SITE/_bun"
+    "$BUN" completions > "$ZSH_SITE/_bun"
 fi
 
 echo "Global mise tools installation complete"

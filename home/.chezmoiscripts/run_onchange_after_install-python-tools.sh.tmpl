@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Run after the mise configuration and tools have been applied.
+
 # python version hash: {{ include "dot_config/mise/config.toml.tmpl" | regexFind "python = \"[^\"]*\"" | sha256sum }}
 # python tools requirements hash: {{ include "dot_config/dotfiles/requirements.txt" | sha256sum }}
 
@@ -7,15 +9,17 @@
 set -o errexit
 set -o nounset
 
-# Only run if uv is available
-if ! command -v uv >/dev/null 2>&1; then
-    echo "uv not found, skipping Python tools installation"
-    exit 0
-fi
-
 # Only run if mise is available
 if ! command -v mise >/dev/null 2>&1; then
     echo "mise not found, skipping Python tools installation"
+    exit 0
+fi
+
+# Resolve uv directly because mise shims are not active in the bootstrap
+# process yet.
+UV=""
+if ! UV="$(mise which uv 2>/dev/null)"; then
+    echo "uv not available via mise, skipping Python tools installation"
     exit 0
 fi
 
@@ -34,7 +38,7 @@ if [ -f "$REQ_FILE" ]; then
   # Ignore comments and blank lines
   grep -Ev '^(#|\s*$)' "$REQ_FILE" | while read -r spec; do
     # --force updates existing tools when version pins change
-    uv tool install --force "$spec"
+    "$UV" tool install --force "$spec"
   done
 else
   echo "No requirements.txt found at $REQ_FILE, skipping Python tools installation"

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Run after bat and its managed themes have been applied.
+
+# bat themes hash: {{ include ".chezmoiexternals/bat.externals.toml" | sha256sum }}
+
+[ -n "${DEBUG:-}" ] && set -o xtrace
+set -o errexit
+set -o nounset
+
+# Resolve bat directly because mise shims are not active in the bootstrap
+# process yet.
+BAT=""
+if command -v bat >/dev/null 2>&1; then
+    BAT="$(command -v bat)"
+elif command -v mise >/dev/null 2>&1; then
+    BAT="$(mise which bat 2>/dev/null || true)"
+fi
+if [ -z "$BAT" ]; then
+    echo "bat not found, skipping cache rebuild"
+    exit 0
+fi
+
+echo "Rebuilding bat cache for new themes..."
+
+# Rebuild bat's cache to include new themes
+"$BAT" cache --build
+
+echo "bat cache rebuild complete"

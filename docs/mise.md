@@ -85,11 +85,11 @@ Tool-specific `run_onchange` scripts will be created using regex-based version e
 
 This ensures scripts only execute when their specific tool version changes, not when any part of the mise config is modified.
 
-**Script execution order**: The base mise installation script is prefixed with `00-` to ensure tools are installed before language-specific scripts run:
+**Script execution order**: Tool scripts use chezmoi's `after_` attribute so managed configuration exists on the first apply. The base mise installation script is also prefixed with `00-` to ensure tools are installed before language-specific scripts run:
 
-- `run_onchange_00-install-mise-tools.sh.tmpl` - Installs all mise-defined tools
-- `run_onchange_install-python-tools.sh.tmpl` - Installs Python ecosystem tools (via uv tool install)
-- Future: `run_onchange_install-nodejs-tools.sh.tmpl`, etc.
+- `run_onchange_after_00-install-mise-tools.sh.tmpl` - Installs all mise-defined tools
+- `run_onchange_after_install-python-tools.sh.tmpl` - Installs Python ecosystem tools (via uv tool install)
+- `run_onchange_after_install-nodejs-tools.sh.tmpl` - Installs Node ecosystem tools through bun
 
 ### Technical Implementation Notes
 

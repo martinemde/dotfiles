@@ -33,6 +33,10 @@ Chezmoi is downloaded from its GitHub release when the distribution package is u
 The installer verifies current `.sigstore.json` bundles with cosign and retains support for the
 detached `.sig` files used by older pinned releases before checking the archive checksum.
 
+Tool-install hooks use chezmoi's `after_` script attribute so the rendered mise configuration
+exists before the first `mise install`. Follow-up hooks for Node, Python, Neovim, and bat run
+after that tool installation rather than silently skipping on a new machine.
+
 The generated chezmoi config keeps the checkout passed by `install.sh` as its working tree.
 Subsequent `chezmoi diff` and `chezmoi apply` commands therefore use that checkout's `home/`
 directory instead of a stale copy under `~/.local/share/chezmoi`.
