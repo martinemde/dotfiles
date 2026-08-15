@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+# Run after mise tools and the Neovim configuration have been applied.
+
+set -o errexit -o nounset -o pipefail
+
+# This script automatically restores Neovim plugins to the managed lockfile when
+# any plugin config changes. Keep this list in sync when adding a plugin file;
+# `include` hashes file contents, whereas chezmoi's `glob` searches destination
+# paths and does not read the matched files.
+# Plugin catppuccin hash: {{ include "dot_config/nvim/lua/plugins/catppuccin.lua" | sha256sum }}
+# Plugin chezmoi hash: {{ include "dot_config/nvim/lua/plugins/chezmoi.lua" | sha256sum }}
+# Plugin cmp hash: {{ include "dot_config/nvim/lua/plugins/cmp.lua" | sha256sum }}
+# Plugin copilot-lsp hash: {{ include "dot_config/nvim/lua/plugins/copilot-lsp.lua" | sha256sum }}
+# Plugin core hash: {{ include "dot_config/nvim/lua/plugins/core.lua" | sha256sum }}
+# Plugin jj hash: {{ include "dot_config/nvim/lua/plugins/jj.lua" | sha256sum }}
+# Plugin lsp hash: {{ include "dot_config/nvim/lua/plugins/lsp.lua" | sha256sum }}
+# Plugin lualine hash: {{ include "dot_config/nvim/lua/plugins/lualine.lua" | sha256sum }}
+# Plugin mini-comment hash: {{ include "dot_config/nvim/lua/plugins/mini-comment.lua" | sha256sum }}
+# Plugin neo-tree hash: {{ include "dot_config/nvim/lua/plugins/neo-tree.lua" | sha256sum }}
+# Plugin sidekick hash: {{ include "dot_config/nvim/lua/plugins/sidekick.lua" | sha256sum }}
+# Plugin snacks hash: {{ include "dot_config/nvim/lua/plugins/snacks.lua" | sha256sum }}
+# Plugin tmux-navigator hash: {{ include "dot_config/nvim/lua/plugins/tmux-navigator.lua" | sha256sum }}
+# Plugin treesitter hash: {{ include "dot_config/nvim/lua/plugins/treesitter.lua" | sha256sum }}
+# Plugin twilight hash: {{ include "dot_config/nvim/lua/plugins/twilight.lua" | sha256sum }}
+# Lazy config hash: {{ include "dot_config/nvim/lua/config/lazy.lua" | sha256sum }}
+# Lockfile hash: {{ include "dot_config/nvim/lazy-lock.json" | sha256sum }}
+
+if [[ "${DEBUG:-}" == "1" ]]; then
+    echo "🔄 Restoring Neovim plugins due to configuration changes..."
+fi
+
+# Resolve Neovim directly because mise shims are not active in the bootstrap
+# process yet.
+NVIM=""
+if command -v nvim >/dev/null 2>&1; then
+    NVIM="$(command -v nvim)"
+elif command -v mise >/dev/null 2>&1; then
+    NVIM="$(mise which nvim 2>/dev/null || true)"
+fi
+if [[ -z "$NVIM" ]]; then
+    echo "Warning: Neovim not found, skipping plugin installation"
+    exit 0
+fi
+
+# Install the versions pinned in lazy-lock.json. Updating plugins here would
+# mutate a chezmoi-managed file and make every later apply conflict.
+echo "🚀 Restoring pinned Neovim plugins..."
+LAZY_BOOTSTRAP_RESTORE=1 "$NVIM" --headless "+Lazy! restore" +qa
+
+if [[ "${DEBUG:-}" == "1" ]]; then
+    echo "✅ Neovim plugins restored successfully!"
+fi

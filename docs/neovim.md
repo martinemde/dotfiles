@@ -127,6 +127,11 @@ return {
 - `:Lazy sync` - Install/update all plugins
 - `:Lazy clean` - Remove unused plugins
 
+The chezmoi bootstrap hook uses `:Lazy restore`, so a new machine installs the
+exact revisions recorded in the managed `lazy-lock.json`. Use `:Lazy sync` only
+when intentionally updating plugins, then capture the resulting lockfile back
+into the dotfiles repository.
+
 ### LSP Management
 
 - `:Mason` - Manage LSP servers, formatters, linters

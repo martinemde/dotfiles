@@ -1,8 +1,15 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    opts = {
-      ensure_installed = {
+    opts = function(_, opts)
+      -- Avoid starting parser downloads that the headless bootstrap process
+      -- would terminate on exit. Normal Neovim sessions still ensure them.
+      if vim.env.LAZY_BOOTSTRAP_RESTORE == "1" then
+        opts.ensure_installed = {}
+        return
+      end
+
+      vim.list_extend(opts.ensure_installed or {}, {
         "bash",
         "comment",
         "dockerfile",
@@ -31,8 +38,8 @@ return {
         "yaml",
         "zig",
         "zsh",
-      },
-    },
+      })
+    end,
   },
   {
     "nvim-treesitter/nvim-treesitter-context",

@@ -37,8 +37,16 @@ return {
   -- add any tools you want to have installed below
   {
     "mason-org/mason.nvim",
-    opts = {
-      ensure_installed = {
+    opts = function(_, opts)
+      -- Plugin restoration runs in a short-lived headless Neovim. Do not start
+      -- Mason's asynchronous tool installs there; a normal Neovim session will
+      -- retain the usual ensure_installed behavior.
+      if vim.env.LAZY_BOOTSTRAP_RESTORE == "1" then
+        opts.ensure_installed = {}
+        return
+      end
+
+      vim.list_extend(opts.ensure_installed or {}, {
         "bash-language-server", -- Bash LSP
         "copilot-language-server", -- Tab completions and Next Edit Suggestions from GitHub Copilot
         "docker-compose-language-service", -- Docker Compose LSP
@@ -73,7 +81,7 @@ return {
         "tree-sitter-cli", -- Tree-sitter parser generator
         "yaml-language-server", -- YAML LSP
         "zls", -- Zig LSP
-      },
-    },
+      })
+    end,
   },
 }

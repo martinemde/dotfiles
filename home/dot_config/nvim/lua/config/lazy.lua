@@ -38,7 +38,13 @@ require("lazy").setup({
     ---@type string | fun(plugin: LazyPlugin): string
     path = "~/src",
   },
-  install = { colorscheme = { "catppuccin", "habamax" } },
+  install = {
+    -- During dotfiles bootstrap, let `:Lazy restore` install missing plugins.
+    -- lazy.nvim's automatic startup install writes current revisions to the
+    -- lockfile before the restore command gets a chance to read its pins.
+    missing = vim.env.LAZY_BOOTSTRAP_RESTORE ~= "1",
+    colorscheme = { "catppuccin", "habamax" },
+  },
   checker = {
     enabled = true, -- check for plugin updates periodically
     notify = false, -- notify on update
