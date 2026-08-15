@@ -1,0 +1,132 @@
+personality = "pragmatic"
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+notify = [
+  "/Users/martinemde/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient",
+  "turn-ended",
+]
+approvals_reviewer = "auto_review"
+
+[projects."/Users/martinemde/src/gem-coop/gem-index-client"]
+trust_level = "trusted"
+
+[projects."/Users/martinemde"]
+trust_level = "trusted"
+
+[projects."/Users/martinemde/.local/share/chezmoi"]
+trust_level = "trusted"
+
+[projects."/Users/martinemde/lode"]
+trust_level = "trusted"
+
+[projects."/Users/martinemde/Documents/Codex/2026-08-15/realtime-voice-chat"]
+trust_level = "trusted"
+
+[projects."/Users/martinemde/src/martinemde/unifi"]
+trust_level = "trusted"
+
+[projects."/Users/martinemde/src/martinemde/cloudflare"]
+trust_level = "trusted"
+
+[projects."/Users/martinemde/src/martinemde/esphome"]
+trust_level = "trusted"
+
+[projects."/Users/martinemde/lode/home-assistant"]
+trust_level = "trusted"
+
+[projects."/Users/martinemde/src/martinemde/ha-notify-lights"]
+trust_level = "trusted"
+
+[desktop]
+followUpQueueMode = "queue"
+dock-icon-preference = "codex-system"
+realtimeVoiceScreenContextEnabled = true
+conversationDetailMode = "STEPS_COMMANDS"
+
+[desktop.open-in-target-preferences]
+global = "ghostty"
+
+[desktop.open-in-target-preferences.perPath]
+"/Users/martinemde/src/martinemde/martinemde.com" = "ghostty"
+
+[marketplaces.openai-bundled]
+last_updated = "2026-08-16T04:38:25Z"
+source_type = "local"
+source = "/Users/martinemde/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-08-27T09:15:06Z"
+source_type = "local"
+source = "/Users/martinemde/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."sites@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[features]
+js_repl = false
+
+[mcp_servers.node_repl]
+args = []
+command = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node_repl"
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_node/lib/node_modules"
+NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
+NODE_REPL_TRUSTED_CODE_PATHS = "/Users/martinemde/.codex:/Applications/Codex.app/Contents/Resources/cua_node/lib/node_modules"
+CODEX_HOME = "/Users/martinemde/.codex"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "9230e2bd8b24b7ac7a0ba6774c64bf0d78ecdabbdd91d0ed627b02a587bae2df"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = "Control desktop apps on macOS through Computer Use."
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.810.52044"
+CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
+
+[mcp_servers.computer-use]
+command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
+args = ["mcp"]
+cwd = "."
+enabled = false
+
+[tui]
+alternate_screen = "never"
+terminal_title = [
+  "activity",
+  "run-state",
+  "project-name",
+  "context-used",
+  "weekly-limit",
+  "thread-title",
+]
+
+[tui.model_availability_nux]
+"gpt-5.6-sol" = 1
+
+[shell_environment_policy.set]
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "9230e2bd8b24b7ac7a0ba6774c64bf0d78ecdabbdd91d0ed627b02a587bae2df"
+NODE_REPL_TRUSTED_CODE_PATHS = "/Users/martinemde/.codex:/Applications/Codex.app/Contents/Resources/cua_node/lib/node_modules"
