@@ -40,16 +40,20 @@ render_to_temp() {
   [ "$status" -eq 0 ]
 }
 
-@test "zshenv has valid syntax" {
+@test "zshenv template renders and has valid syntax" {
   if ! command -v zsh >/dev/null 2>&1; then
     skip "zsh not installed"
   fi
 
-  local file="home/dot_zshenv"
-  local temp_file="$TEST_TMPDIR/.zshenv"
-  cat "$file" > "$temp_file"
+  local file="home/dot_zshenv.tmpl"
 
-  run zsh -n "$temp_file"
+  # Render template
+  run render_template "$file"
+  [ "$status" -eq 0 ]
+
+  # Check syntax
+  echo "$output" > "$TEST_TMPDIR/.zshenv"
+  run zsh -n "$TEST_TMPDIR/.zshenv"
   [ "$status" -eq 0 ]
 }
 

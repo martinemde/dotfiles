@@ -11,6 +11,19 @@ export COLORTERM=truecolor
 # Prevent duplicates in PATH automatically
 typeset -U path
 
+# `brew shellenv` exports FPATH, so long-lived processes (the zellij server, the
+# terminal app) hand every shell they spawn the fpath they themselves started
+# with. An inherited FPATH overrides zsh's compiled-in default, so once a
+# `brew upgrade` bumps zsh the versioned Cellar path in that snapshot is gone and
+# autoloads like is-at-least and add-zsh-hook fail until the process restarts.
+# Drop entries that no longer exist and fall back to Homebrew's unversioned
+# symlink dir, which survives upgrades.
+typeset -U fpath
+fpath=( ${^fpath}(N-/) )
+{{- if eq .chezmoi.os "darwin" }}
+[[ -d /opt/homebrew/share/zsh/functions ]] && fpath+=( /opt/homebrew/share/zsh/functions )
+{{- end }}
+
 # XDG Base Directory specification
 # https://specifications.freedesktop.org/basedir-spec/latest/
 export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
