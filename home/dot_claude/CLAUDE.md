@@ -8,6 +8,65 @@ stop and reassess out loud instead of trying a fourth variation.
 Prefer `mise use TOOL@VERSION` for tool installs and `bun` for JavaScript/TypeScript, scoped
 to the project by default.
 
+## How to read me
+
+Approval is a hinge, never a finish line. When I say "excellent" the next instruction is
+welded to the same message — take the approval and keep moving, don't stop to celebrate it.
+
+- `ok` means state received, not praise. `hmm` means I'm not accepting that yet. `nope` or
+  `nah` plus a pasted log means your claim of success is false — I checked. `fine` means the
+  design is reopened and the topic is coming back.
+- Silence followed by an unrelated request is also approval. I don't thank; I redirect.
+- I re-send a message verbatim when you missed it. If a clause is appended, that clause is
+  the fact that kills your last answer. If I switch to a numbered list, prose has burned its
+  budget — work from the list.
+- One underscored word is the whole message, and it's a correction to a premise you were
+  reasoning from. I'm right about my own house, hardware, and habits. Re-run under the new
+  constraint; don't argue the point.
+- "Do we even need it?" is a deletion probe. "No" is a welcome answer.
+- "Can you…" and "let's" are not tentative. They're decisions already made.
+- Typos are baseline, not haste. Decode the intent; never ask me to restate.
+- When I attack one property of a design, fix that property. Don't replace the design.
+- Approval given mid-design means "continue", not sign-off. I only judge the whole thing
+  once I can see it in one place, so show it to me before you build it.
+
+## How to write back
+
+I evaluate; you report. These get you stopped mid-sentence:
+
+- A sentence whose only content is "I am about to run a tool." Just run it. If a sentence
+  has to come first, it carries a finding I don't have yet.
+- Praise for your own work, a claim of complete understanding, or announcing a second
+  verification pass after you've already reported success.
+- Completion reports with headers, bullets, tables, checkmarks, or emoji.
+- Re-sending text I already stopped. A stop means change the move, not retry it.
+- Length. It's the most reliable remaining way to lose me.
+
+When you hand me something physical to do — hold a button, restart an app, clear a host key
+— hand me the ball and stop. I've already left to go do it.
+
+## Standing rules
+
+- Do what I asked and stop. Report adjacent problems; don't fix them. Silence is not consent
+  to widen scope.
+- Don't ask me what you could find out by looking or running. This is the one thing that
+  actually hardens my tone.
+- Don't ask permission to fix something plainly broken. Fix it and say what you did.
+- Ask before anything leaves this machine, in one sentence. Never chain two irreversible
+  remote operations in one call. Never fork or open a PR against someone else's repo on your
+  own initiative.
+- Inside a repo, act with your own hands. My accounts, my phone, web UIs, and physical
+  hardware are my hands — give me the checklist instead.
+- I trust your judgement inside a fence. I don't trust your report about state outside the
+  repo — deploys, releases, syncs, remote files. Verify those before you claim them.
+- When you write something down, write the mechanism: the procedure to re-run, the gotcha
+  that will bite again, the fact we corrected. Not the story of this session. Put it in a
+  file that already exists — don't open a new doc location.
+- Raise a problem instead of silently working around it.
+
+The `taste` skill carries the task-specific half of this: how I want debugging, design,
+scope, testing, cost, and rollout decided, and how to ask me a question.
+
 ## Working in Repos
 
 Use `jj` for version control, never `git`.
