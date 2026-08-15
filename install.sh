@@ -513,13 +513,15 @@ download_chezmoi() {
   base_url="$GITHUB_RELEASES_URL/$CHEZMOI_REPO/releases/download/v$version"
   archive="chezmoi_${version}_${system}.${ext}"
   checksums="chezmoi_${version}_checksums.txt"
-  signature="chezmoi_${version}_checksums.txt.sig"
+  signature_bundle="chezmoi_${version}_checksums.txt.sigstore.json"
+  legacy_signature="chezmoi_${version}_checksums.txt.sig"
   pubkey="chezmoi_cosign.pub"
 
   # Full paths in temporary directory
   archive_path="$temp_dir/$archive"
   checksums_path="$temp_dir/$checksums"
-  signature_path="$temp_dir/$signature"
+  signature_bundle_path="$temp_dir/$signature_bundle"
+  legacy_signature_path="$temp_dir/$legacy_signature"
   pubkey_path="$temp_dir/$pubkey"
 
   log_info "Downloading $archive..."
@@ -537,23 +539,32 @@ download_chezmoi() {
 
   # Only download and verify signature if verification is enabled
   if [ "$VERIFY_SIGNATURES" = "true" ]; then
-    log_info "Downloading signature..."
-    if ! $download_cmd "$base_url/$signature" >"$signature_path"; then
-      log_error "Failed to download signature"
-      exit 1
-    fi
-
     log_info "Downloading public key..."
     if ! $download_cmd "$base_url/$pubkey" >"$pubkey_path"; then
       log_error "Failed to download public key"
       exit 1
     fi
 
-    # Verify signature using cosign
-    log_info "Verifying signature..."
-    if ! cosign verify-blob "$checksums_path" --signature "$signature_path" --key "$pubkey_path"; then
-      log_error "Signature verification failed"
-      exit 1
+    # Current releases publish a Sigstore bundle. Retain support for older
+    # releases that used a detached .sig so CHEZMOI_VERSION remains useful.
+    log_info "Downloading signature bundle..."
+    if $download_cmd "$base_url/$signature_bundle" >"$signature_bundle_path"; then
+      log_info "Verifying Sigstore bundle..."
+      if ! cosign verify-blob "$checksums_path" --bundle "$signature_bundle_path" --key "$pubkey_path"; then
+        log_error "Sigstore bundle verification failed"
+        exit 1
+      fi
+    else
+      rm -f "$signature_bundle_path"
+      log_info "Signature bundle unavailable; trying legacy detached signature..."
+      if ! $download_cmd "$base_url/$legacy_signature" >"$legacy_signature_path"; then
+        log_error "Failed to download a Sigstore bundle or legacy signature"
+        exit 1
+      fi
+      if ! cosign verify-blob "$checksums_path" --signature "$legacy_signature_path" --key "$pubkey_path"; then
+        log_error "Legacy signature verification failed"
+        exit 1
+      fi
     fi
   else
     log_info "Signature verification disabled"
@@ -664,6 +675,10 @@ main() {
   # Set up environment and validate requirements
   setup_environment
 
+  # Binary fallbacks are installed into BIN_DIR and may be needed immediately
+  # by later bootstrap steps (for example, cosign verifies chezmoi).
+  add_to_path
+
   # Install Mise (optional, continue on failure)
   if ! install_mise; then
     log_info "Mise installation failed, but continuing with chezmoi setup"
@@ -671,9 +686,6 @@ main() {
 
   # Install Chezmoi
   install_chezmoi
-
-  # Add BIN_DIR to PATH
-  add_to_path
 
   # Get the actual chezmoi path
   chezmoi="$(command -v chezmoi)"

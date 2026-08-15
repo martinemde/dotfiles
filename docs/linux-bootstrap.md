@@ -29,6 +29,10 @@ sudo apt install zsh git curl
 
 `install.sh` handles installing mise and chezmoi. Mise installs tools declared in `.mise.toml`.
 
+Chezmoi is downloaded from its GitHub release when the distribution package is unavailable.
+The installer verifies current `.sigstore.json` bundles with cosign and retains support for the
+detached `.sig` files used by older pinned releases before checking the archive checksum.
+
 The generated chezmoi config keeps the checkout passed by `install.sh` as its working tree.
 Subsequent `chezmoi diff` and `chezmoi apply` commands therefore use that checkout's `home/`
 directory instead of a stale copy under `~/.local/share/chezmoi`.
