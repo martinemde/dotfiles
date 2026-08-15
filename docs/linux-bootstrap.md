@@ -29,6 +29,10 @@ sudo apt install zsh git curl
 
 `install.sh` handles installing mise and chezmoi. Mise installs tools declared in `.mise.toml`.
 
+The generated chezmoi config keeps the checkout passed by `install.sh` as its working tree.
+Subsequent `chezmoi diff` and `chezmoi apply` commands therefore use that checkout's `home/`
+directory instead of a stale copy under `~/.local/share/chezmoi`.
+
 ## What's Skipped on Linux
 
 - 1Password integration (SSH agent, git signing, `op` CLI)
