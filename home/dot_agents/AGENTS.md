@@ -9,6 +9,13 @@
 
 Install tools with `mise use TOOL@VERSION`, scoped to the project. For JS/TS, use bun or pnpm depending on what the project uses, and start new projects with pnpm.
 
+## Codebase Navigation
+
+- For structural questions in unfamiliar code—where a symbol lives, who calls it, dependency paths, or change reach—query the local code graph before broad file-by-file exploration: `codebase-memory-mcp cli --json <tool> '<json-args>'`.
+- Use `search_graph` for symbols and relationships, `search_code` for lexical search, and `trace_path` for call or dependency paths. Use `list_projects` only when the project name is unknown and `index_status` to check freshness. If the current repository is missing or stale, index it first with `codebase-memory-mcp cli --json index_repository '{"repo_path":"<absolute-path>","mode":"fast"}'`.
+- Treat graph results as navigation hints, not source truth. Read the referenced source and verify behavior with normal repository tools and tests before concluding or editing.
+- The shared cache lives outside most workspace sandboxes. If access is denied, request narrowly scoped host access for `codebase-memory-mcp cli`; do not move `CBM_CACHE_DIR` or create a second cache. If the CLI still fails, report the error and fall back to `rg` and source inspection.
+
 ## Working in Repos
 
 - Use `jj` for all version control.
