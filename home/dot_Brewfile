@@ -65,6 +65,7 @@ cask "amethyst" # window manager
 cask "betterdisplay" # display manager
 cask "colemak-dh" # keyboard layout
 cask "copilot-cli" # coding agent
+cask "finicky" # browser manager
 cask "keymapp" # key mapper
 cask "maccy" # clipboard
 cask "meld" # diff tool
