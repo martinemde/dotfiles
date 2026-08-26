@@ -68,5 +68,3 @@ When asked to commit:
    ```
 
 5. Run `jj status` after, in the same message, to confirm the result.
-
-Do not push (`jj git push`) unless explicitly asked.
