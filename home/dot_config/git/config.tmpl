@@ -2,8 +2,12 @@
 name = "{{ .git.name }}"
 email = "{{ .git.email }}"
 
-[credential]
-helper = !gh auth git-credential
+[credential "https://github.com"]
+helper =
+helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+helper =
+helper = !/opt/homebrew/bin/gh auth git-credential
 
 [commit]
 template = ~/.config/git/message
