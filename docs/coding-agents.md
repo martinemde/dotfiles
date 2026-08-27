@@ -27,6 +27,7 @@ The wrappers are intentional duplication boundaries: identity and permissions be
 ## Constraints and trade-offs
 
 - Shared skills use only `name` and `description` frontmatter. Harness-only fields such as model, tool permissions, argument hints, and dynamic command interpolation stay out of canonical skills.
+- Shared skills remain self-contained or depend only on capabilities available across the target harnesses. Harness- or plugin-specific enrichment must be optional rather than a prerequisite for the workflow.
 - Agent bodies may use Pi-compatible metadata because Pi loads them directly. Claude and Codex wrappers ignore that frontmatter and apply their native settings.
 - The Pi extension packages are exact npm pins in `home/dot_pi/private_agent/settings.json`. The `private_` directory preserves the existing `0700` permissions on `~/.pi/agent`, which also holds credentials and session state. `pi update --extensions` deliberately does not move exact pins; Renovate owns extension upgrades.
 - Claude agent wrappers remain real files instead of symlinks because native agent metadata differs materially and recursive symlink behavior is not part of the compatibility contract.

@@ -1,64 +1,52 @@
 ---
 name: pr
-description: Use when asked to create a pull request (PR)
+description: Prepare, push, and open a GitHub pull request for a Jujutsu (jj) revision. Use only when asked to create or open a PR; do not use for ordinary review or local commits.
 ---
 
 # Create Pull Request
 
-Create a pull request using gh for a specified revision.
+Publish an already-completed change as a GitHub pull request. Default to a draft PR unless the user explicitly asks for ready-for-review.
 
-Usage:
+Use the requested revision when one is supplied. Otherwise use `@-` when the working copy is empty and `@` when it contains the completed change.
 
-- `pr` - Create a draft PR for the current diff from trunk / main
-- `pr <revision>` - Create a draft PR for the specified revision
-- `pr <revision> ready` - Create a ready-for-review PR
+## Review Before Publishing
 
-When creating a pull request:
+Read the active repository instructions and any pull-request template. Inspect the complete proposed stack and diff before making an external change:
 
-1. Push revision and get bookmark name:
-   - If revision has a remote-tracked bookmark: `jj git push --bookmark <name>`
-   - If revision has a local-only bookmark: track then push:
-     `jj bookmark track <name>@origin && jj git push --bookmark <name>`
-   - If revision has no bookmark: `jj git push -c <revision>` (creates and pushes)
-   - Retrieve the bookmark name from the output
-2. Run `jj log -r 'trunk()..<bookmark>'` to list commits between trunk and the bookmark
-3. Run `jj diff --from trunk() --to <bookmark> --stat` to review all changes in the PR
-4. Consider whether the pending changes should be organized into smaller, easier
-   to review commits. If so, use `jj split` or `jj squash` to reorganize before
-   proceeding.
-5. Check .github/ for PR templates and follow them
-6. **Invoke the `elements-of-style:writing-clearly-and-concisely` skill** before
-   drafting any prose. This is mandatory.
-7. **Search episodic memory for design decisions**: Use `episodic-memory:search`
-   to find conversations related to the files changed in this PR. Look for:
-   - Design decisions and their rationale
-   - Alternative approaches that were considered and rejected
-   - Trade-offs discussed during implementation
-   - Requirements or constraints that shaped the solution
-     Extract key decisions to include in the PR summary's "Design Decisions" section.
-8. Generate a PR title summarizing all commits in the changeset (not just the
-   most recent). The title reflects the overall change, not individual commits.
-9. Draft a PR summary explaining why the changes were made and their impact.
-   Focus on context and motivation, not implementation details. Include only
-   an "Assisted-by" footer only when the repository or user requests attribution;
-   do not add harness-specific branding
-   - Do not repeat information obvious from the diff
-   - Omit details like "added function X" or "modified file Y" unless
-     non-obvious reasoning justifies them
-   - Explain user-facing impact, architectural decisions, and tradeoffs
-   - If design decisions were found in episodic memory, include a "Design Decisions"
-     section highlighting key choices and their rationale
-   - Follow repository conventions
-10. **Self-review**: Review the PR changes as a code reviewer. Check for:
-    - Code smells or antipatterns
-    - Missing tests for new functionality
-    - Code repetition that should be refactored
-    - Lengthy or poorly-documented modules
-    - Report findings to the user; address any issues before proceeding
-11. Create the PR: `gh pr create --head <bookmark-name> --title "<title>"` using
-    a HEREDOC to pass the body. Add `--draft` unless `ready` was specified.
-12. **If a Jira card is detected**, transition it to "In Review":
-    - Check workspace name or bookmark for pattern like `PROJ-123` (e.g., `LDE-488`)
-    - If found: `acli jira workitem transition --key <KEY> --status "In Review"`
-    - If not found, skip this step silently
-13. Return the PR URL
+- `jj status`
+- `jj log -r "trunk()..<revision>"`
+- `jj diff --from trunk() --to <revision> --stat`
+- `jj diff --from trunk() --to <revision>`
+- `jj bookmark list --revisions <revision>`
+
+Confirm that the target is conflict-free, every included commit has an accurate description, the diff contains only intended work, and the relevant tests and checks passed. Review the diff for correctness, regressions, missing coverage, security issues, and accidental secrets. Fix issues owned by the current task before publishing; report blockers instead of pushing a knowingly broken stack.
+
+Do not reorganize or rewrite existing history merely to improve presentation. Never push `main`, `master`, or another trunk bookmark as the PR head.
+
+## Push the Exact Target
+
+Prefer a suitable local bookmark that already points to the target.
+
+- Existing bookmark: first run `gh pr list --head <bookmark> --state all`. Do not update or duplicate an existing PR as a side effect of creating one. If none exists, preview with `jj git push --bookmark <bookmark> --dry-run`, then repeat without `--dry-run`.
+- No bookmark: preview with `jj git push --change <revision> --dry-run`, then repeat without `--dry-run`; use the generated bookmark reported by jj.
+
+Do not use `--allow-backwards`. If jj reports a stale or conflicted remote bookmark, fetch and report the conflict rather than overriding it.
+
+Return an existing open PR without pushing. For a closed or merged PR, report it and ask before choosing a new head.
+
+## Draft the Pull Request
+
+Derive the title from the whole stack. Follow the repository template when present. Otherwise keep the body concise and cover:
+
+- why the change is needed and its user-facing impact;
+- important decisions or tradeoffs that are not obvious from the diff;
+- verification performed, including anything not run;
+- related issue links or closing keywords when supported by the available context.
+
+Do not add assistant branding or attribution unless requested or required by repository policy. Do not invoke unavailable writing or memory tools, and do not transition Jira or mutate other external systems as a side effect.
+
+## Create and Verify
+
+Create the PR non-interactively with `gh pr create --head <bookmark> --title <title> --body-file <file>`, adding `--draft` unless ready-for-review was requested. Then verify the returned URL with `gh pr view <url> --json url,title,isDraft,baseRefName,headRefName`.
+
+Return the PR URL, draft state, head/base, and verification summary.
