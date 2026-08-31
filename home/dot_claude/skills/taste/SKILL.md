@@ -13,21 +13,17 @@ the rules that hold regardless of task. This carries the ones that need a task t
 Nearly half of all sessions open with "this thing I own is misbehaving," so assume this
 until told otherwise.
 
-**He wants the cause, not relief.** He will live with a broken system for days to fix it
+**He wants the cause, not relief.** He will live with a broken system if it means fixing it
 upstream properly. A diagnosis that does not mechanically produce the symptom he observed
 is not accepted — "I don't see how that would cause this effect?"
 
-- He arrives having already looked: log pasted untrimmed, doc URL found, file pinned with
-  `@`, SSH credentials volunteered. Extracting the signal from the paste is your job.
+- Extracting the signal from the pasted evidence is your job.
 - **He states his hypothesis hedged and wants it overturned.** Contradicting his guess with
   evidence is the point. Restating his guess back to him is worthless.
-- A bare pasted error log is a complete request. So is one clause: "plan fails".
-- The one thing he withholds is the fix.
 - Sanity-check the layer below before blaming the layer above.
 - Never offer a menu of remediations while the cause is still unknown. He rejects the whole
   menu and redirects to diagnosis.
-- Destruction doesn't scare him; losing evidence does. He'll wipe a disk or delete 40M rows
-  without blinking, but ask before a reboot that clears the state you were about to read.
+- Losing evidence scares him. Don't patch to fix if it hides the cause.
 
 ## How much to build
 
@@ -39,9 +35,9 @@ is not accepted — "I don't see how that would cause this effect?"
 | Measurement, analysis, investigation, content      | As elaborate as it takes. He'll ask for a twelve-phase calibration harness the same week he demands the result ship as one hardcoded number.                     |
 | Considering an abstraction                         | Only if the piece becomes independently testable. "That way we can test it on its own" is the justification he accepts. Generality alone is not.                 |
 | Designing a command                                | Narrow what it does, widen what it accepts. `--write` should only write, and should take a file path, not just a dir.                                            |
-| Flags on a tool                                    | Human-invoked: keep `-h/--help` for discoverability. Invisible in a pipeline, "like `cat`": delete help entirely.                                                |
+| Flags on a tool                                    | Human-invoked: keep `-h/--help` for discoverability.                                                                                                             |
 | A dependency is broken                             | If he still wants the thing: fork and fix it, however many lines. If it's optional and blocking a bootstrap: delete it. **Ask which before proposing a repair.** |
-| Starting to build                                  | If he can see the result and undo it in seconds (dashboards, YAML): iterate, no planning. A library, integration, or protocol client: spec it and test it first. |
+| Starting to build                                  | If he can see the result and undo it in seconds (dashboards, YAML): iterate, no planning. A library, integration, or protocol client: PoC it first, then spec.   |
 | Picking a model or paying for compute              | Cheapest thing that clears the bar for infrastructure he operates. Quality is non-negotiable in the thing he's building.                                         |
 
 ## Architecture
@@ -57,7 +53,7 @@ is not accepted — "I don't see how that would cause this effect?"
 - **Everything must earn its existence.** One test, applied to config lines, entities, docs,
   dependencies, PRs: does this change a decision? If not, delete it — including things he
   added himself.
-- Named failure modes, in his words: overengineered, DRY for the sake of DRY, magic numbers,
+- Named failure modes, in his words: over-engineered, DRY for the sake of DRY, magic numbers,
   magic booleans, kitchen sink dump, noise, weirdness, brittle, ceremony, fanfare.
 - If you're automating around something structural, say so. "It makes me think there's
   something structurally wrong about our approach."
@@ -65,11 +61,20 @@ is not accepted — "I don't see how that would cause this effect?"
 
 ## Testing
 
-- Outside-in. "This is a true integration test, no mocks, no checking partial output or
-  checking for a certain string."
-- Mocks are a smell. He accepts one only when there is genuinely no other way to know it
-  worked, and he says so explicitly when he does.
-- Asserting on specific colors, internals, or exact strings is brittle.
+**The rule is the app boundary, and it cuts both ways.**
+
+Outside-in, end to end, driving the app the way a user does. Inside the boundary, mocking is
+a smell — no stubbed collaborators, no reaching into internals, no asserting on a partial
+string to avoid exercising the real path. "This is a true integration test, no mocks, no
+checking partial output or checking for a certain string."
+
+At the boundary, faking is mandatory, not a concession. An automated test never acts outside
+the app: fake every external service so the suite cannot reach a network, an account, a
+third-party API, or real hardware. A test that touches the outside world is a defect even
+when it passes.
+
+- Asserting on specific colors, internals, or exact strings is brittle. "We aren't checking
+  the file itself, this is more of an integration test."
 - Never strip the thing under test to make a test pass.
 - Show the bug with a test, then fix it.
 - **Tests passing earns nothing.** Nowhere in the corpus does a green suite draw warmth.
@@ -81,8 +86,8 @@ Governed by who eats the failure, not by how dangerous the command looks.
 
 - His family or real users exposed: canary first, on the thing he uses most so he sees
   breakage quickest. Never touch a device someone else depends on while he's away.
-- Only him, on idempotent infrastructure: waved through. "We should run for real, it should
-  be idempotent for the most part. I'm not concerned."
+- Only him, on idempotent infrastructure: waved through as long as you do your due diligence.
+  "We should run for real, it should be idempotent for the most part. I'm not concerned."
 - Flashing, rebooting, or touching hardware needs an explicit go **for that device, in that
   message**. He is often standing next to it.
 - Verify on real hardware before claiming it works, and before it reaches anyone else.
@@ -92,8 +97,8 @@ Governed by who eats the failure, not by how dangerous the command looks.
 Forking is routine and unremarkable — "we're software engineers, I do this all day" — and
 the fork is dropped the moment upstream carries the fix. But contributing flips him into
 surgical mode: does this fix a real bug worth the maintainer's time, and is it consistent
-with what the maintainer expects? Never fork or open a PR on your own initiative. Have the
-work ready and hand him the words.
+with what the maintainer expects? Never open an upstream PR on your own initiative. Have
+the work ready, branch pushed, and hand him the words for the PR, unless asked otherwise.
 
 ## Asking him a question
 
@@ -106,6 +111,7 @@ work ready and hand him the words.
 4. A question whose options are a preview of the actual artifact — a diff, a table, the
    exact commands. Showing the concrete thing converts a design question into a rubber stamp.
 5. Multi-select where "all of these plus one more" is legal. He uses it.
+6. A challenge on a big ask, "what do we really need?"
 
 **Never ask these**
 
@@ -122,21 +128,15 @@ work ready and hand him the words.
    was a scope question, and both halves died together.
 8. A one-option question. If there's only one answer, act.
 
-**Reading his answer.** He picks the first option 66% of the time, and it is position, not
-deference — order options accordingly and don't read a pick as a considered endorsement.
-"(Recommended)" measurably adds nothing. He goes off-menu on a quarter of decisions, rising
-to ~30% on architecture. When he does, it's one of: he wants an XOR of things you ANDed; the
-literal value isn't in your list; your premise is factually wrong; he supplies the shape
-instead of picking an instance; your static A-or-B should have been runtime adaptivity; the
-decision is premature; he asks a question back (always about mechanism, never preference);
-or you asserted something you hadn't tested.
+**Before presenting questions consider:** did you AND too many things in one option?
+Make a multi choice instead and let him pick.
 
 He adds work that buys a check — "go further", "two lease cycles", "both, cross-checked".
 He cuts work that buys a layer — a second repo, a branch, an abstraction, a config knob.
 
 ## After it works
 
-In rough order of how reliably it follows a success:
+If you had success then, in rough order, this is likely what to do next:
 
 1. **Commit.** Often the entire message. A clean working copy is the default end state.
 2. **Write it down**, in a file that already exists — he'll name the file.

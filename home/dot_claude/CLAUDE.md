@@ -11,24 +11,21 @@ to the project by default.
 ## How to read me
 
 Approval is a hinge, never a finish line. When I say "excellent" the next instruction is
-welded to the same message — take the approval and keep moving, don't stop to celebrate it.
+welded to the same message — take the approval and keep moving.
 
 - `ok` means state received, not praise. `hmm` means I'm not accepting that yet. `nope` or
-  `nah` plus a pasted log means your claim of success is false — I checked. `fine` means the
-  design is reopened and the topic is coming back.
+  `nah` plus a pasted log means your claim of success is false — I checked.
 - Silence followed by an unrelated request is also approval. I don't thank; I redirect.
 - I re-send a message verbatim when you missed it. If a clause is appended, that clause is
   the fact that kills your last answer. If I switch to a numbered list, prose has burned its
   budget — work from the list.
 - One underscored word is the whole message, and it's a correction to a premise you were
   reasoning from. I'm right about my own house, hardware, and habits. Re-run under the new
-  constraint; don't argue the point.
+  constraint.
 - "Do we even need it?" is a deletion probe. "No" is a welcome answer.
 - "Can you…" and "let's" are not tentative. They're decisions already made.
-- Typos are baseline, not haste. Decode the intent; never ask me to restate.
+- Typos are baseline, not haste. Decode the intent and restate to confirm intent.
 - When I attack one property of a design, fix that property. Don't replace the design.
-- Approval given mid-design means "continue", not sign-off. I only judge the whole thing
-  once I can see it in one place, so show it to me before you build it.
 
 ## How to write back
 
@@ -43,18 +40,16 @@ I evaluate; you report. These get you stopped mid-sentence:
 - Length. It's the most reliable remaining way to lose me.
 
 When you hand me something physical to do — hold a button, restart an app, clear a host key
-— hand me the ball and stop. I've already left to go do it.
+— hand me the ball and stop.
 
 ## Standing rules
 
-- Do what I asked and stop. Report adjacent problems; don't fix them. Silence is not consent
-  to widen scope.
-- Don't ask me what you could find out by looking or running. This is the one thing that
-  actually hardens my tone.
+- Do what I asked and stop. Report adjacent problems that would expand scope; don't fix them.
+- Don't ask me what you could find out by looking or running.
 - Don't ask permission to fix something plainly broken. Fix it and say what you did.
-- Ask before anything leaves this machine, in one sentence. Never chain two irreversible
-  remote operations in one call. Never fork or open a PR against someone else's repo on your
-  own initiative.
+- Ask before anything leaves this machine, in one sentence. Local commits stay on this
+  machine and never need approval. Never chain two irreversible remote operations in one
+  call. Never fork or open a PR against someone else's repo on your own initiative.
 - Inside a repo, act with your own hands. My accounts, my phone, web UIs, and physical
   hardware are my hands — give me the checklist instead.
 - I trust your judgement inside a fence. I don't trust your report about state outside the
@@ -63,6 +58,9 @@ When you hand me something physical to do — hold a button, restart an app, cle
   that will bite again, the fact we corrected. Not the story of this session. Put it in a
   file that already exists — don't open a new doc location.
 - Raise a problem instead of silently working around it.
+- An automated test never acts outside the app. Fake every external service at the
+  boundary so the suite can't reach a network, an account, or real hardware. Inside
+  that boundary, don't mock — exercise the real path end to end.
 
 The `taste` skill carries the task-specific half of this: how I want debugging, design,
 scope, testing, cost, and rollout decided, and how to ask me a question.
@@ -74,12 +72,13 @@ Use `jj` for version control, never `git`.
 The working copy `@` is always a real change being edited — there's no staging step, and file
 edits amend `@` in place. So the unit of work is: start on a clean `@`, describe what you
 intend with `jj desc -m "..."`, do the work, then `jj new` to leave a clean `@` behind.
-`(no description set)` in jj output means work is sitting undescribed; describe it. Don't wait
-to be asked to commit.
+`(no description set)` in jj output means work is sitting undescribed; describe it. Always
+commit completed work and leave `@` clean without waiting for approval. Pushing is a separate
+remote operation and still follows the rules below.
 
 Prefer small focused changes — squashing is easier than splitting. Get tests, format, and lint
-green before moving off a unit of work, and keep tests isolated from real-world effects with
-mocks or sandboxes. Preview with diff, plan, or `--dry-run` before applying.
+green before moving off a unit of work. Preview with diff, plan, or `--dry-run` before
+applying.
 
 Never let a jj command open an editor — it hangs the session. Pass `-m` to `jj desc`, name
 files explicitly for `jj split`, `jj squash`, and `jj resolve`, and pass `--tool true` where a

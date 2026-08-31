@@ -1,8 +1,9 @@
 # Context Engineering
 
-Conventions for everything Claude loads as context: `AGENTS.md`/`CLAUDE.md`, agent
+Conventions for context shared across Claude and Codex: `AGENTS.md`/`CLAUDE.md`, agent
 definitions, and skills — both the repo-local ones under `.claude/` and the global
-ones chezmoi writes to `~/.claude/`.
+ones chezmoi writes to `~/.claude/`. Shared global skills have one canonical copy under
+`~/.claude/skills/` and a relative symlink from `~/.codex/skills/`.
 
 ## Problem
 
