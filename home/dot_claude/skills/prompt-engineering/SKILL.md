@@ -1,9 +1,9 @@
 ---
 name: prompt-engineering
 description: Draft, review, or improve a prompt for an LLM or agent against a research-backed rubric — explicit instructions, instruction/data separation, output contracts, reasoning scaffolds, grounding, verification, and evals. Use when writing a prompt, auditing one that misbehaves, or explaining a prompting principle.
-argument-hint: "[draft|review|improve|explain] [task description | @prompt-file | principle...]"
+argument-hint: '[draft|review|improve|explain] [task description | @prompt-file | principle...]'
 metadata:
-  author: @ivy
+  author: '@ivy'
 allowed-tools:
   - Read
   - Glob

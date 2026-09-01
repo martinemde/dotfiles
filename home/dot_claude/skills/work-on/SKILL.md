@@ -1,11 +1,11 @@
 ---
 name: work-on
 description: End-to-end workflow for shipping a GitHub issue. Assesses complexity, builds a tailored workflow, and orchestrates skills from research through PR.
-argument-hint: "[#issue | issue URL | issue number]"
+argument-hint: '[#issue | issue URL | issue number]'
 effort: max
 disable-model-invocation: true
 metadata:
-  author: @ivy
+  author: '@ivy'
 allowed-tools:
   - Bash(gh issue view:*)
   - Bash(git branch --show-current:*)

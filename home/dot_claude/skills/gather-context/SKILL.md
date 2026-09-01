@@ -1,9 +1,9 @@
 ---
 name: gather-context
 description: Build comprehensive understanding of a problem by gathering context from GitHub issues, codebase exploration, git history, and linked references. Use when starting work on an issue or investigating a problem.
-argument-hint: "[#issue | problem description]"
+argument-hint: '[#issue | problem description]'
 metadata:
-  author: @ivy
+  author: '@ivy'
 allowed-tools:
   - Bash(command -v:*)
   - Bash(echo:*)

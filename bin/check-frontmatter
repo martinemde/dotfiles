@@ -1,0 +1,525 @@
+#!/usr/bin/env bash
+#
+# check-frontmatter -- Validate YAML frontmatter in Claude skill and agent files
+#
+# Claude Code loads skills and subagents by parsing the YAML frontmatter block at
+# the top of SKILL.md / <agent>.md. A malformed block fails quietly at load time:
+# the skill simply never shows up. This checks the frontmatter eagerly so the
+# breakage surfaces in the test suite instead of during a session.
+#
+# Usage:
+#   bin/check-frontmatter [options] [path...]
+#
+#   path   A Claude config root (containing skills/ and/or agents/), a skills/
+#          or agents/ directory, or a single markdown file.
+#          Defaults to home/dot_claude and .claude.
+#
+# Options:
+#   -q, --quiet   Only report failures
+#   -h, --help    Show this help
+#
+# Exits non-zero if any check fails.
+#
+
+[ -n "${DEBUG:-}" ] && set -o xtrace
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# ==============================================================================
+# Rules
+# ==============================================================================
+
+# Top-level keys Claude Code understands. Anything else is almost always a typo
+# (`arguments-hint`) or a key copied from a different file format. Extend these
+# lists when Claude Code grows a new field.
+SKILL_KEYS="name description argument-hint allowed-tools disable-model-invocation
+  license metadata model context agent effort version"
+AGENT_KEYS="name description tools model color skills"
+
+# Required in both file kinds. `name` is what Claude Code matches a /command
+# against; `description` is the only thing the model sees when deciding whether
+# to load the skill.
+REQUIRED_KEYS="name description"
+
+# Claude Code truncates skill descriptions past this length. Subagent
+# descriptions carry <example> blocks and are legitimately longer, so they get a
+# looser bound that exists only to catch a whole document pasted into the key.
+MAX_SKILL_DESCRIPTION=1024
+MAX_AGENT_DESCRIPTION=4096
+
+# Below this, a description cannot say when to use the skill, which is the one
+# thing the model needs from it.
+MIN_DESCRIPTION=20
+
+# ==============================================================================
+# Output
+# ==============================================================================
+
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+  C_RED=$'\033[31m'
+  C_GREEN=$'\033[32m'
+  C_YELLOW=$'\033[33m'
+  C_DIM=$'\033[2m'
+  C_OFF=$'\033[0m'
+else
+  C_RED='' C_GREEN='' C_YELLOW='' C_DIM='' C_OFF=''
+fi
+
+QUIET=0
+scratch=''
+files_checked=0
+files_failed=0
+errors_total=0
+
+# Errors for the file currently being checked, one per line.
+file_errors=''
+
+fail() {
+  file_errors="${file_errors}$1"$'\n'
+}
+
+note() {
+  printf '%s%s%s\n' "$C_YELLOW" "$1" "$C_OFF" >&2
+}
+
+usage() {
+  sed -n '3,26p' "$0" | sed 's/^#\{1,2\} \{0,1\}//'
+}
+
+# ==============================================================================
+# YAML parsing
+# ==============================================================================
+
+# Pick a YAML parser once. Structural checks run regardless; only the strict
+# "is this parseable YAML" check needs one.
+yaml_parser=''
+detect_yaml_parser() {
+  if command -v python3 >/dev/null 2>&1 && python3 -c 'import yaml' >/dev/null 2>&1; then
+    yaml_parser='python3'
+  elif command -v yq >/dev/null 2>&1; then
+    yaml_parser='yq'
+  fi
+}
+
+# Parse a YAML document on stdin. On failure, prints a single-line diagnostic and
+# returns 1. Line numbers are translated back to the source file, which is one
+# line ahead of the block because of the opening `---`.
+yaml_check() {
+  case "$yaml_parser" in
+    python3)
+      python3 -c '
+import sys, yaml
+
+try:
+    yaml.safe_load(sys.stdin.read())
+except yaml.YAMLError as error:
+    problem = getattr(error, "problem", None) or str(error).splitlines()[0]
+    context = getattr(error, "context", None)
+    message = "{}, {}".format(context, problem) if context else problem
+    mark = getattr(error, "problem_mark", None)
+    if mark is not None:
+        message += " (line {}, column {})".format(mark.line + 2, mark.column + 1)
+    print(message.strip())
+    sys.exit(1)
+'
+      ;;
+    yq)
+      yq '.' - >/dev/null 2>&1 || {
+        echo 'yq could not parse the frontmatter block'
+        return 1
+      }
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
+# ==============================================================================
+# Frontmatter extraction
+# ==============================================================================
+
+# Print the frontmatter block (the lines between the opening and closing `---`).
+# Returns 1 if the file has no opening delimiter, 2 if the block is unterminated.
+extract_frontmatter() {
+  local file="$1"
+  local first_line
+  IFS= read -r first_line <"$file" || first_line=''
+  # Tolerate a UTF-8 BOM and CRLF line endings so the reported error is the real
+  # one rather than a confusing "missing delimiter".
+  first_line="${first_line#$'\xef\xbb\xbf'}"
+  first_line="${first_line%$'\r'}"
+  [ "$first_line" = '---' ] || return 1
+
+  awk '
+    NR == 1 { next }
+    { line = $0; sub(/\r$/, "", line) }
+    line == "---" { found = 1; exit }
+    { print line }
+    END { if (!found) exit 2 }
+  ' "$file"
+}
+
+# List the top-level keys of a frontmatter block, in order. Nested keys are
+# indented, so anchoring at column 0 gives exactly the top level.
+fm_keys() {
+  printf '%s\n' "$1" | sed -n 's/^\([A-Za-z_][A-Za-z0-9_.-]*\):\([ \t].*\)\{0,1\}$/\1/p'
+}
+
+# Print the value of a top-level key, folding block scalars (`>-`, `|`) into a
+# single line and stripping surrounding quotes. Empty output means either a
+# missing key or an empty value; use fm_keys to tell them apart.
+fm_value() {
+  printf '%s\n' "$1" | awk -v key="$2" '
+    BEGIN { state = 0 }
+    state == 0 && substr($0, 1, length(key) + 1) == key ":" {
+      val = substr($0, length(key) + 2)
+      sub(/^[ \t]+/, "", val)
+      sub(/[ \t]+$/, "", val)
+      if (val ~ /^[|>][-+]?[0-9]*$/) { state = 2; next }
+      buf = val
+      exit
+    }
+    state == 2 {
+      if ($0 ~ /^[ \t]*$/) { next }
+      if ($0 !~ /^[ \t]/) { exit }
+      line = $0
+      sub(/^[ \t]+/, "", line)
+      buf = (buf == "" ? line : buf " " line)
+      next
+    }
+    END { print buf }
+  ' | sed -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/"
+}
+
+# Whole-word membership test over a whitespace-separated list. The list is
+# normalised to single spaces and padded so `case` cannot match a partial word.
+# Needles are frontmatter keys, which fm_keys already constrains to characters
+# with no glob meaning.
+list_contains() {
+  local needle="$1" list
+  list=" $(printf '%s' "$2" | tr -s '[:space:]' ' ') "
+  case "$list" in
+    *" $needle "*) return 0 ;;
+  esac
+  return 1
+}
+
+# ==============================================================================
+# Checks
+# ==============================================================================
+
+# check_file <display-path> <kind> <expected-name>
+#
+# kind is "skill" or "agent"; expected_name is the directory name (skills) or
+# file basename (agents) that `name` must agree with, so that a renamed
+# directory can't silently orphan its frontmatter.
+#
+# Chezmoi templates are rendered first when chezmoi is available, so what gets
+# validated is the frontmatter Claude Code will actually load.
+check_file() {
+  local display="$1" kind="$2" expected_name="$3"
+  local file="$display"
+  local block status allowed keys key seen='' yaml_error
+
+  file_errors=''
+  files_checked=$((files_checked + 1))
+
+  case "$display" in
+    *.tmpl)
+      if command -v chezmoi >/dev/null 2>&1; then
+        file="$scratch/rendered.md"
+        if ! chezmoi execute-template --file "$display" >"$file" 2>"$scratch/render.err"; then
+          fail "chezmoi could not render template: $(tr '\n' ' ' <"$scratch/render.err")"
+          report "$display"
+          return
+        fi
+      fi
+      ;;
+  esac
+
+  status=0
+  block=$(extract_frontmatter "$file") || status=$?
+  case "$status" in
+    1)
+      fail 'no YAML frontmatter: file must start with a line containing only ---'
+      report "$display"
+      return
+      ;;
+    2)
+      fail 'unterminated frontmatter: no closing --- delimiter'
+      report "$display"
+      return
+      ;;
+  esac
+
+  if [ -z "${block//[[:space:]]/}" ]; then
+    fail 'empty frontmatter block'
+    report "$display"
+    return
+  fi
+
+  # A literal tab in the indentation is invalid YAML, but parsers report it with
+  # an opaque message, so name it directly.
+  if printf '%s\n' "$block" | grep -q "^[$(printf '\t')]"; then
+    fail 'frontmatter is indented with tabs; YAML requires spaces'
+  fi
+
+  # An unrendered template action is not YAML and never will be. Without chezmoi
+  # there is nothing meaningful to parse, so keep the structural checks and say
+  # what was skipped rather than reporting a bogus syntax error.
+  if [ -n "$yaml_parser" ] && ! printf '%s' "$block" | grep -q '{{'; then
+    yaml_error=$(printf '%s\n' "$block" | yaml_check) || {
+      fail "invalid YAML: $yaml_error"
+      report "$display"
+      return
+    }
+  elif [ -n "$yaml_parser" ]; then
+    note "unrendered template actions in frontmatter, skipping YAML validation: $display"
+  fi
+
+  case "$kind" in
+    skill) allowed="$SKILL_KEYS" ;;
+    agent) allowed="$AGENT_KEYS" ;;
+  esac
+
+  keys=$(fm_keys "$block")
+
+  for key in $keys; do
+    if list_contains "$key" "$seen"; then
+      fail "duplicate key: $key"
+    fi
+    seen="$seen $key"
+
+    if ! list_contains "$key" "$allowed"; then
+      fail "unknown $kind key: $key"
+    fi
+  done
+
+  for key in $REQUIRED_KEYS; do
+    if ! list_contains "$key" "$keys"; then
+      fail "missing required key: $key"
+    elif [ -z "$(fm_value "$block" "$key")" ]; then
+      fail "empty required key: $key"
+    fi
+  done
+
+  # Skills and agents resolve their identity differently, so the name rules are
+  # not the same. Claude Code invokes a skill by its containing directory, which
+  # makes a `name` that disagrees with the directory dead weight at best and
+  # misleading at worst. An agent is invoked by the `name` value itself, so the
+  # filename is only a convention and a display name like "Package Manager" is
+  # legitimate — checking it against the filename would flag working config.
+  if [ "$kind" = skill ] && list_contains name "$keys"; then
+    local name
+    name=$(fm_value "$block" name)
+    if [ -n "$name" ]; then
+      if ! printf '%s' "$name" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)*$'; then
+        fail "name must be lowercase kebab-case: $name"
+      fi
+      if [ "$name" != "$expected_name" ]; then
+        fail "name '$name' does not match skill directory (expected '$expected_name')"
+      fi
+    fi
+  fi
+
+  if list_contains description "$keys"; then
+    local description length max
+    description=$(fm_value "$block" description)
+    length=${#description}
+
+    case "$kind" in
+      skill) max="$MAX_SKILL_DESCRIPTION" ;;
+      agent) max="$MAX_AGENT_DESCRIPTION" ;;
+    esac
+
+    if [ "$length" -gt "$max" ]; then
+      fail "description is $length characters; $kind limit is $max"
+    fi
+    # A description that only names the skill gives the model nothing to match
+    # on. Claude Code's own guidance is to say when to use it.
+    if [ -n "$description" ] && [ "$length" -lt "$MIN_DESCRIPTION" ]; then
+      fail "description is too short to route on ($length characters)"
+    fi
+  fi
+
+  report "$display"
+}
+
+report() {
+  local file="$1" line
+  if [ -z "$file_errors" ]; then
+    [ "$QUIET" -eq 1 ] || printf '%sok%s   %s\n' "$C_GREEN" "$C_OFF" "$file"
+    return
+  fi
+
+  files_failed=$((files_failed + 1))
+  printf '%sFAIL%s %s\n' "$C_RED" "$C_OFF" "$file"
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    errors_total=$((errors_total + 1))
+    printf '     %s- %s%s\n' "$C_DIM" "$line" "$C_OFF"
+  done <<EOF
+$file_errors
+EOF
+}
+
+# ==============================================================================
+# Discovery
+# ==============================================================================
+
+# Strip the chezmoi template suffix, then the markdown extension, so that both
+# `plan.md` and `plan.md.tmpl` resolve to `plan`.
+source_name() {
+  local name
+  name=$(basename "$1")
+  name="${name%.tmpl}"
+  printf '%s' "${name%.md}"
+}
+
+check_skills_dir() {
+  local dir="$1" skill_dir skill_name skill_file
+  [ -d "$dir" ] || return 0
+
+  for skill_dir in "$dir"/*/; do
+    [ -d "$skill_dir" ] || continue
+    skill_dir="${skill_dir%/}"
+    skill_name=$(basename "$skill_dir")
+
+    # Chezmoi renders SKILL.md.tmpl to SKILL.md, so either name is a valid source.
+    if [ -f "$skill_dir/SKILL.md" ]; then
+      skill_file="$skill_dir/SKILL.md"
+    elif [ -f "$skill_dir/SKILL.md.tmpl" ]; then
+      skill_file="$skill_dir/SKILL.md.tmpl"
+    else
+      file_errors=''
+      files_checked=$((files_checked + 1))
+      fail 'skill directory has no SKILL.md or SKILL.md.tmpl'
+      report "$skill_dir"
+      continue
+    fi
+
+    if ! printf '%s' "$skill_name" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)*$'; then
+      file_errors=''
+      files_checked=$((files_checked + 1))
+      fail "skill directory name must be lowercase kebab-case: $skill_name"
+      report "$skill_dir"
+      continue
+    fi
+
+    check_file "$skill_file" skill "$skill_name"
+  done
+}
+
+check_agents_dir() {
+  local dir="$1" agent_file
+  [ -d "$dir" ] || return 0
+
+  # Agents live either as agents/<name>.md or agents/<name>/<name>.md. README.md
+  # files are prose that sits alongside an agent, not agent definitions.
+  while IFS= read -r agent_file; do
+    [ -n "$agent_file" ] || continue
+    check_file "$agent_file" agent "$(source_name "$agent_file")"
+  done <<EOF
+$(find "$dir" -type f \( -name '*.md' -o -name '*.md.tmpl' \) \
+  ! -name 'README.md' ! -name 'README.md.tmpl' | sort)
+EOF
+}
+
+check_path() {
+  local path="$1"
+
+  if [ -f "$path" ]; then
+    case "$path" in
+      */agents/*) check_file "$path" agent "$(source_name "$path")" ;;
+      */skills/*) check_file "$path" skill "$(basename "$(dirname "$path")")" ;;
+      *)
+        note "cannot infer skill/agent kind from path, skipping: $path"
+        ;;
+    esac
+    return 0
+  fi
+
+  if [ ! -d "$path" ]; then
+    printf '%sFAIL%s no such path: %s\n' "$C_RED" "$C_OFF" "$path"
+    files_failed=$((files_failed + 1))
+    errors_total=$((errors_total + 1))
+    return 0
+  fi
+
+  case "$(basename "$path")" in
+    skills)
+      check_skills_dir "$path"
+      ;;
+    agents)
+      check_agents_dir "$path"
+      ;;
+    *)
+      check_skills_dir "$path/skills"
+      check_agents_dir "$path/agents"
+      ;;
+  esac
+}
+
+# ==============================================================================
+# Main
+# ==============================================================================
+
+main() {
+  local paths=() path
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -q | --quiet) QUIET=1 ;;
+      -h | --help)
+        usage
+        return 0
+        ;;
+      -*)
+        printf 'unknown option: %s\n\n' "$1" >&2
+        usage >&2
+        return 2
+        ;;
+      *) paths+=("$1") ;;
+    esac
+    shift
+  done
+
+  # Default to both Claude config roots in this repo: the one chezmoi installs to
+  # ~/.claude, and the project-local one that applies to this checkout.
+  if [ ${#paths[@]} -eq 0 ]; then
+    cd "$(dirname "$0")/.."
+    for path in home/dot_claude .claude; do
+      [ -d "$path" ] && paths+=("$path")
+    done
+  fi
+
+  if [ ${#paths[@]} -eq 0 ]; then
+    note 'no Claude config directories found'
+    return 0
+  fi
+
+  detect_yaml_parser
+  if [ -z "$yaml_parser" ]; then
+    note 'no YAML parser found (python3+PyYAML or yq); skipping YAML syntax validation'
+  fi
+
+  scratch=$(mktemp -d)
+  trap 'rm -rf "$scratch"' EXIT INT TERM
+
+  for path in "${paths[@]}"; do
+    check_path "$path"
+  done
+
+  if [ "$files_failed" -gt 0 ]; then
+    printf '\n%s%d error(s) in %d of %d file(s)%s\n' \
+      "$C_RED" "$errors_total" "$files_failed" "$files_checked" "$C_OFF"
+    return 1
+  fi
+
+  [ "$QUIET" -eq 1 ] || printf '\n%s%d file(s) ok%s\n' "$C_GREEN" "$files_checked" "$C_OFF"
+  return 0
+}
+
+main "$@"

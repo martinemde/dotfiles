@@ -1,9 +1,9 @@
 ---
 name: checkout
 description: Start work on a new issue or feature by creating a jj change on the up-to-date default branch with an optional named bookmark.
-argument-hint: "[#issue | bookmark-name]"
+argument-hint: '[#issue | bookmark-name]'
 metadata:
-  author: @ivy
+  author: '@ivy'
 allowed-tools:
   - Bash(echo:*)
   - Bash(gh issue view:*)

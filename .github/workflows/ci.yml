@@ -16,6 +16,17 @@ jobs:
           shellcheck install.sh
           shellcheck bin/setup
           shellcheck bin/test
+          shellcheck bin/check-frontmatter
+
+  frontmatter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      # No bats, no mise, no chezmoi: the checker runs on a bare shell so a
+      # broken skill or agent is caught even when the rest of the toolchain is
+      # unavailable.
+      - name: Validate skill and agent frontmatter
+        run: ./bin/check-frontmatter
 
   config-validation:
     runs-on: ubuntu-latest

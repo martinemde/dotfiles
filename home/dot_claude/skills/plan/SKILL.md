@@ -1,10 +1,10 @@
 ---
 name: plan
 description: Design an implementation as a task graph with explicit dependencies, parallel phases, and agent team topology. Use after gathering context and agreeing on an approach, when the work is large enough that sequencing it badly costs real time.
-argument-hint: "[context summary or focus area]"
+argument-hint: '[context summary or focus area]'
 effort: high
 metadata:
-  author: @ivy
+  author: '@ivy'
 allowed-tools:
   - Bash(echo:*)
   - Bash(git diff:*)
