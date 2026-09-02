@@ -11,3 +11,11 @@ Library/**
 {{ if env "SSH_CONNECTION" }}
 .config/zsh/secrets.zsh
 {{ end }}
+
+{{- /* Cursor is uninstalled on this machine. Keep its settings in the source
+       repo so they survive for a future migration back, but do not recreate
+       them in the destination. Reinstalling Cursor flips this off again. */ -}}
+{{ if and (not (stat "/Applications/Cursor.app")) (not (stat (joinPath .chezmoi.homeDir "Applications/Cursor.app"))) }}
+Library/Application Support/Cursor
+Library/Application Support/Cursor/**
+{{ end }}
