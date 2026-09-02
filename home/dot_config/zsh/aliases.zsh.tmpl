@@ -2,36 +2,63 @@
 # Zsh Aliases
 # ============================================================================
 
-alias -s md="glow --pager" # Suffix aliases - automatically open files by extension
 alias ...="cd .. ; cd ..; eza --icons"
 alias ..="cd ..; eza --icons"
 alias b='bundle exec'
-alias cat='bat'
-alias claude="claude --model 'opus[1m]'"
 alias cz='chezmoi'
 alias cza='chezmoi apply'
 alias dc="docker compose"
-alias df='duf'
-alias dircolors='gdircolors'
 alias g='git'
 alias git-https='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^git@([^:]*):/*(.*)$,https://\1/\2,'\'')"'
 alias git-ssh='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^https://([^/]*)/(.*)$,git@\1:\2,'\'')"'
 alias histogram='sort | uniq -c | sort -r'
 alias j='jj'
 alias l='eza --icons --group-directories-first'
-alias ls='eza --icons --group-directories-first'
 alias la='eza -a --icons --group-directories-first'
 alias ll='eza -la --icons --color-scale --group-directories-first'
-alias less=bat
-alias make='colormake'
-alias man='batman'
 alias mux='tmux-named'
 alias rc='bin/rails console'
 alias tf='terraform'
-alias top='htop'
-alias tree='eza --icons --tree'
 alias vim='nvim'
 alias vi='nvim'
+
+# ---------------------------------------------------------------------------
+# Agent-hostile aliases
+#
+# AI coding agents shell out expecting real coreutils. Claude Code in
+# particular sources this file to build a shell snapshot that it replays in
+# every tool call, so whatever is defined here becomes the agent's shell.
+# Aliases that change a standard tool's output format, or that open a pager or
+# TUI, break or hang agents.
+#
+# envsense detects any known agent (claude-code, codex, cursor, ...) from env
+# markers, so this covers agents generically rather than tracking env var
+# names by hand. We invoke the installed binary directly instead of the mise
+# shim: the shim costs ~97ms per call, which would land on every interactive
+# shell startup, versus ~6ms direct. The glob is version-agnostic and expands
+# to nothing when envsense is not installed -- in which case we treat the
+# shell as human, so an interactive user never silently loses their aliases.
+# ---------------------------------------------------------------------------
+_envsense=(${XDG_DATA_HOME:-$HOME/.local/share}/mise/installs/aqua-technicalpickles-envsense/*/envsense(N))
+if (( $#_envsense )) && $_envsense[1] check agent >/dev/null 2>&1; then
+  _agent_shell=1
+fi
+unset _envsense
+
+if [[ -z $_agent_shell ]]; then
+  alias -s md="glow --pager" # Suffix alias - open .md files in a pager
+  alias cat='bat'
+  alias claude="claude --model 'opus[1m]'"
+  alias df='duf'
+  alias dircolors='gdircolors'
+  alias less=bat
+  alias ls='eza --icons --group-directories-first'
+  alias make='colormake'
+  alias man='batman'
+  alias top='htop'
+  alias tree='eza --icons --tree'
+fi
+unset _agent_shell
 
 {{ if eq .chezmoi.os "darwin" -}}
 alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"

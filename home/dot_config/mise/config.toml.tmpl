@@ -32,6 +32,9 @@
 "aqua:sigstore/cosign" = "latest"
 "aqua:starship/starship" = "latest"
 "aqua:superfly/flyctl" = "latest"
+# Agent/env detection, used by zsh/aliases.zsh to skip agent-hostile aliases.
+# Pinned: the alias guard depends on `envsense check agent` exit-code semantics.
+"aqua:technicalpickles/envsense" = "0.3.0"
 "aqua:tree-sitter/tree-sitter" = "latest"
 "aqua:zellij-org/zellij" = "latest"
 # Local code intelligence MCP server. The github backend verifies release
