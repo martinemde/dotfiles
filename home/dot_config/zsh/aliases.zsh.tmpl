@@ -36,10 +36,11 @@ alias vi='nvim'
 # names by hand. We invoke the installed binary directly instead of the mise
 # shim: the shim costs ~97ms per call, which would land on every interactive
 # shell startup, versus ~6ms direct. The glob is version-agnostic and expands
-# to nothing when envsense is not installed -- in which case we treat the
+# to nothing when envsense is not installed -- the (N-*) qualifiers mean
+# nullglob, follow symlinks, executables only -- in which case we treat the
 # shell as human, so an interactive user never silently loses their aliases.
 # ---------------------------------------------------------------------------
-_envsense=(${XDG_DATA_HOME:-$HOME/.local/share}/mise/installs/aqua-technicalpickles-envsense/*/envsense(N))
+_envsense=(${XDG_DATA_HOME:-$HOME/.local/share}/mise/installs/aqua-technicalpickles-envsense/*/envsense(N-*))
 if (( $#_envsense )) && $_envsense[1] check agent >/dev/null 2>&1; then
   _agent_shell=1
 fi
