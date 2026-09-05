@@ -184,3 +184,8 @@ fi
 export PATH=".git/safe/../../bin:$PATH"
 
 # vi: ft=zsh
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/martinemde/.lmstudio/bin"
+# End of LM Studio CLI section
+
