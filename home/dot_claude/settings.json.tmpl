@@ -61,6 +61,7 @@
     "defaultMode": "auto"
   },
   "model": "opus[1m]",
+  "disableClaudeAiConnectors": true,
   "hooks": {
     "PreToolUse": [
       {
@@ -90,7 +91,6 @@
     "command": "~/src/martinemde/starship-claude/plugin/bin/starship-claude",
     "padding": 0
   },
-  "disableClaudeAiConnectors": true,
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true
   },
@@ -100,7 +100,8 @@
 {{- end }}
   "skipDangerousModePermissionPrompt": true,
   "editorMode": "vim",
+  "skipAutoPermissionPrompt": true,
   "useAutoModeDuringPlan": true,
   "gitAttribution": false,
-  "skipAutoPermissionPrompt": true
+  "agentPushNotifEnabled": true
 }
