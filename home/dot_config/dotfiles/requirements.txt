@@ -3,5 +3,3 @@
 
 # https://github.com/simonw/claude-code-transcripts
 claude-code-transcripts==0.5
-
-gitingest==0.3.1
