@@ -19,8 +19,9 @@ node_modules/
 bin/
 home/dot_local/bin/
 .chezmoiscripts/
+# Chezmoi modifier named after its TOML target; its contents are POSIX shell.
+home/dot_codex/modify_private_config.toml
 home/dot_config/nvim/lazy-lock.json
 
 # JSON5 file without plugin support
 renovate.json5
-

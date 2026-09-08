@@ -1,0 +1,61 @@
+#!/bin/sh
+set -o errexit -o nounset
+[ -n "${DEBUG:-}" ] && set -o xtrace
+
+# Codex owns the rest of this file. Keep its local history while preserving
+# settings written by the CLI and desktop app.
+awk '
+function write_persistence() {
+    if (!persistence_written) {
+        print "persistence = \"save-all\""
+        persistence_written = 1
+    }
+}
+
+BEGIN {
+    in_history = 0
+    history_found = 0
+    persistence_written = 0
+    saw_input = 0
+}
+
+{
+    saw_input = 1
+
+    if ($0 ~ /^[[:space:]]*\[history\][[:space:]]*(#.*)?$/) {
+        history_found = 1
+        in_history = 1
+        persistence_written = 0
+        print
+        next
+    }
+
+    if (in_history && $0 ~ /^[[:space:]]*\[/) {
+        write_persistence()
+        in_history = 0
+    }
+
+    if (in_history && $0 ~ /^[[:space:]]*persistence[[:space:]]*=/) {
+        write_persistence()
+        next
+    }
+
+    if (in_history && $0 ~ /^[[:space:]]*max_bytes[[:space:]]*=/) {
+        next
+    }
+
+    print
+}
+
+END {
+    if (in_history) {
+        write_persistence()
+    } else if (!history_found) {
+        if (saw_input) {
+            print ""
+        }
+        print "[history]"
+        print "persistence = \"save-all\""
+    }
+}
+'

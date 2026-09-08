@@ -31,14 +31,17 @@ The wrappers are intentional duplication boundaries: identity and permissions be
 - Agent bodies may use Pi-compatible metadata because Pi loads them directly. Claude and Codex wrappers ignore that frontmatter and apply their native settings.
 - The Pi extension packages are exact npm pins in `home/dot_pi/private_agent/settings.json`. The `private_` directory preserves the existing `0700` permissions on `~/.pi/agent`, which also holds credentials and session state. `pi update --extensions` deliberately does not move exact pins; Renovate owns extension upgrades.
 - Claude agent wrappers remain real files instead of symlinks because native agent metadata differs materially and recursive symlink behavior is not part of the compatibility contract.
+- Local transcripts are deliberately long-lived: Claude uses a 36,500-day cleanup window, while Codex persists history without a byte cap. Chezmoi modifies only Codex's history table because the CLI and desktop app own the rest of `~/.codex/config.toml`. Both tools store transcripts as plaintext, so local disk access remains the privacy boundary.
 
 ## Sources
 
 - [Claude Code memory and `CLAUDE.md` imports](https://docs.anthropic.com/en/docs/claude-code/memory)
 - [Claude Code skills](https://docs.anthropic.com/en/docs/claude-code/skills)
 - [Claude Code subagents](https://docs.anthropic.com/en/docs/claude-code/sub-agents)
+- [Claude Code settings](https://code.claude.com/docs/en/settings)
 - [Codex skills](https://developers.openai.com/codex/skills/)
 - [Codex multi-agent configuration](https://developers.openai.com/codex/multi-agent/)
+- [Codex advanced configuration](https://learn.chatgpt.com/docs/config-file/config-advanced)
 - [Pi package documentation](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent)
 
 This structure favors one editable behavioral source over perfectly identical native capabilities. New shared behavior belongs in the canonical file; adapter changes should be limited to discovery, permissions, model choice, or preload syntax.
