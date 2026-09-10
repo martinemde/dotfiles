@@ -11,10 +11,20 @@ Install tools with `mise use TOOL@VERSION`, scoped to the project. For JS/TS, us
 
 ## Codebase Navigation
 
-- For structural questions in unfamiliar code—where a symbol lives, who calls it, dependency paths, or change reach—query the local code graph before broad file-by-file exploration: `codebase-memory-mcp cli --json <tool> '<json-args>'`.
-- Use `search_graph` for symbols and relationships, `search_code` for lexical search, and `trace_path` for call or dependency paths. Use `list_projects` only when the project name is unknown and `index_status` to check freshness. If the current repository is missing or stale, index it first with `codebase-memory-mcp cli --json index_repository '{"repo_path":"<absolute-path>","mode":"fast"}'`.
+- For structural questions in unfamiliar code—where a symbol lives, who calls it, dependency paths, or change reach—query the local code graph before broad file-by-file exploration.
+- Use the flag-based CLI forms below. Do not pass raw JSON arguments; that interface is deprecated.
+- Resolve the project once per agent turn:
+  1. If the project name is unknown, run `codebase-memory-mcp cli --json list_projects` once and match the repository's absolute root to `root_path` exactly.
+  2. For an exact match, check freshness with `codebase-memory-mcp cli --json index_status --project "<project>"`.
+  3. If there is no exact match or the index is stale, run `codebase-memory-mcp cli --json index_repository --repo-path "<absolute-repo-path>" --mode fast`. Reuse the returned `project` value; do not run `list_projects` again.
+- Use these query forms:
+  - Lexical search: `codebase-memory-mcp cli --json search_code --project "<project>" --pattern "<pattern>" --limit 50`.
+  - Symbol discovery: `codebase-memory-mcp cli --json search_graph --project "<project>" --query "<keywords>" --detail ids --limit 20`.
+  - Call paths: first copy the exact fully qualified name returned by `search_graph`, then run `codebase-memory-mcp cli --json trace_path --project "<project>" --function-name "<exact-qualified-name>" --direction inbound --depth 4 --limit 100` (or use `outbound`/`both` as needed).
+- `index_status` accepts a project name, not a repository path. `search_code` accepts `--pattern`, not `--query`. Do not pass a language-level short name such as `Wishes::Prepare.call` to `trace_path`; use the exact qualified graph name.
+- Validate one representative graph query before issuing similar queries in parallel. On failure, read the error and make at most one correction: consult `<tool> --help` for an argument/schema error, or run one `search_graph --query ... --detail ids` lookup for an unresolved trace symbol. If the corrected attempt still fails or is empty, state the limitation and switch to `rg` plus direct source inspection. Do not repeat an identical query unless the index changed.
 - Treat graph results as navigation hints, not source truth. Read the referenced source and verify behavior with normal repository tools and tests before concluding or editing.
-- The shared cache lives outside most workspace sandboxes. If access is denied, request narrowly scoped host access for `codebase-memory-mcp cli`; do not move `CBM_CACHE_DIR` or create a second cache. If the CLI still fails, report the error and fall back to `rg` and source inspection.
+- The shared cache lives outside most workspace sandboxes. If access is denied, immediately retry that same command with narrowly scoped host access before issuing other graph queries. Do not move `CBM_CACHE_DIR` or create a second cache. If host access still fails, report the error and fall back to `rg` and source inspection.
 
 ## Working in Repos
 
