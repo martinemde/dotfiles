@@ -6,7 +6,7 @@ description: >-
   conflicts, the operation log, bookmarks, revsets, fork/PR workflows,
   colocated Git repos, multi-remote setups, divergent changes, or jj
   config. Also the place to look up fileset glob syntax, non-interactive
-  `jj split`, and bookmark advancement.
+  `jj split`, rebase/squash recipes, and moving bookmarks.
 ---
 
 # Advanced Jujutsu (jj)
@@ -16,8 +16,9 @@ Everyday commit flow (describe, new, safety rules) lives in the active
 This skill is the deeper reference — load it when you hit something the
 system prompt doesn't cover.
 
-Always verify behavior against `jj --help` and `jj <command> --help`
-before acting. Treat this skill as orientation, not ground truth.
+Recipes here were verified against **jj 0.38.0** (check `jj --version`).
+Consult `jj <command> --help` when a command actually fails, or when your
+version differs — not by default before acting.
 
 ## Mental Model
 
@@ -49,15 +50,41 @@ jj split --tool true -m "Extract feature" -- \
 
 Remaining changes stay in a follow-up working copy change.
 
-## Advancing Bookmarks
+## Rebase, Squash, Push
 
-After finalizing work, move the nearest ancestor bookmark forward:
+`jj rebase` takes `-o/--onto` — **not** `-d/--destination`, which older jj
+used and models reach for from memory.
 
 ```bash
-jj bookmark advance                  # closest bookmark(s) → @
+jj rebase -r <rev> -o <dest>         # one revision onto a destination
+jj rebase -s <rev> -o <dest>         # revision plus its descendants
+jj rebase -b <rev> -o <dest>         # whole branch containing <rev>
+jj rebase -r <rev> -B <target>       # insert before — reorders a stack
+jj rebase -r <rev> -A <target>       # insert after
+
+jj squash                            # fold @ into its parent
+jj squash --into <rev>               # fold @ into any ancestor
+jj squash --from <a> --into <b>      # move changes between revisions
+jj squash --into <rev> --tool true   # non-interactive
+
+jj git push -b <bookmark>            # one bookmark; new ones push by default
+jj git push -c <rev>                 # push a change, auto-naming its bookmark
+jj git push --all --dry-run          # preview every push
 ```
 
-See `jj bookmark advance --help` for `--to` and other targeting.
+`jj git push` has no `--allow-new` (new bookmarks push by default) and no
+`--allow-backwards` in 0.38.
+
+## Moving Bookmarks Forward
+
+There is no `jj bookmark advance`. To pull the nearest ancestor bookmarks
+up to the working-copy parent:
+
+```bash
+jj bookmark move --from 'heads(::@- & bookmarks())' --to @-
+jj bookmark set <name> -r <rev>      # create, or move an existing one
+jj bookmark move <name> --to <rev>   # move only; never creates
+```
 
 ## Reference Files
 
