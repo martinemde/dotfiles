@@ -66,7 +66,14 @@ The configuration adds user binary directories to PATH with automatic deduplicat
 
 # Add ~/.local/bin to front of PATH
 [[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
+
+# Make mise-managed tools available to non-interactive shells and subprocesses
+[[ -d "$XDG_DATA_HOME/mise/shims" ]] && path=("$XDG_DATA_HOME/mise/shims" $path)
 ```
+
+The mise shim path lives in `.zshenv` because agent commands and executable
+shebangs often run without an interactive prompt. Interactive shells still load
+the richer mise integration from `tools.zsh`.
 
 ## Interactive Shell Configuration (dot_zshrc.tmpl)
 

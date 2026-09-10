@@ -49,6 +49,9 @@ fi
 # Add Go bin directory to PATH (for go install)
 [[ -d "${GOPATH:-$HOME/go}/bin" ]] && path=("${GOPATH:-$HOME/go}/bin" $path)
 
+# Make mise-managed tools available to non-interactive shells and subprocesses
+[[ -d "$XDG_DATA_HOME/mise/shims" ]] && path=("$XDG_DATA_HOME/mise/shims" $path)
+
 # Editor configuration
 export EDITOR="nvim"
 

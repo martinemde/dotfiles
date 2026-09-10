@@ -57,6 +57,24 @@ render_to_temp() {
   [ "$status" -eq 0 ]
 }
 
+@test "zshenv exposes mise shims to non-interactive shells" {
+  if ! command -v zsh >/dev/null 2>&1; then
+    skip "zsh not installed"
+  fi
+
+  local rendered_file
+  rendered_file="$(render_to_temp "home/dot_zshenv.tmpl")"
+  mkdir -p "$TEST_HOME_DIR/.local/share/mise/shims"
+  touch "$TEST_HOME_DIR/.local/share/mise/shims/ruby"
+  chmod +x "$TEST_HOME_DIR/.local/share/mise/shims/ruby"
+
+  run env -i HOME="$TEST_HOME_DIR" PATH="/usr/bin:/bin" /bin/zsh -dfc \
+    "source \"$rendered_file\"; command -v ruby"
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "$TEST_HOME_DIR/.local/share/mise/shims/ruby" ]
+}
+
 @test "zsh completions.zsh template renders and has valid syntax" {
   if ! command -v zsh >/dev/null 2>&1; then
     skip "zsh not installed"
