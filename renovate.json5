@@ -124,15 +124,6 @@
       ],
       datasourceTemplate: 'github-releases',
     },
-    // Handle github-prefixed tools in the templated global mise config
-    {
-      customType: 'regex',
-      fileMatch: ['^home/dot_config/mise/config\\.toml\\.tmpl$'],
-      matchStrings: [
-        '"github:(?<depName>[^/]+/[^"]+)"\\s*=\\s*"(?<currentValue>v?[^"]+)"',
-      ],
-      datasourceTemplate: 'github-releases',
-    },
     // Optional: Go tools (see step 3b)
     {
       customType: 'regex',

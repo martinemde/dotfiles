@@ -54,8 +54,8 @@ These files purposely centralize versions so Renovate can update them automatica
 
 - `.mise.toml` and `home/dot_config/mise/config.toml.tmpl`
   - Define tool versions managed by [mise]. Pins explicit versions (no `latest`).
-  - Supports native mise tools (e.g., `python = "3.13.7"`) and explicit Aqua/GitHub backends (`"aqua:owner/repo"` and `"github:owner/repo"`).
-  - Renovate updates native mise tools via the Mise manager and explicit backends via custom regex managers (GitHub Releases datasource).
+  - Supports native mise tools (e.g., `python = "3.13.7"`) and the explicit Aqua backend (`"aqua:owner/repo"`).
+  - Renovate updates native mise tools via the Mise manager and Aqua-prefixed tools via a custom regex manager (GitHub Releases datasource).
 
 - `home/dot_config/dotfiles/requirements.txt`
   - Pinned versions for Python tools (installed via uv tool install). Updated by Renovate's pip manager.
@@ -92,11 +92,11 @@ Defined in `renovate.json5`:
 - Datasource: `github-releases`, `depNameTemplate: sigstore/cosign`
 - Note: line-anchored via `(?:^|\n)`, not an inline `(?m)` flag. `renovate-config-validator` (and Renovate itself when the native `re2` binding is unavailable) falls back to JS `RegExp`, which rejects inline flags like `(?m)`. Avoid `(?m)`/`(?s)`/`(?i)` in `matchStrings` so managers validate under both engines.
 
-2. Explicit-backend tools in mise TOML (GitHub Releases)
+2. Aqua-prefixed tools in mise TOML (GitHub Releases)
 
 - Files: `.mise.toml`, `home/dot_config/mise/config.toml.tmpl`
-- Patterns: `"aqua:(?<depName>...)" = "<currentValue>"` and `"github:(?<depName>...)" = "<currentValue>"`
-- Datasource: `github-releases` (e.g., `github:DeusData/codebase-memory-mcp` → `DeusData/codebase-memory-mcp`)
+- Pattern: `"aqua:(?<depName>[^/]+/[^\"]+)"\s*=\s*"(?<currentValue>v?[^\"]+)"`
+- Datasource: `github-releases` (e.g., `aqua:mikefarah/yq` → `mikefarah/yq`)
 
 3. Optional Go/Node tool manifests (present if we add these files later)
 
