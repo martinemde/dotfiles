@@ -1,6 +1,9 @@
 keybinds clear-defaults=true {
+    // Ctrl+space opens the palette from either resting mode. Going to "normal"
+    // here instead would be undone by autolock within reaction_seconds whenever
+    // a trigger process is focused; it leaves sub-modes alone.
     locked {
-        bind "Ctrl space" { SwitchToMode "normal"; }
+        bind "Ctrl space" { SwitchToMode "tmux"; }
     }
     normal {
         // Enter passthrough + autolock check for snappy mode switching
@@ -14,7 +17,7 @@ keybinds clear-defaults=true {
         // Ctrl+space as prefix key to access sub-modes
         bind "Ctrl space" { SwitchToMode "tmux"; }
     }
-    // Command palette mode (accessed via Ctrl+space prefix from Normal)
+    // Command palette mode (accessed via Ctrl+space prefix from normal or locked)
     tmux {
         bind "p" { SwitchToMode "pane"; }
         bind "t" { SwitchToMode "tab"; }
