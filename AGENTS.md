@@ -6,10 +6,10 @@ per-tool notes live in `README.md` and `docs/`.
 ## Edit source files, not installed files
 
 Chezmoi copies `home/` to `~/`. Edits to `~/` are overwritten on the next `chezmoi apply`,
-so always work in `home/dot_config/nvim/...`, never `~/.config/nvim/...`. This applies to
-anything under `home/`, including the Claude config in `home/dot_claude/`.
+so always work in, eg `home/dot_config/nvim/...`, never `~/.config/nvim/...`.
+This applies to anything under `home/`, including the Claude config in `home/dot_claude/`.
 
-Preview with `chezmoi diff`, apply with `chezmoi apply [target_path]`.
+Preview and apply by file with `chezmoi diff [target_path]` and `chezmoi apply [target_path]`.
 
 ## Gotchas
 
@@ -26,7 +26,6 @@ Preview with `chezmoi diff`, apply with `chezmoi apply [target_path]`.
   reinstalls; incidental whitespace edits trigger it too.
 - `home/dot_config/zsh/functions/` holds autoloaded zsh functions, one function per file
   named after the function.
-- `private_` prefixed files are encrypted in the source state and hold credentials.
 - The installer verifies GitHub release signatures with cosign by default and falls back to
   checksums; `VERIFY_SIGNATURES=false` skips both. Downloads added to `install.sh` are
   expected to go through that path rather than a bare `curl`.
@@ -41,7 +40,7 @@ sync. See `docs/renovate.md`.
 
 ## Testing
 
-`bats test/` for everything, `bats test/file.bats` for one file, `-t` for verbose. Tests
+Use `bats test/` for everything, `bats test/file.bats` for one file, `-t` for verbose. Tests
 validate template rendering and script syntax via `test_helper.bash` helpers such as
 `assert_valid_shell()` and `assert_script_structure()`.
 
