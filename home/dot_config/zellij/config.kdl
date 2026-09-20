@@ -422,3 +422,6 @@ theme "catppuccin-espresso"
 default_mode "normal"
 
 default_shell "zsh"
+
+// Ctrl+scroll resizes panes by default, which steals macOS's zoom gesture
+mouse_scroll_resize false
