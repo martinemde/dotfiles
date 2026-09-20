@@ -40,6 +40,12 @@ is not accepted — "I don't see how that would cause this effect?"
 | Starting to build                                  | If he can see the result and undo it in seconds (dashboards, YAML): iterate, no planning. A library, integration, or protocol client: PoC it first, then spec.   |
 | Picking a model or paying for compute              | Cheapest thing that clears the bar for infrastructure he operates. Quality is non-negotiable in the thing he's building.                                         |
 
+## Visual interfaces
+
+When the interface already shows something, remove prose that repeats it. Keep text that
+helps someone choose, identifies what they’re seeing, or explains an assumption the visual
+cannot show. When asked to trim copy, preserve the controls and behavior.
+
 ## Architecture
 
 - **Fix it at the layer that owns it.** Push the decision down to whatever has the most
