@@ -5,8 +5,8 @@
   },
   "cleanupPeriodDays": 365,
   "env": {
-{{- if eq .hosttype "work" }}
     "ENABLE_CLAUDEAI_MCP_SERVERS": "false",
+{{- if eq .hosttype "work" }}
     "GUSTO_CLAUDE_SETUP": "true",
 {{- end }}
     "CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS": "1"
@@ -91,9 +91,7 @@
     "command": "~/src/martinemde/starship-claude/plugin/bin/starship-claude",
     "padding": 0
   },
-  "enabledPlugins": {
-    "typescript-lsp@claude-plugins-official": true
-  },
+  "enabledPlugins": {},
   "alwaysThinkingEnabled": true,
 {{- if eq .hosttype "work" }}
   "effortLevel": "high",
