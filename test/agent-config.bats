@@ -66,7 +66,9 @@ load test_helper
   [ "$(readlink .claude/skills)" = "../.agents/skills" ]
   [ "$(tr -d '\n' <home/dot_claude/symlink_CLAUDE.md)" = "../.agents/AGENTS.md" ]
   [ "$(tr -d '\n' <home/dot_claude/symlink_skills)" = "../.agents/skills" ]
+  [ ! -e home/dot_claude/skills ]
   [ "$(tr -d '\n' <home/dot_codex/symlink_AGENTS.md)" = "../.agents/AGENTS.md" ]
+  [ "$(tr -d '\n' <home/dot_codex/skills/symlink_taste)" = "../../.agents/skills/taste" ]
   [ "$(tr -d '\n' <home/dot_pi/private_agent/symlink_AGENTS.md)" = "../../.agents/AGENTS.md" ]
 }
 

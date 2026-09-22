@@ -17,6 +17,8 @@ load test_helper
   local modified="$TEST_TMPDIR/modified.toml"
   local reapplied="$TEST_TMPDIR/reapplied.toml"
 
+  [ ! -e home/dot_codex/private_config.toml ]
+
   cat >"$original" <<'EOF'
 model = "gpt-5.6-sol"
 
