@@ -74,8 +74,7 @@ load test_helper
   jq -e '
     .packages == [
       "npm:pi-subagents@0.44.0",
-      "npm:pi-web-access@0.19.0",
-      "npm:@czottmann/pi-automode@1.11.0"
+      "npm:pi-web-access@0.19.0"
     ] and
     has("lastChangelogVersion") == false
   ' home/dot_pi/private_agent/settings.json
