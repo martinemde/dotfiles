@@ -53,9 +53,13 @@ settle() { sleep 0.3; }
   start_tmux
   t source-file "$BINDINGS"
 
+  run t list-keys -T root
+  [ "$status" -eq 0 ]
+
+  local normalized_output
+  normalized_output="$(printf '%s\n' "$output" | tr -s ' ')"
   for key in C-h C-j C-k C-l; do
-    run t list-keys -T root "$key"
-    [ "$status" -eq 0 ]
+    [[ "$normalized_output" == *"bind-key -T root $key "* ]]
   done
 }
 
@@ -67,10 +71,9 @@ settle() { sleep 0.3; }
   start_tmux
   t source-file "$BINDINGS"
 
-  run t list-keys -T root C-h
+  run t list-keys -T root
+  [ "$status" -eq 0 ]
   [[ "$output" == *'if-shell -F "#{pane_at_left}"'* ]]
-
-  run t list-keys -T root C-l
   [[ "$output" == *'if-shell -F "#{pane_at_right}"'* ]]
 }
 
