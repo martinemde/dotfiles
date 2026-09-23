@@ -29,7 +29,7 @@ Install tools with `mise use TOOL@VERSION` and use `bun` for JS/TS, both scoped 
 - Don't ask me anything you could find out by looking or by running a command.
 - Act directly inside the repo. My accounts, phone, web UIs, and hardware are mine to operate, so give me the steps and stop.
 - Verify any state outside the repo (deploys, releases, syncs, remote files) before you report it.
-- Don't mutate the external world without checking in first (examples: creating upstream PRs, pushing releases, sending emails).
+- Ask in one sentence before mutating the external world (examples: creating upstream PRs, pushing releases, sending emails).
 - When you write notes, record the mechanism: the procedure to re-run, the gotcha, the corrected fact. Don't narrate the session. Add notes to an existing file rather than creating a new location.
 
 ## Repos: jj
