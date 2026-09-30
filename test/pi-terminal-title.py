@@ -19,7 +19,7 @@ import time
 ROOT = Path(__file__).resolve().parent.parent
 TITLE = re.compile(rb"\x1b\]0;([^\x07]*)\x07")
 SPINNER_FRAMES = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
-WORKING = rf"π [{SPINNER_FRAMES}] Working"
+WORKING = rf"π [{SPINNER_FRAMES}] working"
 
 
 class Terminal:
@@ -123,7 +123,7 @@ def main():
             terminal.wait_title(rf"{WORKING} \| \d+% \| alpha \| title-test")
             terminal.wait_title(r"π ready \| 42% \| alpha \| title-test")
             frames = [match.group(1) for title in terminal.titles()
-                      if (match := re.match(rf"π ([{SPINNER_FRAMES}]) Working", title))]
+                      if (match := re.match(rf"π ([{SPINNER_FRAMES}]) working", title))]
             # Match Pi's complete spinner cycle, not a static braille character.
             assert ''.join(dict.fromkeys(frames)) == SPINNER_FRAMES, frames
             terminal.assert_stable("π ready | 42% | alpha | title-test")

@@ -48,7 +48,7 @@ export default function (pi: ExtensionAPI) {
         ? '[!]'
         : '[.]'
       : working || compacting
-        ? `${SPINNER_FRAMES[frame]} Working`
+        ? `${SPINNER_FRAMES[frame]} working`
         : 'ready';
     context.ui.setTitle(`π ${state} | ${suffix}`);
   }

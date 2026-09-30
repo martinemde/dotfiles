@@ -67,7 +67,7 @@ For a complete list of options, run `./install.sh --help`.
 ## Pi terminal title
 
 The personal extension in `home/dot_pi/private_agent/extensions/terminal-title.ts`
-shows `π ⠏ Working | 42% | model xhigh | session name` (or `π ready` when
+shows `π ⠏ working | 42% | model xhigh | session name` (or `π ready` when
 settled). The working spinner uses Pi's default frames and 80 ms cadence. Reasoning
 models show their current effort level, which updates when you cycle it.
 Blocking extension questions and confirmations alternate `[.]` / `[!]` until
