@@ -31,7 +31,8 @@ export default function (pi: ExtensionAPI) {
     models: ['alpha', 'beta'].map((id) => ({
       id,
       name: id,
-      reasoning: false,
+      reasoning: id === 'beta',
+      thinkingLevelMap: id === 'beta' ? { xhigh: 'xhigh' } : undefined,
       input: ['text'],
       contextWindow: 100000,
       maxTokens: 4096,

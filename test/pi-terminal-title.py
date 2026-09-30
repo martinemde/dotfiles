@@ -18,6 +18,8 @@ import time
 
 ROOT = Path(__file__).resolve().parent.parent
 TITLE = re.compile(rb"\x1b\]0;([^\x07]*)\x07")
+SPINNER_FRAMES = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+WORKING = rf"π ── [{SPINNER_FRAMES}] Working"
 
 
 class Terminal:
@@ -118,8 +120,12 @@ def main():
             assert re.fullmatch(r"π ready \| \d+% \| alpha \| title-test", terminal.titles()[-1])
 
             terminal.send("work\r")
-            terminal.wait_title(r"π working \| \d+% \| alpha \| title-test")
+            terminal.wait_title(rf"{WORKING} \| \d+% \| alpha \| title-test")
             terminal.wait_title(r"π ready \| 42% \| alpha \| title-test")
+            frames = [match.group(1) for title in terminal.titles()
+                      if (match := re.match(rf"π ── ([{SPINNER_FRAMES}]) Working", title))]
+            # Match Pi's complete spinner cycle, not a static braille character.
+            assert ''.join(dict.fromkeys(frames)) == SPINNER_FRAMES, frames
             terminal.assert_stable("π ready | 42% | alpha | title-test")
 
             terminal.send("/title-idle-question\r")
@@ -130,28 +136,31 @@ def main():
             terminal.assert_stable("π ready | 42% | alpha | title-test")
 
             terminal.send("question\r")
-            terminal.wait_title(r"π working \| \d+% \| alpha \| title-test")
+            terminal.wait_title(rf"{WORKING} \| \d+% \| alpha \| title-test")
             terminal.wait_title(r"π \[\.\] \| \d+% \| alpha \| title-test")
             terminal.wait_title(r"π \[!\] \| \d+% \| alpha \| title-test")
             terminal.send("\r")  # Accept the selected answer.
-            terminal.wait_title(r"π working \| \d+% \| alpha \| title-test")
+            terminal.wait_title(rf"{WORKING} \| \d+% \| alpha \| title-test")
             terminal.wait_title(r"π ready \| 42% \| alpha \| title-test")
 
             terminal.send("/compact\r")
-            terminal.wait_title(r"π working \| 42% \| alpha \| title-test")
+            terminal.wait_title(rf"{WORKING} \| 42% \| alpha \| title-test")
             terminal.wait_title(r"π ready \| \?% \| alpha \| title-test")
 
             terminal.send("/model terminal-title-test/beta\r")
-            terminal.wait_title(r"π ready \| \?% \| beta \| title-test")
+            terminal.wait_title(r"π ready \| \?% \| beta off \| title-test")
+            for effort in ['minimal', 'low', 'medium', 'high', 'xhigh']:
+                terminal.send("\x1b[Z")  # Shift+Tab: Pi's real effort cycling key.
+                terminal.wait_title(rf"π ready \| \?% \| beta {effort} \| title-test")
             terminal.send("work\r")
-            terminal.wait_title(r"π working \| \?% \| beta \| title-test")
+            terminal.wait_title(rf"{WORKING} \| \?% \| beta xhigh \| title-test")
             terminal.send("\x1b")  # Abort the active turn.
-            terminal.wait_title(r"π ready \| \?% \| beta \| title-test")
+            terminal.wait_title(r"π ready \| \?% \| beta xhigh \| title-test")
 
             terminal.send("/reload\r")
-            terminal.wait_title(r"π ready \| \?% \| beta \| title-test")
+            terminal.wait_title(r"π ready \| \?% \| beta xhigh \| title-test")
             terminal.read(0.7)
-            assert terminal.titles()[-1] == "π ready | ?% | beta | title-test", terminal.titles()
+            assert terminal.titles()[-1] == "π ready | ?% | beta xhigh | title-test", terminal.titles()
 
             terminal.send("/new\r")
             terminal.wait_title(rf"π ready \| \d+% \| alpha \| {fallback}")
