@@ -3,6 +3,11 @@
 Personal dotfiles managed by Chezmoi across macOS, Linux, and containers. Installation and
 per-tool notes live in `README.md` and `docs/`.
 
+## Version control
+
+Work directly on `main` in this personal repository. Do not create feature branches
+or pull requests. Preview pushes with `jj git push --bookmark main --dry-run`.
+
 ## Edit source files, not installed files
 
 Chezmoi copies `home/` to `~/`. Edits to `~/` are overwritten on the next `chezmoi apply`,
