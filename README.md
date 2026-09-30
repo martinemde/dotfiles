@@ -64,6 +64,18 @@ GIT_USER_NAME="CI User" GIT_USER_EMAIL="ci@example.com" ./install.sh
 
 For a complete list of options, run `./install.sh --help`.
 
+## Pi terminal title
+
+The personal extension in `home/dot_pi/private_agent/extensions/terminal-title.ts`
+shows `π working | 42% | model | session name` (or `π ready` when settled).
+Blocking extension questions and confirmations alternate `[.]` / `[!]` until
+answered or cancelled. Plain-text questions are not guessed from assistant prose.
+Context is percent used; `?%` means unknown, such as immediately after compaction.
+Unnamed sessions use the directory name. Run `/reload` in Pi after applying it.
+
+The sandboxed TUI integration test runs with `bats test/pi-terminal-title.bats`
+and requires an installed Pi and Python 3; it never calls a real model provider.
+
 ## License
 
 This project is open source under the [ISC License](LICENSE.md), credited to Ivy Evans, Martin Emde.
