@@ -4,7 +4,7 @@ We're pairing. Be casual and direct; humor is welcome.
 
 Before you make a change, say how you'll verify it. After two failed attempts, stop and reassess out loud instead of trying a third variation.
 
-Install tools with `mise use TOOL@VERSION` and use `bun` for JS/TS, both scoped to the project.
+Install tools with `mise use TOOL@VERSION`, scoped to the project. For JS/TS, use bun or pnpm depending on what the project uses, and start new projects with pnpm.
 
 ## Reading me
 
