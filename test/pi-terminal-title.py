@@ -23,7 +23,7 @@ WORKING = rf"π [{SPINNER_FRAMES}] working"
 
 
 class Terminal:
-    def __init__(self, home):
+    def __init__(self, home, *, extensions=(), environment=None, arguments=()):
         agent = home / "agent"
         agent.mkdir()
         (agent / "settings.json").write_text(json.dumps({
@@ -44,6 +44,9 @@ class Terminal:
             "--provider", "terminal-title-test", "--model", "alpha",
             "--thinking", "off",
         ]
+        for extension in extensions:
+            self.command.extend(['--extension', str(extension)])
+        self.command.extend(arguments)
         self.env = {
             "PATH": os.environ["PATH"],
             "HOME": str(home),
@@ -52,6 +55,7 @@ class Terminal:
             "PI_OFFLINE": "1",
             "TERM": "xterm-256color",
         }
+        self.env.update(environment or {})
         self.process = subprocess.Popen(
             self.command, stdin=slave, stdout=slave, stderr=slave,
             cwd=home, env=self.env,

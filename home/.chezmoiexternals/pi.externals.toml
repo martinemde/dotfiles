@@ -1,0 +1,12 @@
+# PR-aware Pi session names. Keep upstream unmodified; index.ts formats the name.
+# renovate: repo=lepht/pi-pr-session-title branch=main
+
+[".pi/agent/extensions/pr-session-title/upstream.ts"]
+type = "file"
+url = "https://github.com/lepht/pi-pr-session-title/raw/c15057be32f7351a6c82b06d2cf588bd214b9892/extensions/pr-session-title.ts"
+refreshPeriod = "168h"
+
+[".pi/agent/extensions/pr-session-title/LICENSE"]
+type = "file"
+url = "https://github.com/lepht/pi-pr-session-title/raw/c15057be32f7351a6c82b06d2cf588bd214b9892/LICENSE"
+refreshPeriod = "168h"

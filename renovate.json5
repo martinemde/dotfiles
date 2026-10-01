@@ -18,6 +18,7 @@
     'devcontainer',
     'github-actions',
     'npm',
+    'custom.regex',
   ],
 
   // Actions: pin to digests for reproducibility
@@ -177,6 +178,18 @@
       currentValueTemplate: 'main',
       depNameTemplate: 'marlonrichert/zsh-snap',
       packageNameTemplate: 'https://github.com/marlonrichert/zsh-snap',
+    },
+    // Chezmoi external dependencies - PR session naming code and license
+    {
+      customType: 'regex',
+      fileMatch: ['^home/\\.chezmoiexternals/pi\\.externals\\.toml$'],
+      matchStrings: [
+        'lepht/pi-pr-session-title/raw/(?<currentDigest>[a-f0-9]{40})/',
+      ],
+      datasourceTemplate: 'git-refs',
+      currentValueTemplate: 'main',
+      depNameTemplate: 'lepht/pi-pr-session-title',
+      packageNameTemplate: 'https://github.com/lepht/pi-pr-session-title',
     },
     // Chezmoi external dependencies - zellij plugin release binaries
     // Tracks zellij-autolock, zjstatus, and zjframes via GitHub release tags in URLs
