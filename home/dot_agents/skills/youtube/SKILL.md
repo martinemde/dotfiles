@@ -27,7 +27,7 @@ context.
 ### 2. Fetch Video Metadata
 
 ```bash
-yt-dlp --print "%(title)s" --print "%(channel)s" --print "%(uploader)s" --print "%(upload_date)s" --print "%(duration)s" --skip-download "VIDEO_URL"
+uvx yt-dlp --print "%(title)s" --print "%(channel)s" --print "%(uploader)s" --print "%(upload_date)s" --print "%(duration)s" --skip-download "VIDEO_URL"
 ```
 
 Capture:
@@ -41,7 +41,7 @@ Capture:
 
 ```bash
 mkdir -p tmp
-yt-dlp --skip-download --write-auto-subs --sub-langs "en" --sub-format "srt" --convert-subs srt -o "tmp/transcript" "VIDEO_URL"
+uvx yt-dlp --skip-download --write-auto-subs --sub-langs "en" --sub-format "srt" --convert-subs srt -o "tmp/transcript" "VIDEO_URL"
 ```
 
 Saves to `tmp/transcript.en.srt`. If no English subs, try `en-orig` or check `--list-subs`.
