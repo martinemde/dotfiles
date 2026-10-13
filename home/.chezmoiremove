@@ -1,3 +1,4 @@
 .config/zsh/llm.zsh
 .config/git/config-llm
 .config/bat/config-llm
+.agents/skills/synced

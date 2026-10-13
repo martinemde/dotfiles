@@ -2,6 +2,51 @@
 
 load test_helper
 
+@test "Claude account skill sync is disabled on personal and work hosts" {
+  local hosttype
+  for hosttype in personal work; do
+    run chezmoi --config /dev/null --config-format toml \
+      --source "$TEST_SOURCE_DIR" \
+      --override-data "{\"hosttype\":\"$hosttype\"}" \
+      execute-template --file home/dot_claude/settings.json.tmpl
+    [ "$status" -eq 0 ]
+
+    local settings="$output"
+    run jq -e '.syncClaudeAiSkills == false' <<<"$settings"
+    [ "$status" -eq 0 ]
+  done
+}
+
+@test "chezmoi removes synced skills while preserving personal skills" {
+  cp home/.chezmoiremove "$TEST_SOURCE_DIR/.chezmoiremove"
+  local skills="$TEST_HOME_DIR/.agents/skills"
+  mkdir -p "$skills/synced/account/pdf" "$skills/taste"
+  printf 'downloaded skill\n' >"$skills/synced/account/pdf/SKILL.md"
+  printf 'personal skill\n' >"$skills/taste/SKILL.md"
+
+  run chezmoi --config /dev/null --config-format toml \
+    --source "$TEST_SOURCE_DIR" --destination "$TEST_HOME_DIR" \
+    --persistent-state "$TEST_TMPDIR/chezmoi-state.boltdb" \
+    apply --dry-run "$skills/synced"
+  [ "$status" -eq 0 ]
+  [ -f "$skills/synced/account/pdf/SKILL.md" ]
+
+  run chezmoi --config /dev/null --config-format toml \
+    --source "$TEST_SOURCE_DIR" --destination "$TEST_HOME_DIR" \
+    --persistent-state "$TEST_TMPDIR/chezmoi-state.boltdb" \
+    apply "$skills/synced"
+  [ "$status" -eq 0 ]
+  [ ! -e "$skills/synced" ]
+  [ "$(cat "$skills/taste/SKILL.md")" = "personal skill" ]
+
+  run chezmoi --config /dev/null --config-format toml \
+    --source "$TEST_SOURCE_DIR" --destination "$TEST_HOME_DIR" \
+    --persistent-state "$TEST_TMPDIR/chezmoi-state.boltdb" apply
+  [ "$status" -eq 0 ]
+  [ ! -e "$skills/synced" ]
+  [ -f "$skills/taste/SKILL.md" ]
+}
+
 @test "shared skills have portable frontmatter and matching directory names" {
   while IFS= read -r skill; do
     local keys name directory
