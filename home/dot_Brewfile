@@ -49,7 +49,6 @@ brew "readline" # line editing library
 brew "redis", restart_service: :changed # database
 brew "ruby-build" # Ruby builder
 brew "ruby-install" # Ruby installer
-brew "rv" # Ruby version manager
 brew "tesseract" # OCR tool
 brew "texinfo" # documentation
 brew "thefuck" # command corrector

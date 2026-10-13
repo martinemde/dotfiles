@@ -15,8 +15,6 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # (bundler-shims check) requires this; plain hook mode doesn't expose the shims dir.
 eval "$(mise activate zsh --shims)"
 
-# disable rv temporarily, it causes issues with gems
-# znap eval rv 'rv shell init zsh' # rv - ruby manager
 (( $+commands[atuin] ))    && znap eval atuin 'atuin init zsh'
 # starship bakes its absolute binary path into the cached init; drop the cache when mise moves it
 _starship_cache=${XDG_CACHE_HOME:-$HOME/.cache}/zsh-snap/eval/starship.zsh
