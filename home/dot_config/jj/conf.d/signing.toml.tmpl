@@ -1,0 +1,14 @@
+{{- $key := joinPath .chezmoi.homeDir ".ssh" "commit_signing" -}}
+{{- if stat $key -}}
+#:schema https://docs.jj-vcs.dev/latest/config-schema.json
+# The private key is machine-local and never managed by Chezmoi.
+
+[signing]
+backend = "ssh"
+key = {{ $key | quote }}
+# Sign on push, not on every working-copy snapshot or rewrite.
+behavior = "drop"
+
+[git]
+sign-on-push = true
+{{ end -}}
