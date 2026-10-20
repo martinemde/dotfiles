@@ -33,6 +33,7 @@ The wrappers are intentional duplication boundaries: identity and permissions be
 - The Pi extension packages are exact npm pins in `home/dot_pi/private_agent/settings.json`. The `private_` directory preserves the existing `0700` permissions on `~/.pi/agent`, which also holds credentials and session state. `pi update --extensions` deliberately does not move exact pins; Renovate owns extension upgrades.
 - Claude agent wrappers remain real files instead of symlinks because native agent metadata differs materially and recursive symlink behavior is not part of the compatibility contract.
 - Local transcripts are deliberately long-lived: Claude uses a 36,500-day cleanup window, while Codex persists history without a byte cap. Chezmoi modifies only Codex's history table because the CLI and desktop app own the rest of `~/.codex/config.toml`. Both tools store transcripts as plaintext, so local disk access remains the privacy boundary.
+- Prime Agent telemetry is disabled in `~/.prime/agent/settings.json` and through `PRIME_AGENT_TELEMETRY=0` in zshenv. The settings opt-out covers running sessions and launches outside a shell; the environment opt-out also covers new shell launches. Chezmoi modifies only the telemetry setting so Prime Agent can keep managing model choices and other local preferences. Credentials, installation IDs, and session state stay untracked.
 
 ## Sources
 

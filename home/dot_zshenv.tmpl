@@ -62,6 +62,9 @@ export LESS="-FR"
 # NPM security hardening - disable postinstall scripts for global CLI tools
 export NPM_CONFIG_IGNORE_SCRIPTS=1
 
+# Disable Prime Agent telemetry for all shell-launched sessions
+export PRIME_AGENT_TELEMETRY=0
+
 # Retry transient Runlayer hook failures
 export RUNLAYER_HOOK_RETRIES=5
 

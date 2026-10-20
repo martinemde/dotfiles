@@ -1,0 +1,7 @@
+#!/bin/sh
+set -o errexit -o nounset
+[ -n "${DEBUG:-}" ] && set -o xtrace
+
+# Prime Agent owns the other settings, including local model and skill choices.
+command -v jq >/dev/null
+jq -s '(.[0] // {}) | .telemetry.enabled = false'
