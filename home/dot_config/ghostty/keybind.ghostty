@@ -32,9 +32,6 @@ keybind = global:option+grave_accent=toggle_quick_terminal
 # Basic Keybindings
 keybind = super+w=close_tab
 
-## Shift+Enter for Claude Code
-keybind = shift+enter=text:\x1b\r
-
 ######
 # Tmux inspired shortcuts
 
