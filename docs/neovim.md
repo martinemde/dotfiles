@@ -39,6 +39,11 @@ home/dot_config/nvim/
 
 ### Custom Plugins
 
+Copilot autocomplete is disabled via `servers.copilot.enabled = false` in
+`lua/plugins/copilot-lsp.lua` and `nes.enabled = false` in `lua/plugins/sidekick.lua`.
+Both are needed to turn off inline completions and next-edit suggestions while
+retaining Sidekick's CLI integration and ordinary completion.
+
 #### Tmux Navigator
 
 **Plugin**: `christoomey/vim-tmux-navigator`

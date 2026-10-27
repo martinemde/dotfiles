@@ -1,8 +1,8 @@
 return {
   "folke/sidekick.nvim",
-  event = "VeryLazy", -- Load after UI is ready to enable NES and LSP integration
+  event = "VeryLazy", -- Load after UI is ready
   opts = {
-    -- add any options here
+    nes = { enabled = false },
     cli = {
       mux = {
         backend = "tmux",

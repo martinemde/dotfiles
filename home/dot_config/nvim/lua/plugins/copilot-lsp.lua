@@ -6,7 +6,8 @@ return {
     opts = {
       servers = {
         copilot = {
-          -- Enable Copilot LSP for sidekick.nvim Next Edit Suggestions (NES)
+          -- Disable Copilot autocomplete, including native inline completions.
+          enabled = false,
           -- brew install github-copilot-cli
           filetypes = {
             "lua",
