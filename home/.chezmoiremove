@@ -2,3 +2,4 @@
 .config/git/config-llm
 .config/bat/config-llm
 .agents/skills/synced
+.config/nvim/lua/plugins/copilot-lsp.lua

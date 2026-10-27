@@ -39,10 +39,10 @@ home/dot_config/nvim/
 
 ### Custom Plugins
 
-Copilot autocomplete is disabled via `servers.copilot.enabled = false` in
-`lua/plugins/copilot-lsp.lua` and `nes.enabled = false` in `lua/plugins/sidekick.lua`.
-Both are needed to turn off inline completions and next-edit suggestions while
-retaining Sidekick's CLI integration and ordinary completion.
+Copilot is removed from the LazyVim extras, Mason install list, and Brewfile.
+`.chezmoiremove` deletes the retired LSP override on apply. Keep Sidekick's
+`nes.enabled = false`: its CLI integration is still used, but Copilot next-edit
+suggestions are not. Blink uses its ordinary `super-tab` completion preset.
 
 #### Tmux Navigator
 

@@ -48,7 +48,6 @@ return {
 
       vim.list_extend(opts.ensure_installed or {}, {
         "bash-language-server", -- Bash LSP
-        "copilot-language-server", -- Tab completions and Next Edit Suggestions from GitHub Copilot
         "docker-compose-language-service", -- Docker Compose LSP
         "dockerfile-language-server", -- Dockerfile LSP
         "eslint-lsp", -- ESLint LSP

@@ -11,8 +11,6 @@ return {
     },
   },
   keys = {
-    -- Note: Tab is handled in blink.cmp config for insert mode
-    -- This handles Tab in normal/visual modes for NES
     {
       "<c-.>",
       function()

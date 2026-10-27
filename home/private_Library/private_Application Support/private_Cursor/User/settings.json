@@ -270,15 +270,6 @@
   // EXTENSION SETTINGS
   // ================================================================
 
-  // GitHub Copilot
-  "github.copilot.enable": {
-    "*": true,
-    "plaintext": true,
-    "scminput": false,
-    "yaml": true
-  },
-  "github.copilot.editor.enableAutoCompletions": true,
-
   // GitHub Pull Requests
   "githubPullRequests.pullBranch": "never",
   "githubPullRequests.terminalLinksHandler": "github",
