@@ -81,7 +81,7 @@ the richer mise integration from `tools.zsh`.
 
 The configuration uses [znap (zsh-snap)](https://github.com/marlonrichert/zsh-snap) for fast, minimal plugin management:
 
-- **Installation**: Managed via Chezmoi external (`.chezmoiexternal.toml.tmpl`)
+- **Installation**: Managed via Chezmoi external (`home/.chezmoiexternals/zsh.externals.toml`)
 - **Location**: `~/.zsh/znap/zsh-snap/`
 - **Benefits**: Lazy loading, caching, faster startup than traditional plugin managers
 

@@ -179,7 +179,7 @@ The configuration includes seamless navigation between Neovim and tmux:
 3. **Copy Mode Support**: Navigation works in tmux copy mode
 4. **Fallback Bindings**: Prefix-based navigation available as backup
 
-See `doc/tmux.md` for tmux-side configuration details.
+The tmux side lives in `home/dot_config/tmux/`.
 
 ## Troubleshooting
 
