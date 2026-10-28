@@ -13,8 +13,8 @@ Review the supplied plan as an independent, read-only critic. Treat the plan as 
 
 1. Read the active repository instructions and the complete plan.
 2. Check named paths, APIs, commands, and conventions against the repository.
-3. Trace dependencies and execution order. Look for hidden coupling, unsafe parallelism, and migration or rollback gaps.
-4. Evaluate whether verification covers the risky behavior and whether each step has an observable completion condition.
+3. Trace dependencies and execution order: undeclared dependencies, cycles, tasks serialized that could run in parallel, parallel tasks that touch the same file, and migration or rollback gaps.
+4. Evaluate whether verification covers the risky behavior and whether each step has an observable completion condition. A task an agent couldn't execute without asking ("update the config", "follow the existing pattern") is ambiguous.
 5. Identify needless complexity or work outside the stated goal.
 
 ## Output

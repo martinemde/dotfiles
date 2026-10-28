@@ -32,7 +32,7 @@ If no plan is found, stop and tell the user.
 
 **For existing issues:** fetch the body with `gh issue view NNN --json body,title`. Preserve the **Problem** and **Goal** sections if they exist -- only add/replace implementation sections.
 
-### 4. Format the Issue Body
+### 3. Format the Issue Body
 
 Structure the updated issue body using this template:
 
@@ -93,9 +93,9 @@ key design decisions. This is the only section most readers will read.]
 - Group implementation details by component, not by step number
 - Edge cases always get their own `<details>` block
 
-### 5. Publish
+### 4. Publish
 
-Write the formatted body to a temp file to avoid shell escaping issues with backticks and code fences. Commands will prompt for approval since they're not in `allowed-tools`.
+Write the formatted body to a temp file to avoid shell escaping issues with backticks and code fences.
 
 ```bash
 # Write the formatted body (no shell escaping concerns)
