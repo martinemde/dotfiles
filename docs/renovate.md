@@ -73,9 +73,8 @@ These files purposely centralize versions so Renovate can update them automatica
 - `home/dot_config/docker-compose/*.yml`
   - Service images pinned with tag+digest (e.g., `image: repo:tag@sha256:...`). Digest updates are auto‑merged.
 
-- `home/.chezmoiexternal.toml.tmpl`
-  - All externals pinned to commit SHAs for reproducibility.
-  - Tarball archives pinned in the URL with commit SHA; git repo pinned via `revision = "<sha>"`.
+- `home/.chezmoiexternals/*.externals.toml`
+  - All externals pinned to commit SHAs (archive or raw URLs) or release tags for reproducibility.
 
 ---
 
@@ -117,15 +116,10 @@ Defined in `renovate.json5`:
 
 5. Chezmoi externals pinned to SHAs (Git Refs)
 
-- File: `home/.chezmoiexternal.toml.tmpl`
+- Files: `home/.chezmoiexternals/*.externals.toml`, one custom manager per dependency
 - Datasource: `git-refs` with `currentValueTemplate: "master"` (we track the upstream default branch and replace our pinned SHA when the branch moves).
 
-Current rules:
-
-- oh-my-zsh tarball: `ohmyzsh/ohmyzsh/archive/(?<currentDigest>[a-f0-9]{7,40})\.tar\.gz`
-- zsh‑autosuggestions tarball: `zsh-users/zsh-autosuggestions/archive/(?<currentDigest>[a-f0-9]{7,40})\.tar\.gz`
-- zsh‑syntax‑highlighting tarball: `zsh-users/zsh-syntax-highlighting/archive/(?<currentDigest>[a-f0-9]{7,40})\.tar\.gz`
-- gpakosz/.tmux repo revision: `^\s*revision\s*=\s*"(?<currentDigest>[a-f0-9]{7,40})"`
+Each external has its own `customManagers` entry in `renovate.json5`, keyed to the file and URL it pins.
 
 Note: When adding new externals, add a matching regex rule so Renovate can keep their SHAs fresh automatically.
 
@@ -220,10 +214,8 @@ Examples (from this repo’s usage):
 gh api repos/sigstore/cosign/releases/latest --jq .tag_name
 
 # Chezmoi externals (current master SHA to pin)
-gh api repos/ohmyzsh/ohmyzsh/commits/master --jq .sha
 gh api repos/zsh-users/zsh-autosuggestions/commits/master --jq .sha
 gh api repos/zsh-users/zsh-syntax-highlighting/commits/master --jq .sha
-gh api repos/gpakosz/.tmux/commits/master --jq .sha
 ```
 
 ---

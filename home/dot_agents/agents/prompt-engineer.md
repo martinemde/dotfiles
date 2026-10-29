@@ -17,16 +17,7 @@ The `prompt-engineering` skill (`PLAYBOOK.md` + `SKILL.md`) is preloaded and own
 
 Treat the message body as your entire brief—one of: a task description (draft), a prompt to review, a prompt plus reported failure modes (improve), or a principle question (explain). If the caller passes `@path/to/prompt.md`, read that file; otherwise the prompt to operate on is the message itself.
 
-## What you return
-
-Match the request shape; pick the smallest format that delivers the value.
-
-- **Draft** → the prompt in a fenced block, then 2–4 bullets of design rationale (which gates each section satisfies, which trade-offs you made).
-- **Review** → a rubric scorecard (1–5 on the dimensions in `PLAYBOOK.md` §6), then the top 3–5 concrete fixes in priority order. No padding.
-- **Improve** → the revised prompt in a fenced block, then a diff-style list of what changed and why, with each change tied to a gate or to a failure mode the caller named.
-- **Explain** → name the principle, give a bad/good example pair, and one sentence on when it applies vs. when it doesn't. Under 200 words.
-
-End your reply with the deliverable. No closing summary, no offer to revise — the caller will follow up if they want more.
+Produce the deliverable in the shape the skill defines for that mode, and end with it: no closing summary or offer to revise.
 
 ## Operating as an isolated reviewer
 

@@ -2,8 +2,7 @@
 
 Conventions for context shared across Claude and Codex: `AGENTS.md`/`CLAUDE.md`, agent
 definitions, and skills — both the repo-local ones under `.claude/` and the global
-ones chezmoi writes to `~/.claude/`. Shared global skills have one canonical copy under
-`~/.claude/skills/` and a relative symlink from `~/.codex/skills/`.
+ones chezmoi writes to `~/.agents/`. See `coding-agents.md` for the canonical-file layout.
 
 ## Problem
 
@@ -27,7 +26,7 @@ prompt and in our CLAUDE.md files and skills," with conflicting messages causing
 The canonical example from the post: "Never write multi-paragraph docstrings" became
 "Write code that reads like the surrounding code: match its comment density, naming, and
 idiom." Rules survive only where the cost of a wrong call is unrecoverable — the jj
-safety protocol and secret handling in `home/dot_claude/CLAUDE.md` stay imperative,
+safety protocol and secret handling in `home/dot_agents/AGENTS.md` stay imperative,
 because "don't rewrite history you didn't create" is not a stylistic preference.
 
 **One home per instruction.** Trigger conditions live in the frontmatter `description`,
@@ -36,9 +35,14 @@ is restated in a parent `CLAUDE.md`. A "When to use this skill" section duplicat
 description is pure overhead.
 
 **Progressive disclosure over completeness.** Long skills become a directory: a short
-`SKILL.md` that orients and an index of `references/*.md` loaded on demand. Applied to
-`ghostty-shaders`, which was a 677-line monolith carrying a full GLSL language reference
-into context for a one-line shader edit.
+`SKILL.md` that orients and an index of `references/*.md` loaded on demand.
+
+**Cut what the model already knows.** A reference is only worth carrying when it holds
+something the model can't produce or look up. `ghostty-shaders` was a 677-line GLSL
+tutorial and `managing-chezmoi-packages` carried 1,600 lines of generic chezmoi and
+Renovate documentation whose paths (`packages.yaml`, `.chezmoiexternal.toml.tmpl`) no
+longer existed. Both now hold only this repo's facts. Copies of upstream docs (the jj
+manual) go stale; point at `jj help -k` or the published docs instead.
 
 **Interfaces over examples.** Few-shot examples "actually constrain [models] to a certain
 exploration space." Agent descriptions carry expressive trigger conditions instead of

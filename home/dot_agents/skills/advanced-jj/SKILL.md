@@ -16,7 +16,7 @@ Everyday commit flow (describe, new, safety rules) lives in the active
 This skill is the deeper reference — load it when you hit something the
 system prompt doesn't cover.
 
-Recipes here were verified against **jj 0.38.0** (check `jj --version`).
+Recipes here were verified against **jj 0.45.1** (check `jj --version`).
 Consult `jj <command> --help` when a command actually fails, or when your
 version differs — not by default before acting.
 
@@ -73,33 +73,21 @@ jj git push --all --dry-run          # preview every push
 ```
 
 `jj git push` has no `--allow-new` (new bookmarks push by default) and no
-`--allow-backwards` in 0.38.
+`--allow-backwards`. `jj git push --tag <tag>` pushes a tag.
 
 ## Moving Bookmarks Forward
 
-There is no `jj bookmark advance`. To pull the nearest ancestor bookmarks
-up to the working-copy parent:
-
 ```bash
-jj bookmark move --from 'heads(::@- & bookmarks())' --to @-
+jj bookmark advance --to @-          # nearest ancestor bookmarks up to @-
 jj bookmark set <name> -r <rev>      # create, or move an existing one
 jj bookmark move <name> --to <rev>   # move only; never creates
 ```
 
-## Reference Files
+## Deeper reference
 
-Load from `references/` as needed:
-
-- **`git-to-jj-commands.md`** — Git → jj command translation table
-- **`git-comparison.md`** — Conceptual differences from Git
-- **`git-compatibility.md`** — Colocated repos, Git interop
-- **`working-copy.md`** — How automatic commits work
-- **`bookmarks.md`** — Managing bookmarks (branches)
-- **`revsets.md`** — Query syntax (`@`, `@-`, `main..@`, etc.)
-- **`conflicts.md`** — Conflict resolution
-- **`operation-log.md`** — `jj op log`, undo, restore
-- **`divergence.md`** — Handling divergent changes
-- **`github.md`** — Fork workflows and PRs
-- **`multiple-remotes.md`** — Multi-remote setups
-- **`config.md`** — Configuration options
-- **`tutorial.md`** — Step-by-step introduction (for humans)
+The jj manual ships with the binary and matches the installed version:
+`jj help -k bookmarks|config|filesets|glossary|revsets|templates|tutorial`, and
+`jj help <command>` for any command. Other topics are on the docs site
+(`https://jj-vcs.github.io/jj/latest/<page>/`): `conflicts`, `operation-log`,
+`working-copy`, `git-compatibility`, `git-comparison`, `git-command-table`, `github`,
+`guides/divergence`, `guides/multiple-remotes`.
