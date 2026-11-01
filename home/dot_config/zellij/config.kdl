@@ -19,6 +19,7 @@ keybinds clear-defaults=true {
     }
     // Command palette mode (accessed via Ctrl+space prefix from normal or locked)
     tmux {
+        bind "n" { NewPane; SwitchToMode "normal"; }
         bind "p" { SwitchToMode "pane"; }
         bind "t" { SwitchToMode "tab"; }
         bind "m" { SwitchToMode "move"; }
@@ -192,7 +193,6 @@ keybinds clear-defaults=true {
         bind "Ctrl ]" { NextSwapLayout; }
         bind "Ctrl f" { ToggleFloatingPanes; }
         bind "Ctrl i" { MoveTab "left"; }
-        bind "Ctrl n" { NewPane; }
         bind "Alt p" { TogglePaneInGroup; }
         bind "Alt Shift p" { ToggleGroupMarking; }
     }
