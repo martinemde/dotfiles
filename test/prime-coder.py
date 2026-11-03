@@ -1,0 +1,283 @@
+"""Offline CLI boundary tests: no Coder account, network, or model access."""
+
+import json
+import os
+from pathlib import Path
+import socket
+import subprocess
+import sys
+import tempfile
+import threading
+import unittest
+
+ROOT = Path(__file__).resolve().parent.parent
+LAUNCHER = ROOT / "home/dot_local/bin/executable_prime-coder"
+VERSION = "test-prime-1"
+
+
+def record(home, event):
+    with (home / "events.jsonl").open("a") as stream:
+        stream.write(json.dumps(event) + "\n")
+
+
+def fake_command():
+    home = Path(__file__).resolve().parent.parent
+    config = json.loads((home / "config.json").read_text())
+    tool, args = Path(sys.argv[0]).name, sys.argv[1:]
+    event = {"tool": tool, "args": args}
+    if tool == "prime-agent":
+        event["remote"] = os.environ.get("HOME") == str(home / "remote")
+        if args[:1] == ["--daemon-socket"]:
+            event["env"] = dict(os.environ)
+            event["cwd"] = os.getcwd()
+        record(home, event)
+        if args == ["--version"]:
+            print(VERSION)
+        elif args == ["update", "--check"]:
+            print("Channel:  stable\nUp to date." if config.get("remote_current")
+                  else "Channel:  stable\nUpdate available.")
+        elif args == ["update", "--stable"]:
+            if config.get("fail_update") == ("remote" if event["remote"] else "local"):
+                return 9
+        elif args[:1] == ["--daemon-socket"]:
+            return config.get("ui_exit", 0)
+        else:
+            raise AssertionError(args)
+    elif tool == "coder":
+        record(home, event)
+        if args == ["list", "--output", "json"]:
+            print(json.dumps(config["workspaces"]))
+        elif args[:1] == ["ssh"]:
+            command = args[args.index("--") + 1:]
+            assert len(command) == 1, command
+            env = {**os.environ, "HOME": str(home / "remote"), "PATH": str(home / "bin"),
+                   "TMPDIR": str(home / "remote/tmp")}
+            return subprocess.call(["/bin/sh", "-c", command[0]], env=env)
+        elif args[0] == "stop":
+            return 1 if config.get("cancel_stop") else 0
+        elif args[0] not in ("create", "start"):
+            raise AssertionError(args)
+    elif tool == "fzf":
+        event["choices"] = sys.stdin.read().splitlines()
+        record(home, event)
+        print(config.get("key", ""))
+        print(event["choices"][config.get("choice", 0)])
+    elif tool == "ssh":
+        record(home, event)
+        if "-L" in args:
+            endpoint, remote = args[args.index("-L") + 1].split(":", 1)
+            Path(endpoint).symlink_to(remote)
+        else:
+            assert args[args.index("-O") + 1] == "exit", args
+    else:
+        raise AssertionError(tool)
+    return 0
+
+
+class PrimeCoderTest(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix="pc-test-", dir="/tmp")
+        self.home = Path(self.temporary.name).resolve()
+        self.bin = self.home / "bin"
+        self.bin.mkdir()
+        self.remote = self.home / "remote"
+        (self.remote / ".prime/agent").mkdir(parents=True)
+        (self.remote / "workspace/project/.git").mkdir(parents=True)
+        source = "#!" + sys.executable + "\n" + Path(__file__).read_text()
+        for tool in ("coder", "ssh", "prime-agent", "fzf"):
+            executable = self.bin / tool
+            executable.write_text(source)
+            executable.chmod(0o755)
+        (self.bin / "python3").symlink_to(sys.executable)
+        (self.remote / ".local/bin").mkdir(parents=True)
+        (self.remote / ".local/bin/prime-agent").symlink_to(self.bin / "prime-agent")
+        self.config = {
+            "workspaces": [{"name": "dev", "template_name": "durable",
+                            "latest_build": {"status": "running"}}],
+            "sessions": [{"sessionName": "prime-coder", "activeSessionId": "session-existing",
+                          "workerPid": 1234}],
+        }
+        self.endpoint = self.remote / "tmp" / f"prime-agent-{os.getuid()}" / "daemon.sock"
+        self.endpoint.parent.mkdir(parents=True)
+        self.server = socket.socket(socket.AF_UNIX)
+        self.server.bind(str(self.endpoint))
+        self.server.listen()
+        self.server.settimeout(0.1)
+        self.stopping = threading.Event()
+        self.requests = []
+        self.errors = []
+        self.connections = 0
+        self.thread = threading.Thread(target=self.serve, daemon=True)
+        self.thread.start()
+
+    def tearDown(self):
+        self.stopping.set()
+        self.thread.join(2)
+        self.server.close()
+        self.temporary.cleanup()
+        self.assertFalse(self.thread.is_alive(), "Fake daemon failed to stop")
+        self.assertEqual(self.errors, [])
+
+    def serve(self):
+        while not self.stopping.is_set():
+            try:
+                connection, _ = self.server.accept()
+            except socket.timeout:
+                continue
+            try:
+                with connection, connection.makefile("rwb") as stream:
+                    self.connections += 1
+                    version = self.config.get("daemon_version", VERSION)
+                    if self.config.get("bad_forward") and self.connections % 2 == 0:
+                        version = "wrong-version"
+                    stream.write((json.dumps({"type": "hello", "protocol": 1,
+                                              "appVersion": version}) + "\n").encode())
+                    stream.flush()
+                    for line in stream:
+                        message = json.loads(line)
+                        command = message["command"]
+                        self.requests.append(command)
+                        if command["type"] == "list":
+                            data = {"sessions": self.config["sessions"]}
+                        elif command["type"] == "create":
+                            data = {"activeSessionId": "session-created"}
+                        else:
+                            raise AssertionError(command)
+                        stream.write((json.dumps({"type": "response", "id": message["id"],
+                                                  "success": True, "data": data}) + "\n").encode())
+                        stream.flush()
+            except Exception as error:
+                self.errors.append(repr(error))
+
+    def launch(self, *args, input=""):
+        (self.home / "config.json").write_text(json.dumps(self.config))
+        env = {"HOME": str(self.home), "PATH": str(self.bin), "LANG": "C",
+               "TERM": "xterm-256color", "LAPTOP_SECRET": "never-send-this"}
+        result = subprocess.run([sys.executable, str(LAUNCHER), *args], input=input,
+                                text=True, capture_output=True, env=env, timeout=10)
+        return result
+
+    def events(self, tool=None):
+        path = self.home / "events.jsonl"
+        events = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []
+        return [event for event in events if tool is None or event["tool"] == tool]
+
+    def ui_events(self):
+        return [event for event in self.events("prime-agent")
+                if event["args"][:1] == ["--daemon-socket"]]
+
+    def assert_cleanup(self):
+        ssh = self.events("ssh")
+        forwards = [event for event in ssh if "-L" in event["args"]]
+        exits = [event for event in ssh if "-O" in event["args"]]
+        self.assertEqual(len(exits), len(forwards))
+        for forward, exit_event in zip(forwards, exits):
+            args = forward["args"]
+            control = args[args.index("-S") + 1]
+            self.assertEqual(exit_event["args"][exit_event["args"].index("-S") + 1], control)
+            self.assertFalse(Path(control).parent.exists())
+
+    def test_forwarding_updates_and_cleanup_on_every_invocation(self):
+        self.config["ui_exit"] = 7
+        arguments = ["--name", "two words", "--print", "literal '$HOME'; *", ""]
+        for remote_current in (False, True):
+            self.config["remote_current"] = remote_current
+            result = self.launch("dev", *arguments)
+            self.assertEqual(result.returncode, 7, result.stderr)
+        self.assertEqual(len(self.ui_events()), 2)
+        for event in self.ui_events():
+            self.assertEqual(event["args"][2:], arguments)
+            self.assertEqual(event["cwd"], "/")
+            self.assertNotIn("LAPTOP_SECRET", event["env"])
+            self.assertNotIn("HOME", event["env"])
+            self.assertNotIn("PATH", event["env"])
+            self.assertEqual(event["env"]["PRIME_AGENT_SESSION_DIR"],
+                             str(self.remote / ".prime/agent/sessions"))
+        updates = [event["remote"] for event in self.events("prime-agent")
+                   if event["args"] == ["update", "--stable"]]
+        self.assertEqual(updates, [False, True, False])
+        checks = [event["remote"] for event in self.events("prime-agent")
+                  if event["args"] == ["update", "--check"]]
+        self.assertEqual(checks, [True, True])
+        self.assertEqual(self.requests, [])
+        self.assert_cleanup()
+
+    def test_chooser_creates_workspace_with_native_coder_prompts(self):
+        self.config["sessions"] = []
+        self.config["workspaces"].append({"name": "unrelated", "template_name": "other",
+                                          "latest_build": {"status": "running"}})
+        result = self.launch(input="new-dev\n")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        create = next(event for event in self.events("coder") if event["args"][0] == "create")
+        self.assertEqual(create["args"], ["create", "new-dev"])
+        self.assertEqual(self.events("fzf")[0]["choices"],
+                         ["+ New workspace", "dev\trunning", "unrelated\trunning"])
+        self.assertEqual(self.ui_events()[0]["args"][2:], ["attach", "session-created"])
+        self.assertEqual(self.requests[-1]["config"]["cwd"], str(self.remote / "workspace/project"))
+        self.assertTrue(self.requests[-1]["telemetryDisabled"])
+        self.assert_cleanup()
+
+    def test_stopped_workspace_starts_and_reattaches_existing_session(self):
+        self.config["workspaces"][0]["latest_build"]["status"] = "stopped"
+        self.config["choice"] = 1
+        result = self.launch()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        coder = self.events("coder")
+        self.assertEqual(coder[1]["args"], ["start", "dev", "--yes"])
+        self.assertEqual(self.ui_events()[0]["args"][2:], ["attach", "session-existing"])
+        self.assertEqual([command["type"] for command in self.requests], ["list"])
+        self.assert_cleanup()
+
+    def test_chooser_stop_confirms_without_starting_or_connecting(self):
+        self.config.update(choice=1, key="ctrl-x")
+        for cancel in (False, True):
+            with self.subTest(cancel=cancel):
+                self.config["cancel_stop"] = cancel
+                result = self.launch()
+                self.assertEqual(result.returncode, 1 if cancel else 0, result.stderr)
+                self.assertEqual([event["args"] for event in self.events("coder")],
+                                 [["list", "--output", "json"], ["stop", "dev"]])
+                self.assertEqual(self.events("prime-agent"), [])
+                self.assertEqual(self.events("ssh"), [])
+                self.assertEqual(self.requests, [])
+                (self.home / "events.jsonl").unlink()
+        self.config["choice"] = 0
+        result = self.launch()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual([event["args"] for event in self.events("coder")],
+                         [["list", "--output", "json"]])
+
+    def test_inactive_saved_session_is_resumed_instead_of_attached(self):
+        self.config["sessions"][0].update(workerPid=None, sessionFile="/saved/session.jsonl")
+        result = self.launch("dev")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.ui_events()[0]["args"][2:], ["attach", "session-created"])
+        self.assertEqual(self.requests[-1]["sessionPath"], "/saved/session.jsonl")
+        self.assertTrue(self.requests[-1]["telemetryDisabled"])
+        self.assert_cleanup()
+
+    def test_update_or_daemon_failure_prevents_ui(self):
+        for failure in ({"fail_update": "local"}, {"fail_update": "remote"},
+                        {"daemon_version": "wrong-version"}, {"bad_forward": True}):
+            with self.subTest(failure=failure):
+                self.config.update(failure)
+                result = self.launch("dev", "list", "--all", "--json")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(self.ui_events(), [])
+                updates = [event["remote"] for event in self.events("prime-agent")
+                           if event["args"] == ["update", "--stable"]]
+                self.assertEqual(updates, [False] if failure.get("fail_update") == "local"
+                                 else [False, True])
+                self.assertEqual(bool(self.events("ssh")), bool(failure.get("bad_forward")))
+                self.assert_cleanup()
+                for key in failure:
+                    del self.config[key]
+                (self.home / "events.jsonl").unlink()
+                self.connections = 0
+
+
+if __name__ == "__main__":
+    if Path(sys.argv[0]).name == "prime-coder.py":
+        unittest.main()
+    else:
+        sys.exit(fake_command())

@@ -1,0 +1,208 @@
+#!/usr/bin/env python3
+"""Local Prime UI, remote Coder daemon. Run prime-coder --help for usage."""
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import socket
+import subprocess
+import sys
+import tempfile
+
+
+REMOTE = r'''import json, os, shutil, socket, subprocess, sys, time
+from pathlib import Path
+
+home = Path.home()
+os.environ["PATH"] = str(home / ".local/bin") + ":" + os.environ.get("PATH", "")
+state = home / ".prime/agent"
+state.mkdir(parents=True, exist_ok=True)
+endpoint = str(Path(os.environ.get("TMPDIR", "/tmp")) / f"prime-agent-{os.getuid()}" / "daemon.sock")
+Path(endpoint).parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+def connect():
+    sock = socket.socket(socket.AF_UNIX)
+    sock.settimeout(30)
+    try:
+        sock.connect(endpoint)
+        return sock
+    except OSError:
+        sock.close()
+        raise
+
+try:
+    sock = connect()
+except (FileNotFoundError, ConnectionRefusedError):
+    with (state / "prime-coder.log").open("ab") as log:
+        subprocess.Popen([shutil.which("prime-agent"), "--mode", "daemon", "--daemon-socket", endpoint],
+                         stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
+    deadline = time.monotonic() + 30
+    while True:
+        try:
+            sock = connect()
+            break
+        except (FileNotFoundError, ConnectionRefusedError):
+            if time.monotonic() >= deadline:
+                raise RuntimeError("Daemon did not start; inspect ~/.prime/agent/prime-coder.log")
+            time.sleep(0.1)
+
+stream = sock.makefile("rwb")
+hello = json.loads(stream.readline())
+
+def request(command):
+    stream.write((json.dumps({"type": "command", "id": "bootstrap", "protocol": hello["protocol"],
+                             "command": command}) + "\n").encode())
+    stream.flush()
+    while True:
+        response = json.loads(stream.readline())
+        if response.get("type") == "response" and response.get("id") == "bootstrap":
+            if not response.get("success"):
+                raise RuntimeError(response.get("error"))
+            return response["data"]
+
+session_id = None
+if sys.argv[1] == "attach":
+    rows = request({"type": "list", "all": True}).get("sessions", [])
+    existing = next((row for row in rows if row.get("sessionName") == "prime-coder"), None)
+    if existing and existing.get("workerPid"):
+        session_id = existing["activeSessionId"]
+    else:
+        repos = sorted(p for p in (home / "workspace").glob("*") if (p / ".git").exists())
+        config = {"cwd": str(repos[0] if len(repos) == 1 else home / "workspace")}
+        Path(config["cwd"]).mkdir(parents=True, exist_ok=True)
+        command = {"type": "create", "name": "prime-coder", "lifecycle": "resident", "config": config, "telemetryDisabled": True}
+        if existing and existing.get("sessionFile"):
+            command["sessionPath"] = existing["sessionFile"]
+        session_id = request(command)["activeSessionId"]
+print(json.dumps({"socket": endpoint, "sessions": str(state / "sessions"),
+                  "session": session_id, "version": hello.get("appVersion")}))
+'''
+
+
+def run(args, **kwargs):
+    if os.environ.get("DEBUG"):
+        print("+ " + shlex.join(args), file=sys.stderr)
+    return subprocess.run(args, check=True, **kwargs)
+
+
+def output(args, **kwargs):
+    return run(args, stdout=subprocess.PIPE, text=True, **kwargs).stdout
+
+
+def main(args):
+    if args and args[0] in ("-h", "--help"):
+        print("""Usage: prime-coder [WORKSPACE [PRIME-AGENT ARGS...]]
+
+Without WORKSPACE, choose a workspace: Enter connects, Ctrl-X stops it (with confirmation).
+Uses your current Coder CLI login. Coder prompts for the template and parameters.
+Updates local and remote Prime to latest stable on every connection.
+Without ARGS, reattach the workspace's prime-coder conversation.
+With ARGS, pass them unchanged to local prime-agent over the remote socket.
+
+Examples:
+  prime-coder
+  prime-coder my-workspace
+  prime-coder my-workspace --resume
+  prime-coder my-workspace list --all --json
+  prime-coder my-workspace --help
+
+Closing the UI disconnects only; compute and remote agents keep running.
+This is a proof: path/auth commands still have Prime's local-client behavior.
+New sessions created by explicit ARGS start at / unless Prime overrides it.
+""")
+        return 0
+    for tool in ("coder", "ssh", "prime-agent", "python3"):
+        if not shutil.which(tool):
+            raise RuntimeError(f"Required command not found: {tool}")
+    workspaces = json.loads(output(["coder", "list", "--output", "json"]))
+    if args:
+        workspace, *prime_args = args
+    else:
+        if not shutil.which("fzf"):
+            raise RuntimeError("Install fzf to use the workspace chooser")
+        choices = ["+ New workspace"] + [
+            f'{row["name"]}\t{row["latest_build"]["status"]}'
+            for row in workspaces
+        ]
+        selection = output(["fzf", "--prompt=Prime workspace> ", "--height=40%", "--layout=reverse",
+                            "--header=Enter connect · Ctrl-X stop workspace", "--expect=ctrl-x"],
+                           input="\n".join(choices) + "\n").splitlines()
+        key, choice = selection
+        if key == "ctrl-x":
+            if choice == choices[0]:
+                return 0
+            workspace = choice.split("\t")[0]
+            print(f"Stopping {workspace} ends all agents and commands there. Saved files remain.")
+            run(["coder", "stop", workspace])
+            return 0
+        prime_args = []
+        if choice == choices[0]:
+            workspace = input("Workspace name: ").strip()
+            if not workspace or workspace.startswith("-"):
+                raise RuntimeError("A workspace name is required")
+            run(["coder", "create", workspace])
+        else:
+            workspace = choice.split("\t")[0]
+    if not workspace or workspace.startswith("-"):
+        raise RuntimeError("Expected a Coder workspace name before Prime arguments")
+    row = next((row for row in workspaces if row["name"] == workspace), None)
+    if row and row["latest_build"]["status"] == "stopped":
+        run(["coder", "start", workspace, "--yes"])
+
+    # Coder owns credentials and its configured server; nothing is copied from auth files.
+    remote = ["coder", "ssh", "--wait", "yes", "--forward-agent=false", "--forward-gpg=false", workspace, "--"]
+    run(["prime-agent", "update", "--stable"], stdout=sys.stderr)
+    remote_update = '"$HOME/.local/bin/prime-agent" update --check'
+    update_status = output(remote + [remote_update])
+    print(update_status, end="", file=sys.stderr)
+    if "Up to date." not in update_status or "Channel:  stable" not in update_status:
+        run(remote + ['"$HOME/.local/bin/prime-agent" update --stable'], stdout=sys.stderr)
+    info = json.loads(output(remote + [shlex.join(["python3", "-c", REMOTE, "attach" if not prime_args else "connect"])]))
+    local_version = output(["prime-agent", "--version"]).strip()
+    if info["version"] != local_version:
+        raise RuntimeError(f'Daemon is {info["version"]}, local Prime is {local_version}; restart the remote daemon before attaching')
+
+    # Use OpenSSH for stream-local forwarding, but Coder's login/transport, not ~/.ssh config.
+    proxy = shlex.join([shutil.which("coder"), "ssh", "--stdio", "--wait=no", "--disable-autostart",
+                        "--forward-agent=false", "--forward-gpg=false", workspace])
+    with tempfile.TemporaryDirectory(prefix="prime-coder-", dir="/tmp") as directory:
+        control = str(Path(directory) / "ssh")
+        endpoint = str(Path(directory) / "daemon.sock")
+        ssh = ["ssh", "-F", "/dev/null", "-o", f"ProxyCommand={proxy}",
+               "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
+               "-o", "LogLevel=ERROR", "-o", "BatchMode=yes", "-o", "ForwardAgent=no",
+               "-o", "ExitOnForwardFailure=yes", "-S", control]
+        host = "coder-workspace"
+        run(ssh + ["-M", "-f", "-N", "-L", f'{endpoint}:{info["socket"]}', host])
+        try:
+            # Preflight before Prime can mistake an unavailable tunnel for an absent local daemon.
+            with socket.socket(socket.AF_UNIX) as probe:
+                probe.settimeout(10)
+                probe.connect(endpoint)
+                with probe.makefile("rb") as stream:
+                    hello = json.loads(stream.readline())
+                if hello.get("appVersion") != local_version:
+                    raise RuntimeError("Forwarded daemon version does not match local Prime")
+            if not prime_args:
+                prime_args = ["attach", info["session"]]
+            # Prime forwards its environment on create: never overwrite remote HOME/PATH or send laptop secrets.
+            env = {key: os.environ[key] for key in
+                   ("TERM", "COLORTERM", "LANG", "LC_ALL", "TERM_PROGRAM", "NO_COLOR", "DO_NOT_TRACK", "PRIME_AGENT_TELEMETRY")
+                   if key in os.environ}
+            env["PRIME_AGENT_CODING_AGENT_DIR"] = os.environ.get("PRIME_AGENT_CODING_AGENT_DIR", str(Path.home() / ".prime/agent"))
+            env["PRIME_AGENT_SESSION_DIR"] = info["sessions"]
+            binary = str(Path(shutil.which("prime-agent")).resolve())
+            return subprocess.call([binary, "--daemon-socket", endpoint, *prime_args], cwd="/", env=env)
+        finally:
+            subprocess.run(ssh + ["-O", "exit", host], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except KeyboardInterrupt:
+        sys.exit(130)
+    except (RuntimeError, OSError, ValueError, subprocess.CalledProcessError) as error:
+        print(f"prime-coder: {error}", file=sys.stderr)
+        sys.exit(1)

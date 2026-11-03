@@ -99,6 +99,46 @@ real Pi sessions and titles with a fake `gh` and an offline model provider. To t
 without installing the external, set `PI_PR_SESSION_TITLE_UPSTREAM` to a local copy
 of the pinned source. Tests themselves never download dependencies or call GitHub.
 
+## Prime in Coder
+
+`prime-coder` runs the local Prime UI against a daemon in Coder through an SSH
+Unix-socket forward. It uses the current `coder` login, Python 3, OpenSSH, and
+`fzf` for the workspace chooser; no separate server URL or credentials.
+
+```sh
+prime-coder                             # choose a workspace or create one
+prime-coder my-workspace                # open its prime-coder conversation
+prime-coder my-workspace --resume       # Prime's session picker
+prime-coder my-workspace list --all --json
+prime-coder my-workspace --help         # Prime's own help
+```
+
+Every connection checks/updates both installations to latest stable. Coder
+prompts for the template and parameters when creating a workspace; the launcher
+sets no template, harness, or repository defaults. All templates appear in the
+chooser. Workspaces must provide Python 3 and Prime at `~/.local/bin/prime-agent`.
+Existing stopped workspaces are started.
+Closing the UI removes the tunnel, not the remote agents or workspace. Compute
+continues billing until Coder stops it. In the chooser, press **Ctrl-X** on a
+workspace to stop it, with Coder's confirmation. This ends all running agents and
+commands there but preserves saved files. `coder stop WORKSPACE` also works.
+
+Without additional arguments, the launcher creates or reopens the remote
+`prime-coder` session in the template's sole checkout (otherwise `~/workspace`).
+Arguments after the workspace are passed unchanged to the local Prime binary.
+The launcher does not copy local credentials or forward the laptop's environment
+to remote workers. Initial launcher-created sessions disable telemetry.
+
+This is a working-model launcher, not a remote-filesystem adapter: `--cwd`,
+`@files`, auth/settings, and some saved-session commands still run client-side.
+Explicit arguments that create a new session default to `/`; use the default
+conversation for the template checkout. Some Prime maintenance commands ignore
+or reject explicit daemon sockets. A failed initial tunnel preflight stops the
+launcher, but Prime itself has no connect-only flag. Remote access to local files
+and cross-workspace subagents are deliberately out of scope.
+
+Offline checks: `bats test/prime-coder.bats`.
+
 ## License
 
 This project is open source under the [ISC License](LICENSE.md), credited to Ivy Evans, Martin Emde.
