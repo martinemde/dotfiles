@@ -57,6 +57,8 @@ def fake_command():
         elif args[:1] == ["ssh"]:
             command = args[args.index("--") + 1:]
             assert len(command) == 1, command
+            if config.get("banner"):
+                print("==> Startup scripts finished", flush=True)
             env = {**os.environ, "HOME": str(home / "remote"), "PATH": str(home / "bin"),
                    "TMPDIR": str(home / "remote/tmp")}
             return subprocess.call(["/bin/sh", "-c", command[0]], env=env)
@@ -226,6 +228,7 @@ class PrimeCoderTest(unittest.TestCase):
 
     def test_forwarding_updates_and_cleanup_on_every_invocation(self):
         self.config["ui_exit"] = 7
+        self.config["banner"] = True
         arguments = ["--name", "two words", "--print", "literal '$HOME'; *", ""]
         for remote_current in (False, True):
             self.config["remote_current"] = remote_current

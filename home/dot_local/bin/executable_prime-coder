@@ -290,10 +290,16 @@ New sessions created by explicit ARGS start at / unless Prime overrides it.
                  + shlex.join(["exec", "python3", "-c", REMOTE, "attach" if not prime_args else "connect",
                                local_version, str(UPDATE_INTERVAL)]))
     try:
-        info = json.loads(output(["coder", "ssh", "--wait", "yes", "--forward-agent=false",
-                                  "--forward-gpg=false", workspace, "--", bootstrap]))
+        stdout = output(["coder", "ssh", "--wait", "yes", "--forward-agent=false",
+                         "--forward-gpg=false", workspace, "--", bootstrap])
     except subprocess.CalledProcessError as error:
         raise RuntimeError(f"Remote setup failed (exit {error.returncode})") from None
+    try:
+        # The bootstrap's JSON is its last line; anything before it is login or startup-script noise.
+        info = json.loads(stdout.strip().splitlines()[-1])
+    except (IndexError, ValueError):
+        print(stdout, end="", file=sys.stderr)
+        raise RuntimeError("Remote setup printed no bootstrap result") from None
     if info["version"] != local_version and not local_updated:
         update_local(force=True)
         local_version = output(["prime-agent", "--version"]).strip()
