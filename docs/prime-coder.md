@@ -29,11 +29,15 @@ silently. The remote side prints exactly one JSON line on stdout; installer and
 update output go to stderr.
 
 A daemon started before an update keeps serving the old version. If no session
-row has a `workerPid`, the launcher identifies the socket's peer with
-`SO_PEERCRED`, confirms from `/proc` that it is a `prime-agent` daemon, sends
-SIGTERM, and starts a new one. Saved conversations survive a daemon restart
+row has a `workerPid`, the launcher sends the protocol's `shutdown` command on
+the connection it already holds and starts a new daemon; the new one unlinks the
+dead socket file before binding. Saved conversations survive a daemon restart
 (see the proof below); live workers might not, so their presence is a hard stop.
-Prime has no daemon-stop command to use instead.
+An earlier version found the socket peer with `SO_PEERCRED` and sent SIGTERM,
+on the mistaken belief that Prime had no stop command.
+
+The daemon starts in the workspace's checkout. A client that cannot name a
+remote directory gets the daemon's own cwd.
 
 Shell completion of workspace names was left out: Coder is meant to become an
 implementation detail behind a generic remote-workspace launcher.
@@ -51,3 +55,16 @@ local cwd/file/auth handling, maintenance commands with inconsistent socket
 support, and no strict connect-only mode. The UI can show `/` while an attached
 worker correctly executes in its remote checkout. Credentials stay on their
 original host. This proof does not solve remote login through the local UI.
+
+The Prime fork (`martinemde/prime-agent`, branch
+`claude/project-thread-lvon8q`, not proposed upstream) removes the client's
+same-machine assumption. The daemon's hello reports its cwd; a client whose
+connected socket is not the file the daemon bound treats it as remote, and
+then defers cwd, session directory, and environment to the daemon, shows the
+session's own cwd, and refuses to replace a mismatched daemon rather than
+spawning a local one on the forwarded path. With that build on both sides, the
+environment scrub and `PRIME_AGENT_SESSION_DIR` here become redundant, and the
+agent picker's new-session path works. They stay while stock 0.10.2 is the
+target. Still open: `--cwd` cannot name a remote directory (it chdirs locally),
+`@` file completion searches the local disk, and an absent socket still spawns
+a local daemon.

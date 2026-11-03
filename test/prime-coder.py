@@ -32,9 +32,9 @@ def fake_command():
     if tool == "prime-agent":
         event["remote"] = os.environ.get("HOME") == str(home / "remote")
         event["pid"] = os.getpid()
+        event["cwd"] = os.getcwd()
         if args[:1] == ["--daemon-socket"]:
             event["env"] = dict(os.environ)
-            event["cwd"] = os.getcwd()
         record(home, event)
         if args == ["--version"]:
             print(VERSION)
@@ -113,11 +113,16 @@ def fake_daemon(home, endpoint, config):
             for line in stream:
                 message = json.loads(line)
                 record(home, {"tool": "daemon", "version": version, "command": message["command"]})
-                data = ({"sessions": config["sessions"]} if message["command"]["type"] == "list"
-                        else {"activeSessionId": "session-created"})
+                kind = message["command"]["type"]
+                data = ({"sessions": config["sessions"]} if kind == "list"
+                        else None if kind == "shutdown" else {"activeSessionId": "session-created"})
                 stream.write((json.dumps({"type": "response", "id": message["id"],
                                           "success": True, "data": data}) + "\n").encode())
                 stream.flush()
+                if kind == "shutdown":
+                    server.close()
+                    Path(endpoint).unlink()
+                    return 0
 
 
 class PrimeCoderTest(unittest.TestCase):
@@ -423,9 +428,12 @@ class PrimeCoderTest(unittest.TestCase):
             result = self.launch("dev")
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("restarting it", result.stderr)
-            self.assertEqual(old.wait(5), -signal.SIGTERM)
+            self.assertEqual(old.wait(5), 0)
             served = [(event["version"], event["command"]["type"]) for event in self.events("daemon")]
-            self.assertEqual(served, [("old", "list"), (VERSION, "list"), (VERSION, "create")])
+            self.assertEqual(served, [("old", "list"), ("old", "shutdown"), (VERSION, "list"), (VERSION, "create")])
+            started = [event["cwd"] for event in self.events("prime-agent")
+                       if event["args"][:2] == ["--mode", "daemon"] and event["pid"] != old.pid]
+            self.assertEqual(started, [str(self.remote / "workspace/project")])
             self.assertEqual(self.ui_events()[0]["args"][2:], ["attach", "session-created"])
             self.assert_cleanup()
         finally:

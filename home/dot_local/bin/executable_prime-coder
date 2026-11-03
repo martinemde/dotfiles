@@ -19,7 +19,7 @@ UPDATE_INTERVAL = float(os.environ.get("PRIME_CODER_UPDATE_INTERVAL", 24 * 60 * 
 
 # Runs in the workspace as: python3 -c REMOTE MODE LOCAL_VERSION UPDATE_INTERVAL
 # stdout carries exactly one JSON line; everything else goes to stderr.
-REMOTE = r'''import json, os, signal, socket, struct, subprocess, sys, time
+REMOTE = r'''import json, os, socket, subprocess, sys, time
 from pathlib import Path
 
 mode, local_version, interval = sys.argv[1], sys.argv[2], float(sys.argv[3])
@@ -30,6 +30,12 @@ state = home / ".prime/agent"
 state.mkdir(parents=True, exist_ok=True)
 endpoint = str(Path(os.environ.get("TMPDIR", "/tmp")) / f"prime-agent-{os.getuid()}" / "daemon.sock")
 Path(endpoint).parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+def default_cwd():
+    repos = sorted(p for p in (home / "workspace").glob("*") if (p / ".git").exists())
+    cwd = repos[0] if len(repos) == 1 else home / "workspace"
+    cwd.mkdir(parents=True, exist_ok=True)
+    return str(cwd)
 
 def installed_version():
     return subprocess.run([binary, "--version"], stdout=subprocess.PIPE, text=True, check=True).stdout.strip()
@@ -64,7 +70,8 @@ class Daemon:
             self.sock = connect()
         except (FileNotFoundError, ConnectionRefusedError):
             with (state / "prime-coder.log").open("ab") as log:
-                subprocess.Popen([binary, "--mode", "daemon", "--daemon-socket", endpoint],
+                # The daemon's cwd is where sessions start when a client cannot name a remote one.
+                subprocess.Popen([binary, "--mode", "daemon", "--daemon-socket", endpoint], cwd=default_cwd(),
                                  stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
             deadline = time.monotonic() + 30
             while True:
@@ -103,15 +110,9 @@ def restart_stale(daemon):
     stale = f"Daemon is {running}, installed Prime is {version}"
     if live:
         raise RuntimeError(f"{stale}; {len(live)} live session(s) still use it. Close them and reconnect.")
-    if not hasattr(socket, "SO_PEERCRED"):
-        raise RuntimeError(f"{stale}; restart the remote daemon before attaching")
-    pid = struct.unpack("3i", daemon.sock.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize("3i")))[0]
-    cmdline = Path(f"/proc/{pid}/cmdline").read_bytes().split(b"\0")
-    if not any(os.path.basename(arg) == b"prime-agent" for arg in cmdline) or b"daemon" not in cmdline:
-        raise RuntimeError(f"{stale}; socket peer {pid} is not a prime-agent daemon")
     print(f"{stale}; restarting it (no live sessions).", file=sys.stderr)
+    daemon.request({"type": "shutdown"})
     daemon.close()
-    os.kill(pid, signal.SIGTERM)
     deadline = time.monotonic() + 10
     while True:
         try:
@@ -119,7 +120,7 @@ def restart_stale(daemon):
         except (FileNotFoundError, ConnectionRefusedError):
             break
         if time.monotonic() >= deadline:
-            raise RuntimeError(f"Old daemon {pid} did not exit")
+            raise RuntimeError("Old daemon did not exit")
         time.sleep(0.1)
     return Daemon()
 
@@ -133,10 +134,8 @@ def main():
         if existing and existing.get("workerPid"):
             session_id = existing["activeSessionId"]
         else:
-            repos = sorted(p for p in (home / "workspace").glob("*") if (p / ".git").exists())
-            config = {"cwd": str(repos[0] if len(repos) == 1 else home / "workspace")}
-            Path(config["cwd"]).mkdir(parents=True, exist_ok=True)
-            command = {"type": "create", "name": "prime-coder", "lifecycle": "resident", "config": config, "telemetryDisabled": True}
+            command = {"type": "create", "name": "prime-coder", "lifecycle": "resident",
+                       "config": {"cwd": default_cwd()}, "telemetryDisabled": True}
             if existing and existing.get("sessionFile"):
                 command["sessionPath"] = existing["sessionFile"]
             session_id = daemon.request(command)["activeSessionId"]
