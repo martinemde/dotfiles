@@ -204,11 +204,13 @@ class PrimeCoderTest(unittest.TestCase):
             except Exception as error:
                 self.errors.append(repr(error))
 
-    def launch(self, *args, input="", interval="0"):
+    def launch(self, *args, input="", interval="0", debug=False):
         (self.home / "config.json").write_text(json.dumps(self.config))
         env = {"HOME": str(self.home), "PATH": str(self.bin), "LANG": "C",
                "TERM": "xterm-256color", "LAPTOP_SECRET": "never-send-this",
                "PRIME_AGENT_INTERACTIVE_SELF_UPDATE": "1"}
+        if debug:
+            env["DEBUG"] = "1"
         if interval is not None:
             env["PRIME_CODER_UPDATE_INTERVAL"] = interval
         result = subprocess.run([sys.executable, str(LAUNCHER), *args], input=input,
@@ -234,6 +236,84 @@ class PrimeCoderTest(unittest.TestCase):
             control = args[args.index("-S") + 1]
             self.assertEqual(exit_event["args"][exit_event["args"].index("-S") + 1], control)
             self.assertFalse(Path(control).parent.exists())
+
+    def test_auth_is_never_read_or_changed_without_opt_in(self):
+        local = self.home / ".prime/agent"
+        local.mkdir(parents=True)
+        (local / "auth.json").write_text("not valid JSON")
+        remote = self.remote / ".prime/agent/auth.json"
+        remote.write_text('{"untouched": true}')
+        result = self.launch("dev")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(remote.read_text(), '{"untouched": true}')
+
+    def test_forward_auth_merges_refreshes_and_never_logs_keys(self):
+        local = self.home / ".prime/agent"
+        local.mkdir(parents=True)
+        remote = self.remote / ".prime/agent/auth.json"
+        remote.write_text(json.dumps({"provider": {"type": "oauth", "refresh": "old"},
+                                      "unrelated": {"type": "api_key", "key": "remote-key"}}))
+        remote.chmod(0o644)
+        for secret in ("test-secret-first", "test-secret-rotated"):
+            saved = {"provider": {"type": "api_key", "key": secret},
+                     "oauth": {"type": "oauth", "access": "oauth-access", "refresh": "oauth-refresh"},
+                     "command": {"type": "api_key", "key": "!never-run-this"}}
+            (local / "auth.json").write_text(json.dumps(saved))
+            result = self.launch("--forward-auth", "dev", debug=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(remote.read_text()), {
+                "provider": saved["provider"], "unrelated": {"type": "api_key", "key": "remote-key"}})
+            self.assertEqual(remote.stat().st_mode & 0o777, 0o600)
+            self.assertFalse((remote.parent / "auth.json.lock").exists())
+            self.assertEqual(list(remote.parent.glob(".auth-*")), [])
+            visible = result.stdout + result.stderr + json.dumps(self.events())
+            for value in (secret, "oauth-access", "oauth-refresh"):
+                self.assertNotIn(value, visible)
+            command = [event for event in self.events("coder") if event["args"][0] == "ssh"][-1]
+            self.assertIn("--tty=false", command["args"])
+            self.assertNotIn("--forward-auth", self.ui_events()[-1]["args"])
+        self.assert_cleanup()
+
+    def test_forward_auth_resolves_saved_env_references_with_picker(self):
+        local = self.home / ".prime/agent"
+        local.mkdir(parents=True)
+        (local / "auth.json").write_text(json.dumps({"provider": {"type": "api_key", "key": "LAPTOP_SECRET"}}))
+        self.config["choice"] = 1  # existing workspace, not New workspace
+        result = self.launch("--forward-auth")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads((self.remote / ".prime/agent/auth.json").read_text()), {
+            "provider": {"type": "api_key", "key": "never-send-this"}})
+        self.assertNotIn("LAPTOP_SECRET", self.ui_events()[0]["env"])
+
+    def test_forward_auth_failures_do_not_launch_or_replace_remote_auth(self):
+        local = self.home / ".prime/agent"
+        local.mkdir(parents=True)
+        path = local / "auth.json"
+        for content in (None, "not JSON", json.dumps({"oauth": {"type": "oauth", "refresh": "secret"}})):
+            if content is not None:
+                path.write_text(content)
+            result = self.launch("--forward-auth", "dev")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(self.ui_events(), [])
+            self.assertEqual(self.requests, [])
+            self.assertNotIn("secret", result.stderr)
+        path.write_text(json.dumps({"provider": {"type": "api_key", "key": "test-secret"}}))
+        remote = self.remote / ".prime/agent/auth.json"
+        for malformed in ("not JSON", "[]"):
+            remote.write_text(malformed)
+            result = self.launch("--forward-auth", "dev")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(remote.read_text(), malformed)
+            self.assertFalse((remote.parent / "auth.json.lock").exists())
+            self.assertEqual(list(remote.parent.glob(".auth-*")), [])
+        remote.write_text("{}")
+        (remote.parent / "auth.json.lock").mkdir()
+        result = self.launch("--forward-auth", "dev")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(remote.read_text(), "{}")
+        self.assertIn("busy", result.stderr)
+        self.assertEqual(self.ui_events(), [])
+        self.assertEqual(self.requests, [])
 
     def test_forwarding_updates_and_cleanup_on_every_invocation(self):
         self.config["ui_exit"] = 7
@@ -337,10 +417,10 @@ class PrimeCoderTest(unittest.TestCase):
 
     def test_chooser_stop_confirms_without_starting_or_connecting(self):
         self.config.update(choice=1, key="ctrl-x")
-        for cancel in (False, True):
-            with self.subTest(cancel=cancel):
+        for args, cancel in (([], False), ([], True), (["--forward-auth"], False), (["--forward-auth"], True)):
+            with self.subTest(args=args, cancel=cancel):
                 self.config["cancel_stop"] = cancel
-                result = self.launch()
+                result = self.launch(*args)
                 self.assertEqual(result.returncode, 1 if cancel else 0, result.stderr)
                 self.assertEqual([event["args"] for event in self.events("coder")],
                                  [["list", "--output", "json"], ["stop", "dev"]])

@@ -17,19 +17,46 @@ import time
 INSTALLER = "https://app.primeintellect.ai/prime-agent/install.sh"
 UPDATE_INTERVAL = float(os.environ.get("PRIME_CODER_UPDATE_INTERVAL", 24 * 60 * 60))
 
-# Runs in the workspace as: python3 -c REMOTE MODE LOCAL_VERSION UPDATE_INTERVAL
+# Runs in the workspace as: python3 -c REMOTE MODE LOCAL_VERSION UPDATE_INTERVAL FORWARD_AUTH
 # stdout carries exactly one JSON line; everything else goes to stderr.
-REMOTE = r'''import json, os, socket, subprocess, sys, time
+REMOTE = r'''import json, os, socket, subprocess, sys, tempfile, time
 from pathlib import Path
 
 mode, local_version, interval = sys.argv[1], sys.argv[2], float(sys.argv[3])
+forwarding = sys.argv[4] == "1"
 home = Path.home()
 os.environ["PATH"] = str(home / ".local/bin") + ":" + os.environ.get("PATH", "")
 binary = str(home / ".local/bin/prime-agent")
 state = home / ".prime/agent"
-state.mkdir(parents=True, exist_ok=True)
+state.mkdir(mode=0o700, parents=True, exist_ok=True)
 endpoint = str(Path(os.environ.get("TMPDIR", "/tmp")) / f"prime-agent-{os.getuid()}" / "daemon.sock")
 Path(endpoint).parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+def forward_auth():
+    incoming = json.load(sys.stdin)
+    path = state / "auth.json"
+    # Prime uses an empty directory as the auth document's cross-process lock.
+    lock = state / "auth.json.lock"
+    try:
+        lock.mkdir(mode=0o700)
+    except FileExistsError:
+        raise RuntimeError("Remote auth is busy; reconnect to retry") from None
+    temporary = None
+    try:
+        current = json.loads(path.read_text()) if path.exists() else {}
+        if not isinstance(current, dict):
+            raise RuntimeError("Expected a remote auth.json object; left unchanged")
+        current.update(incoming)
+        with tempfile.NamedTemporaryFile(mode="w", dir=state, prefix=".auth-", delete=False) as stream:
+            temporary = Path(stream.name)
+            json.dump(current, stream)
+            stream.write("\n")
+        temporary.replace(path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        lock.rmdir()
+    print(f"Forwarded {len(incoming)} saved API key(s); retained on workspace after disconnect.", file=sys.stderr)
 
 def default_cwd():
     repos = sorted(p for p in (home / "workspace").glob("*") if (p / ".git").exists())
@@ -125,6 +152,8 @@ def restart_stale(daemon):
     return Daemon()
 
 def main():
+    if forwarding:
+        forward_auth()
     update()
     daemon = restart_stale(Daemon())
     session_id = None
@@ -144,7 +173,7 @@ def main():
 
 try:
     main()
-except (RuntimeError, OSError, subprocess.CalledProcessError) as error:
+except (RuntimeError, OSError, ValueError, subprocess.CalledProcessError) as error:
     print(f"remote: {error}", file=sys.stderr)
     sys.exit(1)
 '''
@@ -176,6 +205,32 @@ def update_local(force=False):
     cache.mkdir(parents=True, exist_ok=True)
     stamp.touch()
     return True
+
+
+def auth_to_forward():
+    """Only saved API keys; never copy refresh tokens or execute credential commands."""
+    state = Path(os.environ.get("PRIME_AGENT_CODING_AGENT_DIR") or Path.home() / ".prime/agent").expanduser()
+    try:
+        saved = json.loads((state / "auth.json").read_text())
+    except FileNotFoundError:
+        raise RuntimeError("No saved Prime credentials to forward") from None
+    if not isinstance(saved, dict):
+        raise RuntimeError("Expected a Prime auth.json object")
+    credentials = {}
+    for provider, credential in saved.items():
+        if not isinstance(credential, dict) or credential.get("type") != "api_key":
+            continue
+        key = credential.get("key")
+        if not isinstance(key, str) or not key or key.startswith("!"):
+            continue
+        # Prime permits a saved key to name an environment variable.
+        key = os.environ.get(key, key)
+        if key and not key.startswith("!"):
+            credentials[provider] = {**credential, "key": key}
+    print("Forwarding saved API keys only; OAuth and command-backed keys are skipped.", file=sys.stderr)
+    if not credentials:
+        raise RuntimeError("No saved API keys to forward; OAuth and command-backed keys are not supported")
+    return json.dumps(credentials)
 
 
 def parse_time(value):
@@ -226,11 +281,17 @@ def choose(workspaces):
 
 
 def main(args):
+    forward_auth = bool(args and args[0] == "--forward-auth")
+    if forward_auth:
+        args = args[1:]
     if args and args[0] in ("-h", "--help"):
-        print("""Usage: prime-coder [WORKSPACE [PRIME-AGENT ARGS...]]
+        print("""Usage: prime-coder [--forward-auth] [WORKSPACE [PRIME-AGENT ARGS...]]
 
 Without WORKSPACE, choose a workspace: Enter connects, Ctrl-X stops it (with confirmation).
 Uses your current Coder CLI login. Coder prompts for the template and parameters.
+--forward-auth copies saved Prime API keys over SSH stdin before connecting (off by default).
+OAuth and command-backed keys are skipped. Matching remote credentials are replaced;
+unrelated credentials remain. Keys persist on the workspace after disconnect: trust its users/admins.
 Installs missing remote Prime with the official installer.
 Updates local and remote Prime to latest stable at most daily, and whenever their versions differ.
 Restarts a remote daemon left on an older version when no sessions are live in it.
@@ -240,6 +301,7 @@ With ARGS, pass them unchanged to local prime-agent over the remote socket.
 Examples:
   prime-coder
   prime-coder my-workspace
+  prime-coder --forward-auth my-workspace
   prime-coder my-workspace --resume
   prime-coder my-workspace list --all --json
   prime-coder my-workspace --help
@@ -277,6 +339,7 @@ New sessions created by explicit ARGS start at / unless Prime overrides it.
             run(["coder", "create", workspace])
     if not workspace or workspace.startswith("-"):
         raise RuntimeError("Expected a Coder workspace name before Prime arguments")
+    auth_payload = auth_to_forward() if forward_auth else None
     row = next((row for row in workspaces if row["name"] == workspace), None)
     if row and row["latest_build"]["status"] == "stopped":
         run(["coder", "start", workspace, "--yes"])
@@ -284,15 +347,16 @@ New sessions created by explicit ARGS start at / unless Prime overrides it.
     local_updated = update_local()
     local_version = output(["prime-agent", "--version"]).strip()
     # One round trip: install if missing, update if due or mismatched, start or replace the daemon, bootstrap.
-    # Coder owns credentials and its configured server; nothing is copied from auth files.
+    # Only explicit opt-in sends saved API keys, on stdin rather than in argv or the UI environment.
     bootstrap = ('if [ ! -x "$HOME/.local/bin/prime-agent" ]; then '
                  f'curl -fsSL {INSTALLER} | sh >&2 || exit $?; '
                  'fi; test -x "$HOME/.local/bin/prime-agent" || exit 1; '
                  + shlex.join(["exec", "python3", "-c", REMOTE, "attach" if not prime_args else "connect",
-                               local_version, str(UPDATE_INTERVAL)]))
+                               local_version, str(UPDATE_INTERVAL), "1" if forward_auth else "0"]))
     try:
-        stdout = output(["coder", "ssh", "--wait", "yes", "--forward-agent=false",
-                         "--forward-gpg=false", workspace, "--", bootstrap])
+        stdout = output(["coder", "ssh", "--wait", "yes", "--tty=false", "--forward-agent=false",
+                         "--forward-gpg=false", workspace, "--", bootstrap],
+                        **({"input": auth_payload} if forward_auth else {"stdin": subprocess.DEVNULL}))
     except subprocess.CalledProcessError as error:
         raise RuntimeError(f"Remote setup failed (exit {error.returncode})") from None
     try:

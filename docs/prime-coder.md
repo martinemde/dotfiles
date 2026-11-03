@@ -68,8 +68,19 @@ no laptop credentials were copied. Model execution still needs remote login.
 Known upstream limits remain visible rather than being rewritten by a proxy:
 local cwd/file/auth handling, maintenance commands with inconsistent socket
 support, and no strict connect-only mode. The UI can show `/` while an attached
-worker correctly executes in its remote checkout. Credentials stay on their
-original host. This proof does not solve remote login through the local UI.
+worker correctly executes in its remote checkout. Remote login through the local
+UI remains unsupported.
+
+Credential forwarding is explicit on each connection, with no workspace-ownership
+check: the user decides which workspace to trust. Saved API keys travel on SSH
+stdin, not argv, logs or the UI environment. Merge under Prime's auth lock and
+atomically replace the private file so concurrent native auth writes do not lose
+unrelated entries. Retain keys after disconnect because remote agents keep running.
+OAuth/refresh tokens are deliberately excluded: two hosts refreshing one token
+can invalidate each other's sessions. Command-backed credentials are excluded too;
+copying their commands would execute them on a different host. Environment-only
+credentials and a second remote credential store were left out. Existing session
+streams can cache keys; model reselection may be needed after rotation.
 
 The Prime fork (`martinemde/prime-agent`, branch
 `claude/project-thread-lvon8q`, not proposed upstream) removes the client's
@@ -83,3 +94,11 @@ agent picker's new-session path works. They stay while stock 0.10.2 is the
 target. Still open: `--cwd` cannot name a remote directory (it chdirs locally),
 `@` file completion searches the local disk, and an absent socket still spawns
 a local daemon.
+
+Forwarding proof on the same disposable workspace (2026-11-03): `--forward-auth`
+copied only the saved API-key entry, with `0600` mode and no temporary-file residue.
+After model reselection, a native remote `prompt_and_wait` authenticated to Kimi;
+the persisted Python tool result returned `prime-python-978723` and
+`/work/workspace`. Test credentials were removed and the workspace stopped.
+Stock `--print` instead tried to execute locally with cwd `/` and failed its
+kernel setup; it is not a remote execution path, even with the socket argument.
