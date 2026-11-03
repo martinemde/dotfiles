@@ -3,6 +3,7 @@
 import json
 import os
 from pathlib import Path
+import shlex
 import socket
 import subprocess
 import sys
@@ -57,6 +58,19 @@ def fake_command():
             return 1 if config.get("cancel_stop") else 0
         elif args[0] not in ("create", "start"):
             raise AssertionError(args)
+    elif tool == "curl":
+        event["remote"] = os.environ.get("HOME") == str(home / "remote")
+        record(home, event)
+        failure = config.get("install_failure")
+        if failure == "curl":
+            return 22
+        if failure != "before":
+            installer = ('import os; from pathlib import Path; home = Path(os.environ["HOME"]); '
+                         '(home / ".local/bin/prime-agent").symlink_to(home.parent / "bin/prime-agent")')
+            print("python3 -c " + shlex.quote(installer))
+            print("echo 'Installed Prime fixture'")
+        if failure in ("before", "after"):
+            print("exit 9")
     elif tool == "fzf":
         event["choices"] = sys.stdin.read().splitlines()
         record(home, event)
@@ -84,11 +98,12 @@ class PrimeCoderTest(unittest.TestCase):
         (self.remote / ".prime/agent").mkdir(parents=True)
         (self.remote / "workspace/project/.git").mkdir(parents=True)
         source = "#!" + sys.executable + "\n" + Path(__file__).read_text()
-        for tool in ("coder", "ssh", "prime-agent", "fzf"):
+        for tool in ("coder", "ssh", "prime-agent", "fzf", "curl"):
             executable = self.bin / tool
             executable.write_text(source)
             executable.chmod(0o755)
         (self.bin / "python3").symlink_to(sys.executable)
+        (self.bin / "sh").symlink_to("/bin/sh")
         (self.remote / ".local/bin").mkdir(parents=True)
         (self.remote / ".local/bin/prime-agent").symlink_to(self.bin / "prime-agent")
         self.config = {
@@ -185,6 +200,7 @@ class PrimeCoderTest(unittest.TestCase):
             result = self.launch("dev", *arguments)
             self.assertEqual(result.returncode, 7, result.stderr)
         self.assertEqual(len(self.ui_events()), 2)
+        self.assertEqual(self.events("curl"), [])
         for event in self.ui_events():
             self.assertEqual(event["args"][2:], arguments)
             self.assertEqual(event["cwd"], "/")
@@ -201,6 +217,52 @@ class PrimeCoderTest(unittest.TestCase):
         self.assertEqual(checks, [True, True])
         self.assertEqual(self.requests, [])
         self.assert_cleanup()
+
+    def test_missing_remote_prime_installs_before_updates_and_bootstrap(self):
+        binary = self.remote / ".local/bin/prime-agent"
+        binary.unlink()
+        result = self.launch("dev")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(os.access(binary, os.X_OK))
+        self.assertEqual(self.events("curl"), [{
+            "tool": "curl", "args": ["-fsSL", "https://app.primeintellect.ai/prime-agent/install.sh"],
+            "remote": True,
+        }])
+        self.assertIn("Installed Prime fixture", result.stderr)
+        self.assertNotIn("Installed Prime fixture", result.stdout)
+        events = self.events()
+        curl_index = next(index for index, event in enumerate(events) if event["tool"] == "curl")
+        remote_checks = [index for index, event in enumerate(events)
+                         if event["tool"] == "prime-agent" and event["remote"]
+                         and event["args"] == ["update", "--check"]]
+        self.assertEqual(len(remote_checks), 1)
+        self.assertLess(curl_index, remote_checks[0])
+        updates = [event["remote"] for event in self.events("prime-agent")
+                   if event["args"] == ["update", "--stable"]]
+        self.assertEqual(updates, [False, True])
+        self.assertEqual([command["type"] for command in self.requests], ["list"])
+        self.assertEqual(self.ui_events()[0]["args"][2:], ["attach", "session-existing"])
+        self.assert_cleanup()
+
+    def test_remote_install_failure_prevents_update_bootstrap_and_ui(self):
+        binary = self.remote / ".local/bin/prime-agent"
+        for failure in ("curl", "before", "after"):
+            with self.subTest(failure=failure):
+                binary.unlink(missing_ok=True)
+                self.config["install_failure"] = failure
+                result = self.launch("dev")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(binary.exists(), failure == "after")
+                self.assertEqual(len(self.events("curl")), 1)
+                self.assertEqual([(event["remote"], event["args"])
+                                  for event in self.events("prime-agent")],
+                                 [(False, ["update", "--stable"])])
+                self.assertEqual(len(self.events("coder")), 2)
+                self.assertEqual(self.requests, [])
+                self.assertEqual(self.connections, 0)
+                self.assertEqual(self.ui_events(), [])
+                self.assertEqual(self.events("ssh"), [])
+                (self.home / "events.jsonl").unlink()
 
     def test_chooser_creates_workspace_with_native_coder_prompts(self):
         self.config["sessions"] = []

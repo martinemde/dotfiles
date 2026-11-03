@@ -18,6 +18,8 @@ Use the native default daemon socket: Prime's updater coordinates that socket,
 not arbitrary explicit sockets. The Linux unmanaged installer reinstalls even
 when already current, so check its stable version before invoking an update.
 Local managed installs perform that check inside `update` themselves.
+For a missing remote executable, run the official curl-to-sh installer first;
+let the upstream installer own platform selection and installation.
 
 Live proof on `prime-coder-proof` (2026-11-02): local 0.10.2 UI connected to remote
 0.10.2; both a shell command and a model-driven Python call reported the Coder

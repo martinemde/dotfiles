@@ -116,7 +116,9 @@ prime-coder my-workspace --help         # Prime's own help
 Every connection checks/updates both installations to latest stable. Coder
 prompts for the template and parameters when creating a workspace; the launcher
 sets no template, harness, or repository defaults. All templates appear in the
-chooser. Workspaces must provide Python 3 and Prime at `~/.local/bin/prime-agent`.
+chooser. Workspaces must provide Python 3, curl, and sh. If Prime is missing at
+`~/.local/bin/prime-agent`, the launcher installs it using the official
+`https://app.primeintellect.ai/prime-agent/install.sh` script.
 Existing stopped workspaces are started.
 Closing the UI removes the tunnel, not the remote agents or workspace. Compute
 continues billing until Coder stops it. In the chooser, press **Ctrl-X** on a

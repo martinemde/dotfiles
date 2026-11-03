@@ -96,6 +96,7 @@ def main(args):
 
 Without WORKSPACE, choose a workspace: Enter connects, Ctrl-X stops it (with confirmation).
 Uses your current Coder CLI login. Coder prompts for the template and parameters.
+Installs missing remote Prime with the official installer.
 Updates local and remote Prime to latest stable on every connection.
 Without ARGS, reattach the workspace's prime-coder conversation.
 With ARGS, pass them unchanged to local prime-agent over the remote socket.
@@ -153,6 +154,9 @@ New sessions created by explicit ARGS start at / unless Prime overrides it.
     # Coder owns credentials and its configured server; nothing is copied from auth files.
     remote = ["coder", "ssh", "--wait", "yes", "--forward-agent=false", "--forward-gpg=false", workspace, "--"]
     run(["prime-agent", "update", "--stable"], stdout=sys.stderr)
+    run(remote + ['if [ ! -x "$HOME/.local/bin/prime-agent" ]; then '
+                  'curl -fsSL https://app.primeintellect.ai/prime-agent/install.sh | sh || exit $?; '
+                  'fi; test -x "$HOME/.local/bin/prime-agent"'], stdout=sys.stderr)
     remote_update = '"$HOME/.local/bin/prime-agent" update --check'
     update_status = output(remote + [remote_update])
     print(update_status, end="", file=sys.stderr)
