@@ -25,7 +25,8 @@ Install, update check, daemon start, and session bootstrap share one `coder ssh`
 call; each call costs a full Coder connection, and four of them dominated launch
 time. Update checks are throttled to daily with a stamp file on each side, but a
 local/remote version mismatch bypasses the stamp, so the two never drift apart
-silently. The remote side prints exactly one JSON line on stdout; installer and
+silently. Strip `PRIME_AGENT_INTERACTIVE_SELF_UPDATE` from the local updater:
+inside a Prime shell it makes an already-current update exit 75 rather than 0. The remote side prints exactly one JSON line on stdout; installer and
 update output go to stderr.
 
 A daemon started before an update keeps serving the old version. If no session
@@ -49,6 +50,20 @@ while a delayed command ran did not stop the remote command. The chooser reopene
 the saved conversation, including after a daemon restart. Local `list --json`
 worked through the forwarded socket. Offline tests exercise command boundaries;
 they never provision Coder or call a model.
+
+The Python launcher replaces the Agent Feeds TypeScript client. Keep the current
+Coder login, stable updates, native state/runtime and restricted UI environment;
+do not retain the separate pinned bootstrap, private token config or launch receipts.
+Those created a second installation/auth location without improving this interactive
+workflow. Native Prime commands cover session listing and creation.
+
+Live recheck on disposable Daedalus workspace `prime-python-978723` (2026-11-03):
+0.10.2 local UI attached to remote 0.10.2; native bash returned the workspace hostname
+and `/work/workspace`; all eight bundled Python skill modules imported from the
+native kernel venv. Disconnect left the same worker alive. Stop/start retained the
+durable conversation, and default attach resumed it. The test workspace was stopped.
+A real model prompt was refused because the fresh template has no provider auth;
+no laptop credentials were copied. Model execution still needs remote login.
 
 Known upstream limits remain visible rather than being rewritten by a proxy:
 local cwd/file/auth handling, maintenance commands with inconsistent socket

@@ -42,6 +42,8 @@ def fake_command():
             print("Channel:  stable\nUp to date." if config.get("remote_current")
                   else "Channel:  stable\nUpdate available.")
         elif args == ["update", "--stable"]:
+            if os.environ.get("PRIME_AGENT_INTERACTIVE_SELF_UPDATE") == "1":
+                return 75
             if config.get("fail_update") == ("remote" if event["remote"] else "local"):
                 return 9
         elif args[:1] == ["--daemon-socket"]:
@@ -61,6 +63,7 @@ def fake_command():
                 print("==> Startup scripts finished", flush=True)
             env = {**os.environ, "HOME": str(home / "remote"), "PATH": str(home / "bin"),
                    "TMPDIR": str(home / "remote/tmp")}
+            env.pop("PRIME_AGENT_INTERACTIVE_SELF_UPDATE", None)
             return subprocess.call(["/bin/sh", "-c", command[0]], env=env)
         elif args[0] == "stop":
             return 1 if config.get("cancel_stop") else 0
@@ -204,7 +207,8 @@ class PrimeCoderTest(unittest.TestCase):
     def launch(self, *args, input="", interval="0"):
         (self.home / "config.json").write_text(json.dumps(self.config))
         env = {"HOME": str(self.home), "PATH": str(self.bin), "LANG": "C",
-               "TERM": "xterm-256color", "LAPTOP_SECRET": "never-send-this"}
+               "TERM": "xterm-256color", "LAPTOP_SECRET": "never-send-this",
+               "PRIME_AGENT_INTERACTIVE_SELF_UPDATE": "1"}
         if interval is not None:
             env["PRIME_CODER_UPDATE_INTERVAL"] = interval
         result = subprocess.run([sys.executable, str(LAUNCHER), *args], input=input,

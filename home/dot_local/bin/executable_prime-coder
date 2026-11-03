@@ -170,7 +170,9 @@ def update_local(force=False):
             return False
     except FileNotFoundError:
         pass
-    run(["prime-agent", "update", "--stable"], stdout=sys.stderr)
+    env = {key: value for key, value in os.environ.items()
+           if key != "PRIME_AGENT_INTERACTIVE_SELF_UPDATE"}
+    run(["prime-agent", "update", "--stable"], stdout=sys.stderr, env=env)
     cache.mkdir(parents=True, exist_ok=True)
     stamp.touch()
     return True
