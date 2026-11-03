@@ -21,6 +21,23 @@ Local managed installs perform that check inside `update` themselves.
 For a missing remote executable, run the official curl-to-sh installer first;
 let the upstream installer own platform selection and installation.
 
+Install, update check, daemon start, and session bootstrap share one `coder ssh`
+call; each call costs a full Coder connection, and four of them dominated launch
+time. Update checks are throttled to daily with a stamp file on each side, but a
+local/remote version mismatch bypasses the stamp, so the two never drift apart
+silently. The remote side prints exactly one JSON line on stdout; installer and
+update output go to stderr.
+
+A daemon started before an update keeps serving the old version. If no session
+row has a `workerPid`, the launcher identifies the socket's peer with
+`SO_PEERCRED`, confirms from `/proc` that it is a `prime-agent` daemon, sends
+SIGTERM, and starts a new one. Saved conversations survive a daemon restart
+(see the proof below); live workers might not, so their presence is a hard stop.
+Prime has no daemon-stop command to use instead.
+
+Shell completion of workspace names was left out: Coder is meant to become an
+implementation detail behind a generic remote-workspace launcher.
+
 Live proof on `prime-coder-proof` (2026-11-02): local 0.10.2 UI connected to remote
 0.10.2; both a shell command and a model-driven Python call reported the Coder
 hostname and the remote checkout directory. Terminating the local UI

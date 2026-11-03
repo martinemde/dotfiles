@@ -113,7 +113,11 @@ prime-coder my-workspace list --all --json
 prime-coder my-workspace --help         # Prime's own help
 ```
 
-Every connection checks/updates both installations to latest stable. Coder
+Both installations are updated to latest stable at most once a day
+(`PRIME_CODER_UPDATE_INTERVAL` seconds; `0` checks every run), and immediately
+when local and remote versions differ. A remote daemon still running an older
+version is restarted when none of its sessions are live. The chooser lists
+running workspaces first, most recently used first, with their template. Coder
 prompts for the template and parameters when creating a workspace; the launcher
 sets no template, harness, or repository defaults. All templates appear in the
 chooser. Workspaces must provide Python 3, curl, and sh. If Prime is missing at

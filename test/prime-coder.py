@@ -1,14 +1,17 @@
 """Offline CLI boundary tests: no Coder account, network, or model access."""
 
+from datetime import datetime, timedelta, timezone
 import json
 import os
 from pathlib import Path
 import shlex
+import signal
 import socket
 import subprocess
 import sys
 import tempfile
 import threading
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -28,6 +31,7 @@ def fake_command():
     event = {"tool": tool, "args": args}
     if tool == "prime-agent":
         event["remote"] = os.environ.get("HOME") == str(home / "remote")
+        event["pid"] = os.getpid()
         if args[:1] == ["--daemon-socket"]:
             event["env"] = dict(os.environ)
             event["cwd"] = os.getcwd()
@@ -42,6 +46,8 @@ def fake_command():
                 return 9
         elif args[:1] == ["--daemon-socket"]:
             return config.get("ui_exit", 0)
+        elif args[:2] == ["--mode", "daemon"]:
+            fake_daemon(home, args[args.index("--daemon-socket") + 1], config)
         else:
             raise AssertionError(args)
     elif tool == "coder":
@@ -74,6 +80,8 @@ def fake_command():
     elif tool == "fzf":
         event["choices"] = sys.stdin.read().splitlines()
         record(home, event)
+        if config.get("fzf_exit"):
+            return config["fzf_exit"]
         print(config.get("key", ""))
         print(event["choices"][config.get("choice", 0)])
     elif tool == "ssh":
@@ -86,6 +94,28 @@ def fake_command():
     else:
         raise AssertionError(tool)
     return 0
+
+
+def fake_daemon(home, endpoint, config):
+    """A separate daemon process, for tests that need to replace one."""
+    Path(endpoint).unlink(missing_ok=True)
+    server = socket.socket(socket.AF_UNIX)
+    server.bind(endpoint)
+    server.listen()
+    version = config.get("daemon_version", VERSION)
+    while True:
+        connection, _ = server.accept()
+        with connection, connection.makefile("rwb") as stream:
+            stream.write((json.dumps({"type": "hello", "protocol": 1, "appVersion": version}) + "\n").encode())
+            stream.flush()
+            for line in stream:
+                message = json.loads(line)
+                record(home, {"tool": "daemon", "version": version, "command": message["command"]})
+                data = ({"sessions": config["sessions"]} if message["command"]["type"] == "list"
+                        else {"activeSessionId": "session-created"})
+                stream.write((json.dumps({"type": "response", "id": message["id"],
+                                          "success": True, "data": data}) + "\n").encode())
+                stream.flush()
 
 
 class PrimeCoderTest(unittest.TestCase):
@@ -164,10 +194,12 @@ class PrimeCoderTest(unittest.TestCase):
             except Exception as error:
                 self.errors.append(repr(error))
 
-    def launch(self, *args, input=""):
+    def launch(self, *args, input="", interval="0"):
         (self.home / "config.json").write_text(json.dumps(self.config))
         env = {"HOME": str(self.home), "PATH": str(self.bin), "LANG": "C",
                "TERM": "xterm-256color", "LAPTOP_SECRET": "never-send-this"}
+        if interval is not None:
+            env["PRIME_CODER_UPDATE_INTERVAL"] = interval
         result = subprocess.run([sys.executable, str(LAUNCHER), *args], input=input,
                                 text=True, capture_output=True, env=env, timeout=10)
         return result
@@ -256,7 +288,7 @@ class PrimeCoderTest(unittest.TestCase):
                 self.assertEqual(len(self.events("curl")), 1)
                 self.assertEqual([(event["remote"], event["args"])
                                   for event in self.events("prime-agent")],
-                                 [(False, ["update", "--stable"])])
+                                 [(False, ["update", "--stable"]), (False, ["--version"])])
                 self.assertEqual(len(self.events("coder")), 2)
                 self.assertEqual(self.requests, [])
                 self.assertEqual(self.connections, 0)
@@ -273,7 +305,8 @@ class PrimeCoderTest(unittest.TestCase):
         create = next(event for event in self.events("coder") if event["args"][0] == "create")
         self.assertEqual(create["args"], ["create", "new-dev"])
         self.assertEqual(self.events("fzf")[0]["choices"],
-                         ["+ New workspace", "dev\trunning", "unrelated\trunning"])
+                         ["+ New workspace", "dev        running  durable  never used",
+                          "unrelated  running  other    never used"])
         self.assertEqual(self.ui_events()[0]["args"][2:], ["attach", "session-created"])
         self.assertEqual(self.requests[-1]["config"]["cwd"], str(self.remote / "workspace/project"))
         self.assertTrue(self.requests[-1]["telemetryDisabled"])
@@ -336,6 +369,68 @@ class PrimeCoderTest(unittest.TestCase):
                     del self.config[key]
                 (self.home / "events.jsonl").unlink()
                 self.connections = 0
+
+    def test_chooser_sorts_running_then_recent_and_shows_template(self):
+        now = datetime.now(timezone.utc)
+        stamp = lambda hours: (now - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%S.123456789Z")
+        self.config["workspaces"] = [
+            {"name": "old", "template_name": "t", "last_used_at": stamp(50),
+             "latest_build": {"status": "running"}},
+            {"name": "parked", "template_name": "t", "last_used_at": stamp(0),
+             "latest_build": {"status": "stopped"}},
+            {"name": "fresh", "template_name": "t", "last_used_at": stamp(3),
+             "latest_build": {"status": "running"}},
+        ]
+        self.config["fzf_exit"] = 130
+        result = self.launch()
+        self.assertEqual(self.events("fzf")[0]["choices"], [
+            "+ New workspace", "fresh   running  t  used 3h ago",
+            "old     running  t  used 2d ago", "parked  stopped  t  used just now"])
+        self.assertEqual((result.returncode, result.stderr), (130, ""))
+        self.assertEqual([event["args"] for event in self.events("coder")],
+                         [["list", "--output", "json"]])
+
+    def test_update_checks_run_at_most_once_per_interval(self):
+        for _ in range(2):
+            result = self.launch("dev", interval=None)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        updates = [(event["remote"], event["args"][1]) for event in self.events("prime-agent")
+                   if event["args"][:1] == ["update"]]
+        self.assertEqual(updates, [(False, "--stable"), (True, "--check"), (True, "--stable")])
+        self.assertEqual(len([event for event in self.events("coder") if event["args"][0] == "ssh"]), 2)
+        self.assertEqual(len(self.ui_events()), 2)
+
+    def test_stale_daemon_without_live_sessions_is_replaced(self):
+        self.stopping.set()
+        self.thread.join(2)
+        self.server.close()
+        self.endpoint.unlink()
+        self.config.update(daemon_version="old", sessions=[
+            {"sessionName": "prime-coder", "sessionFile": "/saved/session.jsonl"}])
+        (self.home / "config.json").write_text(json.dumps(self.config))
+        env = {"HOME": str(self.remote), "PATH": str(self.bin), "TMPDIR": str(self.remote / "tmp")}
+        old = subprocess.Popen([str(self.bin / "prime-agent"), "--mode", "daemon",
+                                "--daemon-socket", str(self.endpoint)], env=env)
+        try:
+            for _ in range(100):
+                if self.endpoint.exists():
+                    break
+                time.sleep(0.05)
+            del self.config["daemon_version"]
+            result = self.launch("dev")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("restarting it", result.stderr)
+            self.assertEqual(old.wait(5), -signal.SIGTERM)
+            served = [(event["version"], event["command"]["type"]) for event in self.events("daemon")]
+            self.assertEqual(served, [("old", "list"), (VERSION, "list"), (VERSION, "create")])
+            self.assertEqual(self.ui_events()[0]["args"][2:], ["attach", "session-created"])
+            self.assert_cleanup()
+        finally:
+            old.kill()
+            old.wait()
+            for event in self.events("prime-agent"):
+                if event["args"][:2] == ["--mode", "daemon"] and event["pid"] != old.pid:
+                    os.kill(event["pid"], signal.SIGKILL)
 
 
 if __name__ == "__main__":
