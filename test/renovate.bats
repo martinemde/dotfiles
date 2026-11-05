@@ -10,6 +10,7 @@
 
     const root = process.env.REPO_ROOT;
     const config = runInNewContext("(" + readFileSync(join(root, "renovate.json5"), "utf8") + ")");
+    assert.equal(config.schedule, undefined);
     assert.equal(config.minimumReleaseAge, "7 days");
     assert.equal(config.minimumReleaseAgeBehaviour, "timestamp-required");
     assert.equal(config.internalChecksFilter, "strict");

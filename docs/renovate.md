@@ -4,7 +4,7 @@ This guide explains how Renovate is configured in this repository, how the custo
 
 ## TL;DR
 
-- Renovate config lives at `renovate.json5` and runs daily (before 9am), opening labeled PRs (`deps`, `automated`) with low concurrency.
+- Renovate config lives at `renovate.json5` and runs every 30 minutes, opening labeled PRs (`deps`, `automated`) with low concurrency.
 - We pin everything important to immutable versions or digests for reproducibility and supply‑chain safety.
 - Standard managers are enabled (pip, mise, docker-compose, devcontainer, actions) and custom regex managers cover Chezmoi externals, Pi extensions, and select version files.
 - Renovate proposes pin updates for review; automerge is disabled.
@@ -16,7 +16,7 @@ This guide explains how Renovate is configured in this repository, how the custo
 File: `renovate.json5`
 
 - Extends: `config:recommended`, `:semanticCommits`; Dependency Dashboard enabled
-- Schedule: `before 9am`
+- Run interval: every 30 minutes; no update-time window
 - Labels: `deps`, `automated`
 - PR limits: `prHourlyLimit: 2`, `prConcurrentLimit: 5`
 
@@ -46,8 +46,9 @@ All updates require review. A matching hash proves byte integrity, not that upst
 
 ## Self-hosted activation and visible evidence
 
-The **Renovate** Actions workflow is the intended writer. It runs daily at 06:23
-UTC, within the config's `before 9am` window. The hosted Mend App is not required;
+The **Renovate** Actions workflow is the intended writer. It runs at minutes 7 and 37 of every hour
+UTC, with no separate update-time window so dashboard requests and passing CI
+can be processed on the next run. The hosted Mend App is not required;
 do not enable both writers. The seven-day age rule, low PR limits, and manual
 review policy remain in `renovate.json5`.
 
@@ -77,7 +78,7 @@ and merge queues are not used here.
    `RENOVATE_APP_PRIVATE_KEY` containing the complete PEM file. Add repository
    variable `RENOVATE_APP_ID` containing the App ID (not its installation ID).
    Set the ID last: scheduled runs are skipped while it is absent, avoiding
-   daily credential failures. Keep the private key out of the repository and
+   repeated credential failures. Keep the private key out of the repository and
    logs; remove any unneeded local copy after storing it securely.
 
 The token action limits each installation token to the current repository,

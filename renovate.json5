@@ -5,7 +5,6 @@
     ':semanticCommits',
   ],
   dependencyDashboard: true,
-  schedule: ['before 9am'],
   labels: ['deps', 'automated'],
   prHourlyLimit: 2,
   prConcurrentLimit: 5,
