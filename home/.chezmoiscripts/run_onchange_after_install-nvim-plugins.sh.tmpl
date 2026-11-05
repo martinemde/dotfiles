@@ -9,19 +9,16 @@ set -o errexit -o nounset -o pipefail
 # `include` hashes file contents, whereas chezmoi's `glob` searches destination
 # paths and does not read the matched files.
 # Plugin catppuccin hash: {{ include "dot_config/nvim/lua/plugins/catppuccin.lua" | sha256sum }}
-# Plugin chezmoi hash: {{ include "dot_config/nvim/lua/plugins/chezmoi.lua" | sha256sum }}
-# Plugin cmp hash: {{ include "dot_config/nvim/lua/plugins/cmp.lua" | sha256sum }}
 # Plugin core hash: {{ include "dot_config/nvim/lua/plugins/core.lua" | sha256sum }}
 # Plugin jj hash: {{ include "dot_config/nvim/lua/plugins/jj.lua" | sha256sum }}
 # Plugin lsp hash: {{ include "dot_config/nvim/lua/plugins/lsp.lua" | sha256sum }}
 # Plugin lualine hash: {{ include "dot_config/nvim/lua/plugins/lualine.lua" | sha256sum }}
 # Plugin mini-comment hash: {{ include "dot_config/nvim/lua/plugins/mini-comment.lua" | sha256sum }}
-# Plugin neo-tree hash: {{ include "dot_config/nvim/lua/plugins/neo-tree.lua" | sha256sum }}
 # Plugin sidekick hash: {{ include "dot_config/nvim/lua/plugins/sidekick.lua" | sha256sum }}
 # Plugin snacks hash: {{ include "dot_config/nvim/lua/plugins/snacks.lua" | sha256sum }}
 # Plugin tmux-navigator hash: {{ include "dot_config/nvim/lua/plugins/tmux-navigator.lua" | sha256sum }}
 # Plugin treesitter hash: {{ include "dot_config/nvim/lua/plugins/treesitter.lua" | sha256sum }}
-# Plugin twilight hash: {{ include "dot_config/nvim/lua/plugins/twilight.lua" | sha256sum }}
+# Selected extras hash: {{ include "dot_config/nvim/lazyvim.json" | sha256sum }}
 # Lazy config hash: {{ include "dot_config/nvim/lua/config/lazy.lua" | sha256sum }}
 # Lockfile hash: {{ include "dot_config/nvim/lazy-lock.json" | sha256sum }}
 

@@ -37,7 +37,7 @@ brew "mise" # tool version manager
 brew "mosh" # mobile shell
 brew "mermaid-cli" # diagram generator
 brew "mupdf" # PDF viewer
-brew "neovim", args: ["HEAD"] # editor
+brew "neovim" # editor
 brew "nvm" # Node version manager
 brew "openssl@3" # crypto library
 brew "overmind" # process manager

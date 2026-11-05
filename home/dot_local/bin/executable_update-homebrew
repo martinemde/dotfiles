@@ -1,0 +1,15 @@
+#!/bin/bash
+
+[ -n "${DEBUG:-}" ] && set -o xtrace
+set -o errexit -o nounset -o pipefail
+
+if ! command -v brew >/dev/null 2>&1; then
+    echo "Homebrew not found; no updates performed" >&2
+    exit 1
+fi
+
+printf '\nHomebrew update started: %s\n' "$(date)"
+brew update
+# Keep Homebrew's normal verification and skip greedy auto-updating casks.
+brew upgrade
+printf 'Homebrew update completed: %s\n' "$(date)"

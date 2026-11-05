@@ -14,6 +14,14 @@
     assert.equal(config.minimumReleaseAgeBehaviour, "timestamp-required");
     assert.equal(config.internalChecksFilter, "strict");
     assert.equal(config.automerge, false);
+    assert.equal(config.osvVulnerabilityAlerts, true);
+    assert.equal(config.vulnerabilityAlerts.minimumReleaseAge, null);
+    assert.equal(config.vulnerabilityAlerts.automerge, false);
+    assert(config.vulnerabilityAlerts.addLabels.includes("security"));
+    const tools = JSON.parse(readFileSync(join(root, "home/dot_config/dotfiles/package.json"), "utf8"));
+    for (const version of Object.values(tools.devDependencies)) {
+      assert.match(version, /^\d+\.\d+\.\d+$/);
+    }
     assert(config.packageRules.every(rule => rule.automerge !== true));
     for (const file of ["package.json", "home/dot_config/dotfiles/package.json"]) {
       assert(config.npm.fileMatch.some(pattern => new RegExp(pattern).test(file)), file);

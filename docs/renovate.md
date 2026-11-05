@@ -52,6 +52,20 @@ checks suppress pending versions. Existing update grouping remains restricted to
 same update types, but automerge is disabled globally. A delay is not a signature
 or a vulnerability scan.
 
+Known vulnerability fixes bypass the release delay, normal schedule, and normal
+PR limits using Renovate's built-in vulnerability-alert defaults. They keep manual
+review and gain a `security` label. This was already Renovate's default exception;
+we make the release-age exception explicit rather than claim a new fast path.
+Enable the GitHub dependency graph and Dependabot alerts, and grant Renovate read
+access to those alerts. Repository config alone cannot enable those settings.
+OSV alerts supplement GitHub alerts for direct npm, PyPI, Go, and other supported
+ecosystem dependencies. OSV support is experimental; it does not scan Homebrew,
+GitHub release binaries, Docker images, or arbitrary plugin commits. Alerts appear
+on the next Renovate run, not as a guaranteed real-time response.
+
+Sources: [vulnerability alerts](https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts),
+[OSV coverage](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts).
+
 The GitHub SHA managers use `github-digest`, not `git-refs`, because only the former
 provides commit timestamps. This uses the commit date, not when a branch first
 pointed at that commit. It is not proof that a commit is safe. The root npm manifest

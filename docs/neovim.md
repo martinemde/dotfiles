@@ -1,5 +1,18 @@
 # Neovim Configuration
 
+Use Homebrew's stable Neovim formula, not HEAD. HEAD was a workaround for a
+Copilot-related bug; Copilot has since been removed. Prefer LazyVim defaults and
+only retain extras with an active use case rather than accumulating integrations.
+
+Removed optional task, refactoring, test, layout, profiling, none-ls, and GitHub UI
+frameworks. Snacks remains the explorer/picker and GitHub UI; native Neovim handles
+diagnostic virtual lines. The chezmoi extra retains template support without a
+second plugin auto-applying edits. Mason uses LazyVim and language-extra defaults,
+not a separate broad tool list. Language extras were subsequently removed entirely:
+LSP, Mason, completion, linting, and formatting plugins are explicitly disabled.
+Markdown syntax highlighting and in-editor rendering, Sidekick CLI, and terminal navigation remain. Markdown linting, formatting, completion, and browser preview stay disabled. No already
+installed tools or user data directories are deleted automatically.
+
 This dotfiles repository includes a complete Neovim configuration based on [LazyVim](https://lazyvim.org/), a modern Neovim configuration framework built on top of [lazy.nvim](https://github.com/folke/lazy.nvim).
 
 ## Overview

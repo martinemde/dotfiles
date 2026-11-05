@@ -11,6 +11,15 @@
   prConcurrentLimit: 5,
   automerge: false,
 
+  // Known vulnerability fixes skip the normal release quarantine and queue.
+  osvVulnerabilityAlerts: true,
+  vulnerabilityAlerts: {
+    enabled: true,
+    minimumReleaseAge: null,
+    automerge: false,
+    addLabels: ['security'],
+  },
+
   // Quarantine new releases; missing publication times must not bypass the wait.
   minimumReleaseAge: '7 days',
   minimumReleaseAgeBehaviour: 'timestamp-required',
