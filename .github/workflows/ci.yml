@@ -31,7 +31,7 @@ jobs:
           shellcheck bin/setup
           shellcheck bin/test
 
-  test:
+  unit-tests:
     runs-on: ubuntu-latest
     env:
       MISE_AUTO_INSTALL: '0'
@@ -43,6 +43,58 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y bats zsh jq ripgrep vim neovim lua5.4 tmux python3 python3-yaml
+      - name: Validate Renovate configuration with the deployed engine
+        run: |
+          image=$(bun --eval 'const w = Bun.YAML.parse(await Bun.file(".github/workflows/renovate.yml").text()); console.log(w.jobs.renovate.container.image)')
+          docker run --rm -v "$PWD:/repo:ro" -w /repo "$image" renovate-config-validator --no-global renovate.json5
       - name: Run test suite
         run: |
           ./bin/test
+
+  tool-integration:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: [node, mise, python, cosign]
+    env:
+      MISE_AUTO_INSTALL: '0'
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+      - name: Exercise tools from this checkout's manifests
+        run: mise exec node@latest uv@latest -- python3 bin/check-tool-updates ${{ matrix.tool }}
+
+  plugin-integration:
+    runs-on: ubuntu-latest
+    env:
+      MISE_AUTO_INSTALL: '0'
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+      - name: Install shell test dependency
+        run: sudo apt-get update && sudo apt-get install -y zsh
+      - name: Exercise pinned zsh-snap cache behavior
+        run: python3 bin/check-znap-update
+
+  # Keep one stable required check; a failed or cancelled integration must block it.
+  test:
+    if: always()
+    needs:
+      [
+        download-integrity,
+        shellcheck,
+        unit-tests,
+        tool-integration,
+        plugin-integration,
+      ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every test job to pass
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: jq -e 'all(.[]; .result == "success")' <<< "$RESULTS"

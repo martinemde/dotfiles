@@ -10,6 +10,9 @@
 
     const root = process.env.REPO_ROOT;
     const config = runInNewContext("(" + readFileSync(join(root, "renovate.json5"), "utf8") + ")");
+    const filePatterns = manager => (manager.managerFilePatterns ?? manager.fileMatch ?? [])
+      .map(pattern => new RegExp(pattern.startsWith("/") && pattern.endsWith("/")
+        ? pattern.slice(1, -1) : pattern));
     assert.equal(config.schedule, undefined);
     assert.equal(config.minimumReleaseAge, "7 days");
     assert.equal(config.minimumReleaseAgeBehaviour, "timestamp-required");
@@ -28,17 +31,22 @@
     assert.equal(config.automergeType, "pr");
     assert.equal(config.automergeStrategy, "squash");
     assert.equal(config.statusCheckNames, undefined);
-    const mergePolicy = config.packageRules.at(-1);
+    const mergePolicy = config.packageRules.find(rule => rule.automerge === true);
     assert.equal(mergePolicy.automerge, true);
+    const terminalPolicy = config.packageRules.at(-1);
+    assert.equal(terminalPolicy.automerge, false);
+    for (const file of ["home/.chezmoiexternals/pi.externals.toml", "home/dot_pi/private_agent/settings.json", "home/.chezmoiexternals/zellij.externals.toml"]) {
+      assert(terminalPolicy.matchFileNames.includes(file));
+    }
     assert.deepEqual(Array.from(mergePolicy.matchUpdateTypes), ["minor", "patch", "digest"]);
     for (const file of ["package.json", "home/dot_config/dotfiles/package.json"]) {
-      assert(config.npm.fileMatch.some(pattern => new RegExp(pattern).test(file)), file);
+      assert(filePatterns(config.npm).some(pattern => pattern.test(file)), file);
     }
 
     const miseFile = "home/dot_config/mise/config.toml.tmpl";
     const aqua = config.customManagers.find(manager =>
       manager.matchStrings.some(pattern => pattern.includes("aqua:")));
-    assert(aqua.fileMatch.some(pattern => new RegExp(pattern).test(miseFile)));
+    assert(filePatterns(aqua).some(pattern => pattern.test(miseFile)));
     const mise = readFileSync(join(root, miseFile), "utf8");
     const envsense = [...mise.matchAll(new RegExp(aqua.matchStrings[0], "g"))]
       .find(match => match.groups.depName === "technicalpickles/envsense");
@@ -48,7 +56,7 @@
     const file = "home/.chezmoiexternals/zellij.externals.toml";
     const contents = readFileSync(join(root, file), "utf8");
     const managers = config.customManagers.filter(manager =>
-      manager.fileMatch?.some(pattern => new RegExp(pattern).test(file)));
+      filePatterns(manager).some(pattern => pattern.test(file)));
     assert.equal(managers.length, 1, "no URL-only updater may compete with checksums");
     const manager = managers[0];
     assert.equal(manager.datasourceTemplate, "github-release-attachments");
