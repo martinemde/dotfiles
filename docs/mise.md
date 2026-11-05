@@ -1,5 +1,11 @@
 # Mise
 
+Prefer mise for cross-platform CLI tools when its backend supports the tool and
+our verification policy. GitHub CLI and stable Neovim use explicit Aqua backends
+on macOS and Linux, with the existing seven-day release delay and verification
+settings. Homebrew remains for apps and tools where it is the better fit. Do not
+add a second Homebrew declaration for these mise-managed tools.
+
 Use mise for versioned tools and runtimes; Homebrew still owns system libraries
 and macOS applications. Most global requests stay `latest` so routine updates do
 not depend on maintaining dozens of hand-written pins. Behaviour-dependent pins

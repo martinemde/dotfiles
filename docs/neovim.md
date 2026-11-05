@@ -1,7 +1,8 @@
 # Neovim Configuration
 
-Use Homebrew's stable Neovim formula, not HEAD. HEAD was a workaround for a
-Copilot-related bug; Copilot has since been removed. Prefer LazyVim defaults and
+Use stable Neovim releases through mise's explicit Aqua backend on macOS and
+Linux, not Homebrew HEAD. HEAD was a workaround for a Copilot-related bug;
+Copilot has since been removed. Prefer LazyVim defaults and
 only retain extras with an active use case rather than accumulating integrations.
 
 Removed optional task, refactoring, test, layout, profiling, none-ls, and GitHub UI
