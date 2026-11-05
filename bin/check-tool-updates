@@ -140,9 +140,13 @@ def main():
     # Resolve tool shims before replacing HOME or leaving the project directory.
     binaries = {}
     for name in ("bun", "shfmt", "uv", "node"):
-        result = subprocess.run(["mise", "which", name], cwd=ROOT, capture_output=True, text=True)
-        if result.returncode == 0:
-            binaries[name] = Path(result.stdout.strip())
+        binary = shutil.which(name)
+        if binary and "shims" not in Path(binary).parts:
+            binaries[name] = Path(binary)
+        else:
+            result = subprocess.run(["mise", "which", name], cwd=ROOT, capture_output=True, text=True)
+            if result.returncode == 0:
+                binaries[name] = Path(result.stdout.strip())
     with tempfile.TemporaryDirectory(prefix="dotfiles-tool-check-") as temporary:
         work = Path(temporary)
         home = work / "home"

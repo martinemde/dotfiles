@@ -8,7 +8,8 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 home = Path(sys.argv[1])
 zsh = shutil.which("zsh")
-chezmoi = shutil.which("chezmoi")
+chezmoi = subprocess.run(["mise", "which", "chezmoi"], cwd=ROOT,
+                         text=True, capture_output=True, check=True).stdout.strip()
 assert zsh and chezmoi, "zsh and chezmoi are required"
 bin_dir = home / "bin"
 bin_dir.mkdir()
