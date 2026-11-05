@@ -43,8 +43,8 @@ Grouping and automerge rules:
 Minor, patch, and digest updates use Renovate-managed squash merges after the
 `download-integrity`, `shellcheck`, and `test` checks pass. Platform automerge is
 disabled: Renovate checks and merges on its next run. Majors, initial pin updates,
-and vulnerability-alert updates remain review-only. This is not branch protection;
-humans and other writers can still merge directly.
+and vulnerability-alert updates remain review-only. GitHub branch protection requires these three checks on `main`; administrators
+can still bypass it for direct maintenance.
 A matching hash proves byte integrity, not that upstream code is benign.
 
 ---

@@ -12,7 +12,6 @@
   automergeType: 'pr',
   automergeStrategy: 'squash',
   platformAutomerge: false,
-  statusCheckNames: ['download-integrity', 'shellcheck', 'test'],
 
   // Known vulnerability fixes skip the normal release quarantine and queue.
   osvVulnerabilityAlerts: true,

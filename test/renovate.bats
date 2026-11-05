@@ -27,7 +27,7 @@
     assert.equal(config.platformAutomerge, false);
     assert.equal(config.automergeType, "pr");
     assert.equal(config.automergeStrategy, "squash");
-    assert.deepEqual(Array.from(config.statusCheckNames), ["download-integrity", "shellcheck", "test"]);
+    assert.equal(config.statusCheckNames, undefined);
     const mergePolicy = config.packageRules.at(-1);
     assert.equal(mergePolicy.automerge, true);
     assert.deepEqual(Array.from(mergePolicy.matchUpdateTypes), ["minor", "patch", "digest"]);
