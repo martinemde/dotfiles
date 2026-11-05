@@ -24,7 +24,13 @@
     for (const version of Object.values(tools.devDependencies)) {
       assert.match(version, /^\d+\.\d+\.\d+$/);
     }
-    assert(config.packageRules.every(rule => rule.automerge !== true));
+    assert.equal(config.platformAutomerge, false);
+    assert.equal(config.automergeType, "pr");
+    assert.equal(config.automergeStrategy, "squash");
+    assert.deepEqual(Array.from(config.statusCheckNames), ["download-integrity", "shellcheck", "test"]);
+    const mergePolicy = config.packageRules.at(-1);
+    assert.equal(mergePolicy.automerge, true);
+    assert.deepEqual(Array.from(mergePolicy.matchUpdateTypes), ["minor", "patch", "digest"]);
     for (const file of ["package.json", "home/dot_config/dotfiles/package.json"]) {
       assert(config.npm.fileMatch.some(pattern => new RegExp(pattern).test(file)), file);
     }
@@ -67,7 +73,7 @@
       assert(!contents.replace(match[0], newMatch).includes(currentDigest));
     }
     assert(config.packageRules.some(rule =>
-      rule.matchDatasources?.includes("github-release-attachments") && rule.automerge === false));
+      rule.matchDatasources?.includes("github-release-attachments") && rule.groupName === "zellij-plugins"));
 
     for (const manager of config.customManagers.filter(manager =>
       manager.currentValueTemplate === "master" || manager.currentValueTemplate === "main")) {

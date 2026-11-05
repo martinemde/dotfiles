@@ -9,6 +9,10 @@
   prHourlyLimit: 2,
   prConcurrentLimit: 5,
   automerge: false,
+  automergeType: 'pr',
+  automergeStrategy: 'squash',
+  platformAutomerge: false,
+  statusCheckNames: ['download-integrity', 'shellcheck', 'test'],
 
   // Known vulnerability fixes skip the normal release quarantine and queue.
   osvVulnerabilityAlerts: true,
@@ -55,44 +59,38 @@
     fileMatch: ['^package\\.json$', '^home/dot_config/dotfiles/package\\.json$'],
   },
 
-  // Group related updates for review; never automerge upstream code.
+  // Group related updates; majors remain review-only.
   packageRules: [
     // Docker digest pinning for reproducibility
     { matchCategories: ['docker'], pinDigests: true },
     {
       matchManagers: ['github-actions'],
       groupName: 'github-actions',
-      automerge: false,
       matchUpdateTypes: ['minor', 'patch', 'digest'],
     },
     {
       matchManagers: ['devcontainer'],
       groupName: 'devcontainer',
-      automerge: false,
       matchUpdateTypes: ['minor', 'patch', 'digest'],
     },
     {
       matchManagers: ['docker-compose'],
       groupName: 'docker-compose',
-      automerge: false,
       matchUpdateTypes: ['digest'],
     },
     {
       matchManagers: ['pip_requirements'],
       groupName: 'python-tools',
       matchUpdateTypes: ['minor', 'patch'],
-      automerge: false,
     },
     {
       matchManagers: ['mise'],
       groupName: 'mise-tools',
-      automerge: false,
     },
     {
       matchManagers: ['npm'],
       groupName: 'node-tools',
       rangeStrategy: 'pin',
-      automerge: false,
       matchFileNames: ['package.json', 'home/dot_config/dotfiles/package.json'],
     },
     {
@@ -100,14 +98,16 @@
       matchDatasources: ['npm'],
       matchFileNames: ['home/dot_pi/private_agent/settings.json'],
       groupName: 'pi-extensions',
-      automerge: false,
     },
     {
       matchManagers: ['custom.regex'],
       matchDatasources: ['github-release-attachments'],
       matchFileNames: ['home/.chezmoiexternals/zellij.externals.toml'],
       groupName: 'zellij-plugins',
-      automerge: false,
+    },
+    {
+      matchUpdateTypes: ['minor', 'patch', 'digest'],
+      automerge: true,
     },
   ],
 

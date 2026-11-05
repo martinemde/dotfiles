@@ -7,7 +7,7 @@ This guide explains how Renovate is configured in this repository, how the custo
 - Renovate config lives at `renovate.json5` and runs every 30 minutes, opening labeled PRs (`deps`, `automated`) with low concurrency.
 - We pin everything important to immutable versions or digests for reproducibility and supply‑chain safety.
 - Standard managers are enabled (pip, mise, docker-compose, devcontainer, actions) and custom regex managers cover Chezmoi externals, Pi extensions, and select version files.
-- Renovate proposes pin updates for review; automerge is disabled.
+- Renovate automerges minor, patch, and digest updates after CI; majors and security alerts require review.
 
 ---
 
@@ -32,15 +32,20 @@ Enabled managers and file discovery:
 
 Grouping and automerge rules:
 
-- `github-actions`: group minor/patch/digest updates; no automerge
-- `devcontainer`: group minor/patch/digest updates; no automerge
-- `docker-compose`: group digest updates; no automerge
-- `pip_requirements`: grouped as `python-tools` (no automerge)
-- `npm`: grouped as `node-tools` (no automerge)
-- `mise`: grouped as `mise-tools` (no automerge)
-- Pi extensions: grouped as `pi-extensions` (no automerge)
+- `github-actions`: group minor/patch/digest updates; minor/patch/digest automerge
+- `devcontainer`: group minor/patch/digest updates; minor/patch/digest automerge
+- `docker-compose`: group digest updates; minor/patch/digest automerge
+- `pip_requirements`: grouped as `python-tools` (minor/patch/digest automerge)
+- `npm`: grouped as `node-tools` (minor/patch/digest automerge)
+- `mise`: grouped as `mise-tools` (minor/patch/digest automerge)
+- Pi extensions: grouped as `pi-extensions` (minor/patch/digest automerge)
 
-All updates require review. A matching hash proves byte integrity, not that upstream code is benign.
+Minor, patch, and digest updates use Renovate-managed squash merges after the
+`download-integrity`, `shellcheck`, and `test` checks pass. Platform automerge is
+disabled: Renovate checks and merges on its next run. Majors, initial pin updates,
+and vulnerability-alert updates remain review-only. This is not branch protection;
+humans and other writers can still merge directly.
+A matching hash proves byte integrity, not that upstream code is benign.
 
 ---
 
@@ -50,7 +55,7 @@ The **Renovate** Actions workflow is the intended writer. It runs at minutes 7 a
 UTC, with no separate update-time window so dashboard requests and passing CI
 can be processed on the next run. The hosted Mend App is not required;
 do not enable both writers. The seven-day age rule, low PR limits, and manual
-review policy remain in `renovate.json5`.
+major/security review policy remain in `renovate.json5`.
 
 Live runs need a dedicated GitHub App installed only on `martinemde/dotfiles`.
 The account owner must create and install it through GitHub's authenticated web
@@ -127,7 +132,7 @@ matching remain on Almanac's roadmap, so this is not a replacement security scan
 New releases wait seven days before Renovate proposes them. Missing timestamps are
 not accepted (`minimumReleaseAgeBehaviour: timestamp-required`), and strict internal
 checks suppress pending versions. Existing update grouping remains restricted to the
-same update types, but automerge is disabled globally. A delay is not a signature
+same update types; minor, patch, and digest updates can automerge after CI. A delay is not a signature
 or a vulnerability scan.
 
 Known vulnerability fixes bypass the release delay, normal schedule, and normal
@@ -153,7 +158,7 @@ before these changes.
 Zellij release URLs and adjacent `checksum.sha256` fields are extracted together
 using `github-release-attachments`. Renovate identifies the old asset by its hash
 and computes the next release asset hash, including releases without a GitHub API
-digest. These updates never automerge. CI downloads the exact URLs and verifies
+digest. Minor, patch, and digest updates automerge after CI. CI downloads the exact URLs and verifies
 their pinned SHA256 values. Upstream can return the old digest if it cannot map the
 old asset; CI rejects a resulting URL/hash mismatch. Keep URL and checksum adjacent.
 Review both fields and upstream release changes before merging. These are integrity
@@ -245,7 +250,7 @@ Defined in `renovate.json5`:
 - File: `home/dot_pi/private_agent/settings.json`
 - Pattern: `"npm:(?<depName>...)@(?<currentValue>...)"`
 - Datasource: `npm`
-- Package rule: group as `pi-extensions`; never automerge
+- Package rule: group as `pi-extensions`; automerge minor, patch, and digest updates after CI
 
 5. Chezmoi externals pinned to SHAs (GitHub Digest)
 
@@ -257,7 +262,7 @@ Defined in `renovate.json5`:
 - File: `home/.chezmoiexternals/zellij.externals.toml`
 - Match the release URL and its adjacent SHA256 as one dependency.
 - Datasource: `github-release-attachments`; versioning: `loose`.
-- Package rule: group as `zellij-plugins`; never automerge.
+- Package rule: group as `zellij-plugins`; automerge minor, patch, and digest updates after CI.
 - Verify proposed pairs with `python3 bin/check-zellij-plugins` (also run in CI).
 
 Each external has its own `customManagers` entry in `renovate.json5`, keyed to the file and URL it pins.
