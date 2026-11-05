@@ -3,7 +3,7 @@
 load test_helper
 
 @test "Claude retains local transcripts for 100 years" {
-  run chezmoi execute-template --file home/dot_claude/settings.json.tmpl
+  run chezmoi --config /dev/null --config-format toml     --source "$BATS_TEST_DIRNAME/../home" --override-data '{"hosttype":"home"}'     execute-template --file home/dot_claude/settings.json.tmpl
   [ "$status" -eq 0 ]
 
   local settings="$output"

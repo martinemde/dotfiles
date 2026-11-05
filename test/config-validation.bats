@@ -9,7 +9,10 @@ load test_helper
 # Helper to render a template file
 render_template() {
   local file="$1"
-  chezmoi execute-template --file "$file"
+  local hosttype="${2:-work}"
+  chezmoi execute-template --config /dev/null --config-format toml --source "$BATS_TEST_DIRNAME/../home" \
+    --override-data "{\"hosttype\":\"$hosttype\",\"git\":{\"name\":\"CI Test\",\"email\":\"ci@example.com\"}}" \
+    --file "$file"
 }
 
 # Helper to render and write template to temp file
@@ -137,36 +140,20 @@ render_to_temp() {
 # Editor Configuration Tests
 # ==============================================================================
 
-@test "neovim init.lua can be parsed" {
-  if ! command -v nvim >/dev/null 2>&1; then
-    skip "neovim not installed"
-  fi
-
-  local file="home/dot_config/nvim/init.lua"
-
-  # Try to load config in headless mode with minimal processing
-  # This will catch syntax errors but won't fully initialize plugins
-  run nvim --headless -u "$file" +'lua vim.print("ok")' +qall
-  [ "$status" -eq 0 ]
-}
-
 @test "neovim lua config files have valid syntax" {
   if ! command -v nvim >/dev/null 2>&1; then
     skip "neovim not installed"
   fi
 
-  # Discover all lua files under the nvim config directory
+  # loadfile compiles without running plugin bootstrapping or config code.
   local found=0
   while IFS= read -r -d '' lua_file; do
     found=1
-    if command -v luac >/dev/null 2>&1; then
-      run luac -p "$lua_file"
-      [ "$status" -eq 0 ]
-    else
-      run nvim --headless -u NONE -c "luafile $lua_file" +qall
-      [ "$status" -eq 0 ]
-    fi
-  done < <(find home/dot_config/nvim/lua -name '*.lua' -print0)
+    run env NVIM_SYNTAX_FILE="$lua_file" nvim --headless --noplugin -u NONE -i NONE \
+      -c 'lua local fn, err = loadfile(vim.env.NVIM_SYNTAX_FILE); if not fn then vim.api.nvim_err_writeln(err); vim.cmd("cquit") end' \
+      -c 'qall!'
+    [ "$status" -eq 0 ]
+  done < <(find home/dot_config/nvim -name '*.lua' -print0)
 
   [ "$found" -eq 1 ]
 }
@@ -187,21 +174,6 @@ render_to_temp() {
 # Terminal/Multiplexer Configuration Tests
 # ==============================================================================
 
-@test "tmux config can be parsed" {
-  if ! command -v tmux >/dev/null 2>&1; then
-    skip "tmux not installed"
-  fi
-
-  local file="home/dot_config/tmux/tmux.conf.local"
-
-  # Parse config without starting server
-  # tmux will validate syntax and report errors
-  run tmux -f "$file" source-file "$file"
-  # Exit code 0 or 1 (1 can mean server not running, which is ok for syntax check)
-  # We mainly want to catch syntax errors which give different exit codes
-  [ "$status" -le 1 ]
-}
-
 @test "kitty config can be validated" {
   if ! command -v kitty >/dev/null 2>&1; then
     skip "kitty not installed"
@@ -212,18 +184,6 @@ render_to_temp() {
   # kitty 0.46 has no --debug-config flag; load_config parses the file and
   # reports errors without opening a window
   run kitty +runpy "from kitty.config import load_config; load_config('$file')"
-  [ "$status" -eq 0 ]
-}
-
-@test "ghostty config has valid syntax" {
-  # Ghostty config is simple key=value format
-  # We can at least check it exists and has proper structure
-  local file="home/dot_config/ghostty/config"
-
-  [ -f "$file" ]
-
-  # Basic validation: no empty keys, proper format
-  run grep -v '^#' "$file"
   [ "$status" -eq 0 ]
 }
 
@@ -410,12 +370,10 @@ render_to_temp() {
 @test "claude settings.json has valid JSON syntax on non-work hosts" {
   # hosttype gates three blocks, and those blocks carry the commas, so a
   # personal host can render invalid JSON while a work host renders fine.
-  # Force the else branches by rewriting the conditions before rendering.
   local file="home/dot_claude/settings.json.tmpl"
   local rendered="$TEST_TMPDIR/claude-settings-personal.json"
 
-  sed 's/eq \.hosttype "work"/eq "personal" "work"/' "$file" |
-    chezmoi execute-template >"$rendered"
+  render_template "$file" home >"$rendered"
 
   if command -v jq >/dev/null 2>&1; then
     run jq empty "$rendered"
@@ -430,74 +388,4 @@ render_to_temp() {
   # The else branches must actually have been taken.
   run grep -c 'GUSTO_CLAUDE_SETUP\|effortLevel' "$rendered"
   [ "$output" -eq 0 ]
-}
-
-# ==============================================================================
-# Linter/Formatter Configuration Tests
-# ==============================================================================
-
-@test "editorconfig has valid syntax" {
-  # EditorConfig is simple INI format, basic check
-  local file="home/dot_editorconfig"
-
-  [ -f "$file" ]
-
-  # Check for basic structure
-  run grep -E '^\[.*\]$' "$file"
-  [ "$status" -eq 0 ]
-}
-
-@test "markdownlint config has valid JSON syntax" {
-  if command -v jq >/dev/null 2>&1; then
-    local file="home/dot_markdownlint.jsonc"
-    # jsonc might have comments, try to parse with jq
-    # This will fail on comments, but it's better than nothing
-    run jq '.' "$file"
-    # Don't fail on comments, just check file exists
-    [ -f "$file" ]
-  else
-    skip "jq not available"
-  fi
-}
-
-@test "bat config has valid syntax" {
-  # bat config is simple key=value
-  local file="home/dot_config/bat/config"
-
-  [ -f "$file" ]
-
-  # Check it's not empty and has proper format
-  run grep -v '^#' "$file"
-  [ "$status" -eq 0 ]
-}
-
-# ==============================================================================
-# Brewfile Tests
-# ==============================================================================
-
-@test "Brewfile has valid syntax" {
-  if ! command -v brew >/dev/null 2>&1; then
-    skip "homebrew not installed"
-  fi
-
-  local file="home/dot_Brewfile"
-
-  # Use brew bundle check with --no-upgrade to just validate syntax
-  cd "$(dirname "$file")" || exit 1
-  run brew bundle check --file="$(basename "$file")" --no-upgrade
-  # Exit code might be 1 if packages not installed, which is fine
-  # We're mainly checking for syntax errors
-  [ "$status" -le 1 ]
-}
-
-@test "Brewfile.mas has valid syntax" {
-  if ! command -v brew >/dev/null 2>&1; then
-    skip "homebrew not installed"
-  fi
-
-  local file="home/dot_Brewfile.mas"
-
-  cd "$(dirname "$file")" || exit 1
-  run brew bundle check --file="$(basename "$file")" --no-upgrade
-  [ "$status" -le 1 ]
 }

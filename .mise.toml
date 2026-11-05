@@ -7,6 +7,8 @@ min_version = "2026.10.25"
 
 [tools]
 chezmoi = "latest"
+# Pinned: Bun runs the Renovate and Zellij npm-style manager tests in CI.
+bun = "1.4.2"
 shfmt = "v3.12.0"
 
 [settings]

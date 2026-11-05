@@ -48,18 +48,18 @@ load test_helper
 }
 
 @test "shared skills have portable frontmatter and matching directory names" {
-  while IFS= read -r skill; do
-    local keys name directory
-    keys=$(yq --front-matter=extract -r 'keys | sort | join(",")' "$skill")
-    name=$(yq --front-matter=extract -r '.name' "$skill")
-    directory=$(basename "$(dirname "$skill")")
+  python3 - <<'PY'
+from pathlib import Path
+import yaml
 
-    [ "$keys" = "description,name" ]
-    [ "$name" = "$directory" ]
-  done < <(
-    find .agents/skills home/dot_agents/skills \
-      \( -name SKILL.md -o -name SKILL.md.tmpl \) -print | sort
-  )
+for root in (Path(".agents/skills"), Path("home/dot_agents/skills")):
+    for skill in sorted(root.rglob("SKILL.md*")):
+        if skill.name not in ("SKILL.md", "SKILL.md.tmpl"):
+            continue
+        frontmatter = yaml.safe_load(skill.read_text().split("---", 2)[1])
+        assert set(frontmatter) == {"description", "name"}, skill
+        assert frontmatter["name"] == skill.parent.name, skill
+PY
 }
 
 @test "shared skills avoid harness-specific command metadata" {
@@ -79,14 +79,16 @@ load test_helper
 }
 
 @test "canonical agent names match their filenames" {
-  while IFS= read -r agent; do
-    local name filename
-    name=$(yq --front-matter=extract -r '.name' "$agent")
-    filename=$(basename "$agent" .md)
+  python3 - <<'PY'
+from pathlib import Path
+import yaml
 
-    [ "$name" = "$filename" ]
-    [ "$(yq --front-matter=extract -r '.description | length > 0' "$agent")" = "true" ]
-  done < <(find .agents/agents home/dot_agents/agents -name '*.md' -print | sort)
+for root in (Path(".agents/agents"), Path("home/dot_agents/agents")):
+    for agent in sorted(root.rglob("*.md")):
+        frontmatter = yaml.safe_load(agent.read_text().split("---", 2)[1])
+        assert frontmatter["name"] == agent.stem, agent
+        assert frontmatter["description"], agent
+PY
 }
 
 @test "Claude and Codex adapters reference canonical agent bodies" {

@@ -38,8 +38,11 @@ prepare_prime_source() {
 }
 
 @test "non-interactive shells export the Prime Agent telemetry opt-out" {
-  chezmoi execute-template --file home/dot_zshenv.tmpl >"$TEST_TMPDIR/zshenv"
-  run env -i HOME="$TEST_HOME_DIR" PATH="$PATH" /bin/zsh -dfc \
+  command -v zsh >/dev/null 2>&1 || skip "zsh not installed"
+  chezmoi --config /dev/null --config-format toml \
+    --source "$BATS_TEST_DIRNAME/../home" \
+    execute-template --file "$BATS_TEST_DIRNAME/../home/dot_zshenv.tmpl" >"$TEST_TMPDIR/zshenv"
+  run env -i HOME="$TEST_HOME_DIR" PATH="$PATH" zsh -dfc \
     'source "$1"; sh -c '\''test "$PRIME_AGENT_TELEMETRY" = 0'\''' zsh "$TEST_TMPDIR/zshenv"
   [ "$status" -eq 0 ]
 }

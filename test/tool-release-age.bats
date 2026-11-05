@@ -32,7 +32,9 @@ STUB
 }
 
 render_installer() {
-    chezmoi execute-template --file "home/.chezmoiscripts/run_onchange_after_install-$1-tools.sh.tmpl" > "$TEST_TMPDIR/install.sh"
+    chezmoi --config /dev/null --config-format toml \
+        --source "$BATS_TEST_DIRNAME/../home" \
+        execute-template --file "$BATS_TEST_DIRNAME/../home/.chezmoiscripts/run_onchange_after_install-$1-tools.sh.tmpl" > "$TEST_TMPDIR/install.sh"
 }
 
 @test "Node tool installation enforces a seven-day release age" {

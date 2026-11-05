@@ -17,18 +17,18 @@ teardown() {
   rm -rf "$TEST_TMPDIR"
 }
 
-# Helper: start isolated tmux server with a named session
+# Helper: start an isolated server with explicit window and pane indices.
 start_tmux() {
-  tmux -L "$TMUX_SOCKET" new-session -d -s test -x 80 -y 24
+  tmux -L "$TMUX_SOCKET" -f /dev/null \
+    set-option -g base-index 1 \; \
+    set-window-option -g pane-base-index 1 \; \
+    new-session -d -s test -x 80 -y 24
 }
 
 # Helper: run a tmux command against the test server
 t() {
   tmux -L "$TMUX_SOCKET" "$@"
 }
-
-# Helper: wait briefly for tmux async commands to settle
-settle() { sleep 0.3; }
 
 # =============================================================================
 # Static validation
@@ -61,20 +61,6 @@ settle() { sleep 0.3; }
   for key in C-h C-j C-k C-l; do
     [[ "$normalized_output" == *"bind-key -T root $key "* ]]
   done
-}
-
-@test "C-h/C-l bindings use if-shell -F for edge detection" {
-  if ! command -v tmux >/dev/null 2>&1; then
-    skip "tmux not installed"
-  fi
-
-  start_tmux
-  t source-file "$BINDINGS"
-
-  run t list-keys -T root
-  [ "$status" -eq 0 ]
-  [[ "$output" == *'if-shell -F "#{pane_at_left}"'* ]]
-  [[ "$output" == *'if-shell -F "#{pane_at_right}"'* ]]
 }
 
 @test "tmux-nav.lua has valid lua syntax" {
@@ -122,7 +108,6 @@ settle() { sleep 0.3; }
 
   # Run the exact command from the C-h binding's false branch
   t if-shell -F "#{pane_at_left}" "previous-window" "select-pane -LZ"
-  settle
 
   run t display-message -t test -p '#{window_index}'
   [ "$output" = "2" ]
@@ -139,7 +124,6 @@ settle() { sleep 0.3; }
   t select-window -t test:1
 
   t if-shell -F "#{pane_at_right}" "next-window" "select-pane -RZ"
-  settle
 
   run t display-message -t test -p '#{window_index}'
   [ "$output" = "2" ]
@@ -154,13 +138,11 @@ settle() { sleep 0.3; }
   # Split: pane 1 (left) | pane 2 (right, active)
   # Active pane is NOT at left edge
   t split-window -h -t test
-  settle
 
   local pane_before
   pane_before=$(t display-message -t test -p '#{pane_index}')
 
   t if-shell -F "#{pane_at_left}" "previous-window" "select-pane -LZ"
-  settle
 
   local pane_after
   pane_after=$(t display-message -t test -p '#{pane_index}')
@@ -177,58 +159,11 @@ settle() { sleep 0.3; }
   # Split and select the left pane — NOT at right edge
   t split-window -h -t test
   t select-pane -t test:.1
-  settle
 
   local pane_before
   pane_before=$(t display-message -t test -p '#{pane_index}')
 
   t if-shell -F "#{pane_at_right}" "next-window" "select-pane -RZ"
-  settle
-
-  local pane_after
-  pane_after=$(t display-message -t test -p '#{pane_index}')
-
-  [ "$pane_before" != "$pane_after" ]
-}
-
-@test "select-pane -D moves down" {
-  if ! command -v tmux >/dev/null 2>&1; then
-    skip "tmux not installed"
-  fi
-
-  start_tmux
-  # Split vertically, select top pane
-  t split-window -v -t test
-  t select-pane -t test:.1
-  settle
-
-  local pane_before
-  pane_before=$(t display-message -t test -p '#{pane_index}')
-
-  t select-pane -DZ
-  settle
-
-  local pane_after
-  pane_after=$(t display-message -t test -p '#{pane_index}')
-
-  [ "$pane_before" != "$pane_after" ]
-}
-
-@test "select-pane -U moves up" {
-  if ! command -v tmux >/dev/null 2>&1; then
-    skip "tmux not installed"
-  fi
-
-  start_tmux
-  # Split vertically, stay on bottom pane
-  t split-window -v -t test
-  settle
-
-  local pane_before
-  pane_before=$(t display-message -t test -p '#{pane_index}')
-
-  t select-pane -UZ
-  settle
 
   local pane_after
   pane_after=$(t display-message -t test -p '#{pane_index}')

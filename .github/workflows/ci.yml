@@ -31,39 +31,18 @@ jobs:
           shellcheck bin/setup
           shellcheck bin/test
 
-  config-validation:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - name: Install validation tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y vim tmux python3 yq
-          npm install -g bats
-      - name: Run configuration validation tests
-        run: |
-          bats test/config-validation.bats
-
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest] # macos-latest
+    runs-on: ubuntu-latest
+    env:
+      MISE_AUTO_INSTALL: '0'
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Setup mise
         uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
-      - name: Install chezmoi
-        run: |
-          GIT_USER_NAME="CI Test User" GIT_USER_EMAIL="ci@example.com" ./install.sh
-      - name: Install config validation tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y vim tmux python3 python3-pip yq
-          npm install -g bats
       - name: Install test dependencies
         run: |
-          ./bin/setup
+          sudo apt-get update
+          sudo apt-get install -y bats zsh jq ripgrep vim neovim lua5.4 tmux python3 python3-yaml
       - name: Run test suite
         run: |
           ./bin/test

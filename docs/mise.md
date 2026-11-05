@@ -60,8 +60,9 @@ They also check that the environment setting wins over project settings.
 
 ## Lock scope and updates
 
-The project `mise.lock` covers chezmoi and shfmt on Linux x64/arm64 and macOS
-x64/arm64. It records release URLs and SHA-256 checksums; chezmoi also records
+The project `mise.lock` covers chezmoi, shfmt, and Bun on Linux x64/arm64 and macOS
+x64/arm64. Bun runs the Renovate extraction tests in CI; it is not a global install
+side effect. It records release URLs and SHA-256 checksums; chezmoi also records
 Cosign verification. The initial shfmt digests were compared with upstream
 `sha256sums.txt`, not accepted solely from the mise-versions cache.
 
