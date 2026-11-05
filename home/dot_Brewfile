@@ -3,7 +3,6 @@ brew "automake" # build tool
 brew "bison" # parser generator
 brew "ccusage" # CPU monitor
 brew "cloc" # code counter
-brew "cmake" # build tool
 brew "colima" # Docker runtime
 brew "coreutils" # GNU coreutils
 brew "curl" # HTTP client
@@ -39,7 +38,6 @@ brew "mupdf" # PDF viewer
 brew "nvm" # Node version manager
 brew "openssl@3" # crypto library
 brew "overmind" # process manager
-brew "pandoc" # document converter
 brew "pgvector" # PostgreSQL extension
 brew "poppler" # PDF library
 brew "rbspy" # Ruby profiler

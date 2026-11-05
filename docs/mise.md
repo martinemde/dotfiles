@@ -11,6 +11,27 @@ and macOS applications. Most global requests stay `latest` so routine updates do
 not depend on maintaining dozens of hand-written pins. Behaviour-dependent pins
 need a `# Pinned:` reason and Renovate coverage.
 
+## Homebrew audit
+
+CMake and Pandoc join GitHub CLI and Neovim on explicit Aqua backends.
+The Aqua registry has macOS/Linux release mappings for both. A trial migration
+of eza failed on macOS: its Aqua recipe requires the unsupported Cargo package
+type there. Keep macOS eza on Homebrew rather than add a source-build backend.
+These tools inherit the same verification settings;
+this does not promise signed provenance where upstream does not publish it.
+
+Keep Homebrew libraries, image/media toolchains, login shell, and Redis services.
+Keep Colima and Docker together for now: moving just their executables would lose
+Homebrew dependency and CLI-plugin wiring (including Lima). Keep mosh and its SSH
+integration there too. Do not migrate the remaining tools merely because a generic
+npm, pip, Conda, or GitHub backend can download them. Several have no registry entry
+or need a separate packaging/verification review: cloc, dotslash, overmind, rbspy,
+yamllint, ccusage, mermaid-cli, ruby-build, and ruby-install. Existing nvm setup
+also needs a separate shell-configuration migration, not just a Brewfile deletion.
+
+Removing Brewfile declarations does not uninstall existing packages. Homebrew may
+still need a formula as another package's dependency; do not force-remove it.
+
 ## Download policy
 
 Both configs require mise 2026.10.25, the installed version used to check these
