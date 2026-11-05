@@ -14,6 +14,8 @@ jobs:
   renovate:
     runs-on: ubuntu-latest
     container:
+      # Actions command files are owned by the runner, not the image's default user.
+      options: --user 0
       image: ghcr.io/renovatebot/renovate:44.216.5@sha256:029cf58d0213a20ed3f5e2c86f6261f29e73675b7e1b86659de096e0d3408051
     env:
       LOG_LEVEL: debug
