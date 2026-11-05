@@ -61,7 +61,7 @@ jobs:
           private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
           permission-administration: read
           permission-checks: read
-          permission-statuses: read
+          permission-statuses: write
           permission-contents: write
           permission-pull-requests: write
           permission-issues: write

@@ -68,11 +68,11 @@ Do not copy the CLI's broad personal OAuth token into an Actions secret.
    or user authorization is needed for installation tokens.
 2. Allow installation only on this account. Grant these repository permissions:
 
-- Contents, pull requests, issues, and workflows: read and write.
-- Administration, checks, commit statuses, and Dependabot alerts: read. Metadata read is automatic.
+- Contents, pull requests, issues, workflows, and commit statuses: read and write.
+- Administration, checks, and Dependabot alerts: read. Metadata read is automatic.
 
 These narrow [Renovate's GitHub App permissions](https://docs.renovatebot.com/modules/platform/github/#running-as-a-github-app)
-to this review-only setup: CI owns checks and statuses, and organization membership
+to this review-only setup: CI owns checks; Renovate publishes release-age commit statuses. Organization membership
 and merge queues are not used here.
 
 3. Install the App on `martinemde`, select **Only select repositories**, and
