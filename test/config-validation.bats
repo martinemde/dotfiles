@@ -57,7 +57,7 @@ render_to_temp() {
   [ "$status" -eq 0 ]
 }
 
-@test "zshenv exposes mise shims to non-interactive shells" {
+@test "zshenv exposes mise shims without automatic installs in non-interactive shells" {
   if ! command -v zsh >/dev/null 2>&1; then
     skip "zsh not installed"
   fi
@@ -68,11 +68,11 @@ render_to_temp() {
   touch "$TEST_HOME_DIR/.local/share/mise/shims/ruby"
   chmod +x "$TEST_HOME_DIR/.local/share/mise/shims/ruby"
 
-  run env -i HOME="$TEST_HOME_DIR" PATH="/usr/bin:/bin" /bin/zsh -dfc \
-    "source \"$rendered_file\"; command -v ruby"
+  run env -i HOME="$TEST_HOME_DIR" PATH="/usr/bin:/bin" MISE_AUTO_INSTALL=1 /bin/zsh -dfc \
+    "source \"$rendered_file\"; command -v ruby; print -r -- \"\$MISE_AUTO_INSTALL\""
 
   [ "$status" -eq 0 ]
-  [ "$output" = "$TEST_HOME_DIR/.local/share/mise/shims/ruby" ]
+  [ "$output" = "$(printf '%s\n' "$TEST_HOME_DIR/.local/share/mise/shims/ruby" 0)" ]
 }
 
 @test "zsh completions.zsh template renders and has valid syntax" {

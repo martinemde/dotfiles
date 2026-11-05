@@ -64,6 +64,27 @@ GIT_USER_NAME="CI User" GIT_USER_EMAIL="ci@example.com" ./install.sh
 
 For a complete list of options, run `./install.sh --help`.
 
+## Download verification
+
+Zellij plugins have SHA256 pins. Renovate proposes their release URLs and hashes
+in one update; CI downloads the assets and checks the pair. Tool and image updates
+require review, with a seven-day delay for routine new versions.
+
+Mise verifies the signatures/provenance its backends support. Attested precompiled
+Python and signed mise self-updates have no age delay; other tool selections keep
+the seven-day default. Renovate checks daily. Global tools still track `latest`;
+they are not yet fully hash-locked. Bun and uv package installs also apply a
+seven-day release delay, including their dependency resolution.
+
+Shims remain on PATH, but mise no longer installs missing tools as a side effect
+of running commands. Use explicit `mise install` or `mise upgrade`.
+
+For verification failures, investigate the upstream release instead of disabling
+checks or accepting a replacement hash. See [download trust](docs/download-security.md)
+for limits and [Renovate](docs/renovate.md) for the update path. After changing
+project mise versions, refresh `mise.lock` with the safe seven-day command in
+[Mise](docs/mise.md#lock-scope-and-updates).
+
 ## Pi terminal title
 
 The personal extension in `home/dot_pi/private_agent/extensions/terminal-title.ts`

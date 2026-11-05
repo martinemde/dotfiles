@@ -22,7 +22,7 @@
       manager.depNameTemplate === "lepht/pi-pr-session-title" &&
       manager.fileMatch.some((pattern) => new RegExp(pattern).test(file)));
     assert(manager);
-    assert.equal(manager.datasourceTemplate, "git-refs");
+    assert.equal(manager.datasourceTemplate, "github-digest");
     assert.equal(manager.currentValueTemplate, "main");
     const matches = manager.matchStrings.flatMap((pattern) =>
       [...contents.matchAll(new RegExp(pattern, "g"))]);

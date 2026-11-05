@@ -43,8 +43,8 @@ if [ -f "$MANIFEST" ]; then
     # Extract pkg@version pairs from devDependencies
     "$JQ" -r '.devDependencies // {} | to_entries[] | "\(.key)@\(.value)"' "$MANIFEST" | while read -r spec; do
         echo "Installing $spec..."
-        # Use bun to install globally
-        "$BUN" add --global "$spec"
+        # Hold back new releases, including transitive dependencies, for seven days.
+        "$BUN" add --global --minimum-release-age 604800 "$spec"
     done
 else
     echo "No package.json found at $MANIFEST, skipping Node.js tools installation"

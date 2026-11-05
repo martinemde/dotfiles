@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+"""Verify pinned Zellij release assets without installing them."""
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import sys
+import tomllib
+from urllib.error import URLError
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+
+
+DEFAULT_MANIFEST = Path(__file__).resolve().parents[1] / "home/.chezmoiexternals/zellij.externals.toml"
+RELEASE_URL = re.compile(
+    r"https://github[.]com/(?P<repo>[^/]+/[^/]+)/releases/download/"
+    r"(?P<tag>v?[0-9.]+)/(?P<asset>[^/]+[.]wasm)"
+)
+
+
+def check_plugins(manifest):
+    entries = tomllib.loads(manifest.read_text())
+    if not entries:
+        raise ValueError("plugin manifest is empty")
+    for target, entry in entries.items():
+        match = RELEASE_URL.fullmatch(entry["url"])
+        if entry["type"] != "file" or match is None:
+            raise ValueError(f"{target}: expected a GitHub release WASM file")
+        expected = entry["checksum"]["sha256"]
+        if re.fullmatch(r"[0-9a-f]{64}", expected) is None:
+            raise ValueError(f"{target}: expected a SHA256 pin")
+
+        repo, tag, asset_name = match.group("repo", "tag", "asset")
+        headers = {"Accept": "application/vnd.github+json", "User-Agent": "dotfiles-zellij-check"}
+        token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        api_url = f"https://api.github.com/repos/{repo}/releases/tags/{quote(tag, safe='')}"
+        with urlopen(Request(api_url, headers=headers)) as response:
+            release = json.load(response)
+        asset = next((item for item in release["assets"] if item["name"] == asset_name), None)
+        if asset is None or asset["browser_download_url"] != entry["url"]:
+            raise ValueError(f"{target}: exact pinned asset is not in the GitHub release")
+
+        digest = hashlib.sha256()
+        with urlopen(Request(entry["url"], headers={"User-Agent": "dotfiles-zellij-check"})) as response:
+            while chunk := response.read(65536):
+                digest.update(chunk)
+        actual = digest.hexdigest()
+        if actual != expected:
+            raise ValueError(f"{target}: SHA256 mismatch: expected {expected}, got {actual}")
+        api_digest = asset.get("digest")
+        if api_digest is not None and api_digest != f"sha256:{actual}":
+            raise ValueError(f"{target}: GitHub API digest mismatch: {api_digest}")
+        provenance = "GitHub API digest matches" if api_digest else "GitHub API digest unavailable"
+        print(f"{target}: sha256:{actual} ({provenance})")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("manifest", nargs="?", type=Path, default=DEFAULT_MANIFEST)
+    args = parser.parse_args()
+    try:
+        check_plugins(args.manifest)
+    except (OSError, URLError, ValueError, KeyError, TypeError) as error:
+        print(f"Zellij verification failed: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

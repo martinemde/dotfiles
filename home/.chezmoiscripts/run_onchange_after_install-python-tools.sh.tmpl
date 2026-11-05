@@ -38,7 +38,8 @@ if [ -f "$REQ_FILE" ]; then
   # Ignore comments and blank lines
   grep -Ev '^(#|\s*$)' "$REQ_FILE" | while read -r spec; do
     # --force updates existing tools when version pins change
-    "$UV" tool install --force "$spec"
+    # Apply the same seven-day hold to the tool and its dependencies.
+    "$UV" tool install --force --exclude-newer P7D "$spec"
   done
 else
   echo "No requirements.txt found at $REQ_FILE, skipping Python tools installation"

@@ -4,10 +4,10 @@ This guide explains how Renovate is configured in this repository, how the custo
 
 ## TL;DR
 
-- Renovate config lives at `renovate.json5` and runs weekly (before 9am Monday), opening labeled PRs (`deps`, `automated`) with low concurrency.
+- Renovate config lives at `renovate.json5` and runs daily (before 9am), opening labeled PRs (`deps`, `automated`) with low concurrency.
 - We pin everything important to immutable versions or digests for reproducibility and supply‑chain safety.
 - Standard managers are enabled (pip, mise, docker-compose, devcontainer, actions) and custom regex managers cover Chezmoi externals, Pi extensions, and select version files.
-- Renovate updates these pins automatically and groups safe updates for fast review/automerge.
+- Renovate proposes pin updates for review; automerge is disabled.
 
 ---
 
@@ -16,15 +16,15 @@ This guide explains how Renovate is configured in this repository, how the custo
 File: `renovate.json5`
 
 - Extends: `config:recommended`, `:semanticCommits`, `:disableDependencyDashboard`
-- Schedule: `before 9am on monday`
+- Schedule: `before 9am`
 - Labels: `deps`, `automated`
 - PR limits: `prHourlyLimit: 2`, `prConcurrentLimit: 5`
 
 Enabled managers and file discovery:
 
 - `pip_requirements`: `home/dot_config/dotfiles/requirements.txt`
-- `npm`: `home/dot_config/dotfiles/package.json`
-- `mise`: `.mise.toml`, `home/dot_config/mise/config.toml.tmpl`
+- `npm`: `package.json`, `home/dot_config/dotfiles/package.json`
+- `mise`: `.mise.toml`; custom Aqua regex covers `home/dot_config/mise/config.toml.tmpl`
 - `docker-compose`: `home/dot_config/docker-compose/*.yml`
 - `devcontainer`: `.devcontainer/devcontainer.json`
 - `github-actions`: `.github/workflows/*.yml` (with digest pinning)
@@ -32,15 +32,56 @@ Enabled managers and file discovery:
 
 Grouping and automerge rules:
 
-- `github-actions`: group by manager, automerge minor/patch/digest
-- `devcontainer`: group by manager, automerge minor/patch/digest
-- `docker-compose`: group by manager, automerge digest updates
+- `github-actions`: group minor/patch/digest updates; no automerge
+- `devcontainer`: group minor/patch/digest updates; no automerge
+- `docker-compose`: group digest updates; no automerge
 - `pip_requirements`: grouped as `python-tools` (no automerge)
 - `npm`: grouped as `node-tools` (no automerge)
 - `mise`: grouped as `mise-tools` (no automerge)
 - Pi extensions: grouped as `pi-extensions` (no automerge)
 
-Why: high-signal, low-risk updates (actions/devcontainer/digests) are auto‑merged to keep things current; others require review.
+All updates require review. A matching hash proves byte integrity, not that upstream code is benign.
+
+---
+
+## Update Security Decisions
+
+New releases wait seven days before Renovate proposes them. Missing timestamps are
+not accepted (`minimumReleaseAgeBehaviour: timestamp-required`), and strict internal
+checks suppress pending versions. Existing update grouping remains restricted to the
+same update types, but automerge is disabled globally. A delay is not a signature
+or a vulnerability scan.
+
+The GitHub SHA managers use `github-digest`, not `git-refs`, because only the former
+provides commit timestamps. This uses the commit date, not when a branch first
+pointed at that commit. It is not proof that a commit is safe. The root npm manifest
+and templated Aqua pins are explicitly discovered; neither was reliably covered
+before these changes.
+
+Zellij release URLs and adjacent `checksum.sha256` fields are extracted together
+using `github-release-attachments`. Renovate identifies the old asset by its hash
+and computes the next release asset hash, including releases without a GitHub API
+digest. These updates never automerge. CI downloads the exact URLs and verifies
+their pinned SHA256 values. Upstream can return the old digest if it cannot map the
+old asset; CI rejects a resulting URL/hash mismatch. Keep URL and checksum adjacent.
+Review both fields and upstream release changes before merging. These are integrity
+checks, not signed provenance; a compromised upstream can publish malicious bytes
+and a matching hash.
+
+Project `mise.lock` refresh is explicit: use the command in `docs/mise.md` with the
+seven-day delay after changing `.mise.toml`. Native Renovate lockfile refresh exists,
+but requires operator authorization for unsafe execution. It is not enabled here:
+the hosted runner's authorization and delay propagation have not been verified.
+Renovate's release-age check does not cover `lockFileMaintenance`, so ordinary
+Renovate age settings would not secure that refresh command. Do not enable
+`allowedUnsafeExecutions` or arbitrary post-upgrade commands merely to bypass
+that boundary. The user Go template has no committed lock yet; `latest`
+there is not a reproducible pin.
+
+Sources: [release age](https://docs.renovatebot.com/configuration-options/#minimumreleaseage),
+[GitHub digest](https://docs.renovatebot.com/modules/datasource/github-digest/),
+[attachment digest implementation](https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/github-release-attachments/index.ts),
+[mise lock trust model](https://docs.renovatebot.com/modules/manager/mise/#trust-model-for-lock-file-updates).
 
 ---
 
@@ -53,15 +94,15 @@ These files purposely centralize versions so Renovate can update them automatica
   - Currently: `cosign` (used for signature verification). Renovate updates via GitHub Releases.
 
 - `.mise.toml` and `home/dot_config/mise/config.toml.tmpl`
-  - Define tool versions managed by [mise]. Pins explicit versions (no `latest`).
+  - Define tool versions managed by [mise]. Most user tools intentionally track `latest`; behavior-sensitive tools are pinned.
   - Supports native mise tools (e.g., `python = "3.13.7"`) and the explicit Aqua backend (`"aqua:owner/repo"`).
-  - Renovate updates native mise tools via the Mise manager and Aqua-prefixed tools via a custom regex manager (GitHub Releases datasource).
+  - Renovate updates native project tools via the Mise manager and Aqua-prefixed template pins via a custom regex manager (GitHub Releases datasource). The native manager cannot parse the Go template.
 
 - `home/dot_config/dotfiles/requirements.txt`
   - Pinned versions for Python tools (installed via uv tool install). Updated by Renovate's pip manager.
 
 - `home/dot_config/dotfiles/package.json`
-  - Pinned versions for Node.js CLI tools (installed globally via npm). Updated by Renovate's npm manager.
+  - Pinned versions for Node.js CLI tools (installed globally via Bun). Updated by Renovate's npm manager.
 
 - `home/dot_pi/private_agent/settings.json`
   - Pins Pi extension packages as `npm:<package>@<version>`.
@@ -71,7 +112,7 @@ These files purposely centralize versions so Renovate can update them automatica
   - Base image and all features pinned to immutable `@sha256:` digests. Updated by `devcontainer` manager.
 
 - `home/dot_config/docker-compose/*.yml`
-  - Service images pinned with tag+digest (e.g., `image: repo:tag@sha256:...`). Digest updates are auto‑merged.
+  - Service images pinned with tag+digest (e.g., `image: repo:tag@sha256:...`). Digest updates require review.
 
 - `home/.chezmoiexternals/*.externals.toml`
   - All externals pinned to commit SHAs (archive or raw URLs) or release tags for reproducibility.
@@ -114,10 +155,18 @@ Defined in `renovate.json5`:
 - Datasource: `npm`
 - Package rule: group as `pi-extensions`; never automerge
 
-5. Chezmoi externals pinned to SHAs (Git Refs)
+5. Chezmoi externals pinned to SHAs (GitHub Digest)
 
 - Files: `home/.chezmoiexternals/*.externals.toml`, one custom manager per dependency
-- Datasource: `git-refs` with `currentValueTemplate: "master"` (we track the upstream default branch and replace our pinned SHA when the branch moves).
+- Datasource: `github-digest` with `currentValueTemplate: "master"` or `"main"`. This preserves commit timestamps for the release-age check; `git-refs` has no timestamps.
+
+6. Zellij release assets (GitHub Release Attachments)
+
+- File: `home/.chezmoiexternals/zellij.externals.toml`
+- Match the release URL and its adjacent SHA256 as one dependency.
+- Datasource: `github-release-attachments`; versioning: `loose`.
+- Package rule: group as `zellij-plugins`; never automerge.
+- Verify proposed pairs with `python3 bin/check-zellij-plugins` (also run in CI).
 
 Each external has its own `customManagers` entry in `renovate.json5`, keyed to the file and URL it pins.
 
@@ -127,8 +176,8 @@ Note: When adding new externals, add a matching regex rule so Renovate can keep 
 
 ## End‑to‑End Flow (What Renovate Updates)
 
-- Docker/Devcontainer: PRs updating only digests or minor/patch releases; digests grouped and auto‑merged.
-- GitHub Actions: digest pinning and minor/patch updates grouped and auto‑merged.
+- Docker/Devcontainer: reviewed PRs updating digests or minor/patch releases.
+- GitHub Actions: digest pinning and minor/patch updates grouped for review.
 - Python tools: PRs update `requirements.txt` pinned versions.
 - Node.js tools: PRs update `package.json` pinned versions.
 - Mise tools: PRs update `.mise.toml` and `home/dot_config/mise/config.toml.tmpl` pins.
@@ -152,7 +201,7 @@ Note: When adding new externals, add a matching regex rule so Renovate can keep 
 
 - Add a new Chezmoi external:
   - Pin to a specific commit SHA (tarball URL or `revision = "<sha>"`).
-  - Add a matching `customManagers` rule using `git-refs` so Renovate can update it.
+  - Add a matching `customManagers` rule using `github-digest` and an `owner/repo` package name so Renovate can update it with commit timestamps.
 
 - Docker/Devcontainer:
   - Keep tag+digest pattern for images and features.
@@ -222,7 +271,7 @@ gh api repos/zsh-users/zsh-syntax-highlighting/commits/master --jq .sha
 
 ## Maintenance Tips
 
-- Prefer explicit versions over `latest`; let Renovate do the bumping.
+- Keep behavior-sensitive versions pinned. `latest` in the user mise template is intentional and is not controlled by Renovate.
 - When adding a new external or bespoke versions file, add a matching `customManagers` rule.
 - Keep tag+digest for images: readable tag for humans, digest for reproducibility.
 - Use the gh commands above to sanity‑check SHAs/tags when reviewing Renovate PRs.

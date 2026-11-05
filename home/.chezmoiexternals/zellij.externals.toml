@@ -1,13 +1,15 @@
 # Zellij Plugins
-# Managed via chezmoi externals with Renovate automation
+# Managed via chezmoi externals; Renovate updates release URLs and SHA256 checksums together
+# Checksums pin reviewed bytes; they do not authenticate the builder.
 
 # zellij-autolock: Auto-lock plugin for Zellij
 # Purpose: Locks Zellij (passes keys through) while interactive programs run (e.g. nvim, fzf) so their keybindings aren't captured
-# Updates: Weekly via Renovate tracking GitHub releases
+# Updates: Weekly via Renovate GitHub release attachments; verify URL and SHA256 together
 # renovate: depName=fresh2dev/zellij-autolock
 [".config/zellij/plugins/zellij-autolock.wasm"]
 type = "file"
 url = "https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm"
+checksum.sha256 = "69c95607bfd97e075d6762a44fdbc703a82a3c4909dbbbe43952f020487b8ea4"
 refreshPeriod = "168h"
 
 # zjstatus: Themable status bar for zellij (loaded via default layout)
@@ -16,4 +18,5 @@ refreshPeriod = "168h"
 [".config/zellij/plugins/zjstatus.wasm"]
 type = "file"
 url = "https://github.com/dj95/zjstatus/releases/download/v0.23.0/zjstatus.wasm"
+checksum.sha256 = "e006901223524239db618021e4cc5d17f82dc4bfae5432895ba41f03f13861ff"
 refreshPeriod = "168h"

@@ -49,7 +49,10 @@ fi
 # Add Go bin directory to PATH (for go install)
 [[ -d "${GOPATH:-$HOME/go}/bin" ]] && path=("${GOPATH:-$HOME/go}/bin" $path)
 
-# Make mise-managed tools available to non-interactive shells and subprocesses
+# Make mise-managed tools available to non-interactive shells and subprocesses.
+# Running a command must not install software; use explicit mise install/upgrade.
+# The environment setting also prevents project config from re-enabling this.
+export MISE_AUTO_INSTALL=0
 [[ -d "$XDG_DATA_HOME/mise/shims" ]] && path=("$XDG_DATA_HOME/mise/shims" $path)
 
 # Editor configuration

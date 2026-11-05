@@ -1,112 +1,99 @@
 # Mise
 
-## Context and Problem Statement
+Use mise for versioned tools and runtimes; Homebrew still owns system libraries
+and macOS applications. Most global requests stay `latest` so routine updates do
+not depend on maintaining dozens of hand-written pins. Behaviour-dependent pins
+need a `# Pinned:` reason and Renovate coverage.
 
-The dotfiles repository currently uses Homebrew to install development tools like Python, Node.js, and associated tooling. While working on a project requiring Ansible and other Python CLI tools, inconsistencies emerged: Python was installed via Homebrew, but Python tool management (via uv) needed to align with the Python runtime managed by Mise for consistency. This creates a fragmented tool management approach where some tools come from package managers and others from version managers.
+## Download policy
 
-## Decision Drivers
+Both configs require mise 2026.10.25, the installed version used to check these
+settings. This is a compatibility floor, not a moving dependency pin.
 
-- **Project-specific version requirements**: Need to switch between Python/Node.js versions based on project requirements
-- **Reproducibility**: Pinned versions ensure consistent environments across machines and time
-- **Performance**: Faster dotfile provisioning by avoiding unnecessary tool reinstallations
-- **Consistency**: Single tool management approach reduces complexity
-- **Toolchain integration**: Tools like uv, npm globals should use the same runtime they're installed for
+- Resolve floating requests with a seven-day release delay by default.
+- Require precompiled CPython and its GitHub artifact attestation. Disable source
+  compilation so unavailable precompiled builds fail instead of bypassing that
+  check. Python alone opts out of the delay (`minimum_release_age = "0s"`).
+- Keep Aqua Cosign, Minisign, SLSA and GitHub attestation checks enabled, along
+  with Node verification and Go checksums. These checks depend on what the
+  backend and upstream publish; they do not require provenance from every tool.
+  In particular, uv stays on Aqua with the delay: enabling attestations does
+  not make missing attestations an error there, or on the GitHub backend.
+- Fail on provenance API errors rather than silently skipping verification.
+- Recheck published provenance at installation even when a lock records it
+  (`locked_verify_provenance = true`). This costs extra network requests.
 
-## Considered Options
+The delay is not a complete quarantine. Exact pins and existing lock entries
+bypass it; backends without release timestamps can only warn. Review those cases
+rather than assuming the age filter verified them. Installed tools are not
+reverified merely because the setting changed.
 
-- **Continue with Homebrew-only approach**: Install all tools via package managers
-- **Hybrid Homebrew + Mise approach**: Use Homebrew for some tools, Mise for others
-- **Mise-first approach**: Use Mise for globally versioned tooling, Homebrew for system utilities
+Python's check authenticates the downloaded artifact as published by
+`astral-sh/python-build-standalone`; it accepts any workflow in that repository
+and does not require a SLSA build predicate. This is not proof of a trusted build
+process. No external custom attestation gate is added.
 
-## Decision Outcome
+Native `mise self-update` has its own zero-delay setting. Its signed archives
+and required release manifest provide publisher continuity, not a build-provenance
+gate. This does not enable self-updates or replace Homebrew/OS package updates;
+those keep their own update and verification policy.
 
-Chosen option: "Mise-first approach", because it provides project-specific version management while maintaining fast provisioning through granular update triggers.
+## Implicit installation
 
-### Consequences
+Keep mise shims on PATH, but require an explicit install. `auto_install = false`
+is the master switch for shim/not-found, exec, and task auto-installation in this
+mise version; separate per-command switches would duplicate it. Both configs
+set the default. Managed `.zshenv` also exports `MISE_AUTO_INSTALL=0` so a project
+cannot enable it again for zsh or its descendants. Other launchers need the same
+environment setting if project overrides must be blocked. This is a default and
+shell policy, not a sandbox: an explicit `mise install`, `mise use`, or an install
+command inside a task can still install tools.
 
-- Good, because tools are pinned to specific versions improving reproducibility
-- Good, because project-specific version switching is seamless
-- Good, because dotfile updates only reinstall affected toolchains
-- Good, because toolchain integration (Python + uv) is consistent
-- Bad, because pinned versions require ongoing maintenance
-- Bad, because adds complexity to the chezmoi template system
+`not_found_system_fallback = false` makes a configured shim fail when its version
+is missing rather than run an unrelated system executable. It governs shim
+resolution, not every PATH lookup: `mise exec` can still use a system executable
+when the requested version is absent. It does not disable ordinary system tools.
 
-### Confirmation
+The offline CLI fixtures use isolated config, cache, state, and a fake old install
+to check stale-shim, exec, and task failures without downloading or installing.
+They also check that the environment setting wins over project settings.
 
-Implementation success will be confirmed by:
+## Lock scope and updates
 
-- Fast dotfile provisioning (no unnecessary tool reinstalls)
-- Successful project-specific Python version switching
-- Consistent toolchain behavior (uv using Mise-managed Python)
-- Granular run_onchange script execution
+The project `mise.lock` covers chezmoi and shfmt on Linux x64/arm64 and macOS
+x64/arm64. It records release URLs and SHA-256 checksums; chezmoi also records
+Cosign verification. The initial shfmt digests were compared with upstream
+`sha256sums.txt`, not accepted solely from the mise-versions cache.
 
-## Pros and Cons of the Options
+Refresh with the no-install command next to `[tools]` in `.mise.toml`. Review the
+config and lock together, including after Renovate changes an exact version.
+The explicit environment age setting matters because safe mode ignores project
+settings. Exact pins still require release-date review. Do not remove a checksum
+or provenance field to resolve a refresh failure: establish why upstream bytes
+or verification changed first.
 
-### Continue with Homebrew-only approach
+Global locks are deliberately deferred. The global source is a Chezmoi Go
+template, not parseable mise TOML. Its OS-specific tools also need render-aware
+refreshes; npm/PyPI dependency sidecars and Go's version-only lock coverage need
+review. Locking every global tool across platforms can download release
+artifacts for provenance checks. A partial, unmaintained global lock would hide
+stale versions behind `latest` rather than provide a dependable update path.
 
-Install all development tools including Python, Node.js via Homebrew packages.
+No `locked = true` or `--locked` enforcement yet. A complete global lock and its
+verified refresh path must exist first. The global install script runs from
+`$HOME` so this checkout's project lock does not shadow global tools. It uses the
+global config's release-age policy rather than a CLI override, which would mask
+Python's per-tool exception.
 
-- Good, because simple single package manager approach
-- Good, because automatic dependency management
-- Bad, because no project-specific version switching
-- Bad, because uv/npm tools don't align with runtime versions
-- Bad, because system-wide version conflicts
+Renovate handles project declarations and the template's explicit Aqua pin.
+Native lock refresh needs self-hosted approval for mise execution; this repo
+does not enable unsafe execution or assume hosted Renovate can refresh locks.
+Project lock refresh is an explicit review step until that is configured.
 
-### Hybrid Homebrew + Mise approach
+## Sources
 
-Use Homebrew for system tools, Mise for development runtimes, with mixed approaches for associated tooling.
-
-- Good, because leverages strengths of both tools
-- Neutral, because maintains some Homebrew simplicity
-- Bad, because creates inconsistent toolchain integration
-- Bad, because unclear decision boundaries for new tools
-- Bad, because complex mental model for contributors
-
-### Mise-first approach
-
-Use Mise for globally versioned development tooling (Python, Node.js, etc.) and their associated packages, Homebrew for system utilities.
-
-- Good, because consistent toolchain integration
-- Good, because project-specific version management
-- Good, because pinned versions improve reproducibility
-- Good, because granular update triggers improve provisioning performance
-- Bad, because requires version maintenance overhead
-- Bad, because more complex chezmoi template patterns
-
-## More Information
-
-### Implementation Strategy
-
-Tool-specific `run_onchange` scripts will be created using regex-based version extraction for granular triggering:
-
-```bash
-# python version hash: {{ include "dot_config/mise/config.toml" | regexFind "python = \"[^\"]*\"" | sha256sum }}
-```
-
-This ensures scripts only execute when their specific tool version changes, not when any part of the mise config is modified.
-
-**Script execution order**: Tool scripts use chezmoi's `after_` attribute so managed configuration exists on the first apply. The base mise installation script is also prefixed with `00-` to ensure tools are installed before language-specific scripts run:
-
-- `run_onchange_after_00-install-mise-tools.sh.tmpl` - Installs all mise-defined tools
-- `run_onchange_after_install-python-tools.sh.tmpl` - Installs Python ecosystem tools (via uv tool install)
-- `run_onchange_after_install-nodejs-tools.sh.tmpl` - Installs Node ecosystem tools through bun
-
-### Technical Implementation Notes
-
-**Chezmoi template patterns**: Using `regexFind` with `include` allows extraction of specific configuration lines for targeted change detection. This is more precise than hashing entire config files.
-
-**Path resolution**: Template paths are relative to the `.chezmoiroot` directory (`home/`), so `dot_config/mise/config.toml` maps to `.config/mise/config.toml` in the target system.
-
-### Future Considerations
-
-- **Renovate integration**: Automated version updates will address maintenance overhead
-- **Tool categorization**: Clear guidelines for when to use Mise vs Homebrew
-- **Documentation**: Update CLAUDE.md with new tool management patterns
-- **Testing**: Consider adding BATS tests for tool installation script logic
-
-### Migration Path
-
-1. Migrate from pipx to uv for Python tool management (uv installed via Homebrew)
-2. Establish tool-specific script patterns
-3. Migrate other development tooling incrementally
-4. Document patterns for future tool additions
+- [mise 2026.10.25 settings](https://github.com/jdx/mise/blob/v2026.10.25/settings.toml)
+- [mise 2026.10.25 precompiled Python verification](https://github.com/jdx/mise/blob/v2026.10.25/src/plugins/core/python.rs)
+- [mise 2026.10.25 native self-update verification](https://github.com/jdx/mise/blob/v2026.10.25/src/cli/self_update.rs)
+- [mise 2026.10.25 lock and provenance behaviour](https://github.com/jdx/mise/blob/v2026.10.25/docs/dev-tools/mise-lock.md)
+- [Renovate's mise lock trust model](https://docs.renovatebot.com/modules/manager/mise/#trust-model-for-lock-file-updates)

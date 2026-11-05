@@ -1,4 +1,7 @@
 #:schema https://mise.jdx.dev/schema/mise.json
+# Compatibility floor for the verification and lock semantics tested here.
+min_version = "2026.10.25"
+
 [tools]
 "aqua:ajeetdsouza/zoxide" = "latest"
 "aqua:ast-grep/ast-grep" = "latest"
@@ -43,7 +46,8 @@ codex = "latest"
 go = "latest"
 node = "latest"
 pnpm = "latest"
-python = "latest"
+# Require artifact attestations for precompiled CPython instead of a release delay.
+python = { version = "latest", minimum_release_age = "0s" }
 uv = "latest"
 ansible-core = "latest"
 
@@ -58,10 +62,41 @@ NODE_OPTIONS = "--use-openssl-ca"
 
 {{ end -}}
 [settings]
+# Keep shims, exec, and tasks from installing tools as a side effect.
+auto_install = false
+# A missing configured shim must not run an unrelated tool from PATH.
+not_found_system_fallback = false
 idiomatic_version_file_enable_tools = ["ruby"]
+# Exact pins and existing lock entries bypass the age filter; review those updates.
+minimum_release_age = "7d"
+locked_verify_provenance = true
+provenance_api_failures_fatal = true
+github_attestations = true
+slsa = true
+
+[settings.aqua]
+cosign = true
+github_attestations = true
+minisign = true
+slsa = true
+
+[settings.node]
+verify = true
+
+[settings.go]
+skip_checksum = false
 
 [settings.github]
 use_git_credentials = true
+
+[settings.python]
+# Do not silently fall back to an unverified source build.
+compile = false
+github_attestations = true
+
+# Applies only to mise self-update; package-manager updates keep their own policy.
+[settings.self_update]
+minimum_release_age = "0s"
 
 [settings.ruby]
 compile = false

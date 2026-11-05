@@ -33,9 +33,10 @@ Preview and apply by file with `chezmoi diff [target_path]` and `chezmoi apply [
   reinstalls; incidental whitespace edits trigger it too.
 - `home/dot_config/zsh/functions/` holds autoloaded zsh functions, one function per file
   named after the function.
-- The installer verifies GitHub release signatures with cosign by default and falls back to
-  checksums; `VERIFY_SIGNATURES=false` skips both. Downloads added to `install.sh` are
-  expected to go through that path rather than a bare `curl`.
+- The installer verifies chezmoi release signatures with cosign and then archive checksums;
+  `VERIFY_SIGNATURES=false` skips signatures only, not checksums. Direct cosign downloads
+  always require release-key signature verification. Downloads added to `install.sh` are
+  expected to go through verification rather than a bare `curl`.
 
 ## Packages, images, and versions
 

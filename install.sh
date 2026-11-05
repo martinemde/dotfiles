@@ -280,6 +280,45 @@ run_with_sudo() {
 # COSIGN INSTALLATION
 # =============================================================================
 
+# Cosign's release KMS key is vendored, not fetched alongside the binary.
+# OpenSSL checks the ECDSA/SHA-256 signature over the exact downloaded bytes.
+# This is direct public-key verification, not Sigstore transparency verification.
+verify_cosign_download() {
+  cosign_download="$1"
+  cosign_download_url="$2"
+  if ! command -v openssl >/dev/null 2>&1; then
+    log_error "OpenSSL is required to authenticate the cosign download; install openssl or cosign using a trusted package manager"
+    exit 1
+  fi
+
+  cosign_signature="$temp_dir/cosign.sig"
+  # v2 releases have detached signatures; v3 puts the KMS signature in a bundle.
+  if ! $download_cmd "$cosign_download_url.sig" >"$cosign_signature"; then
+    if ! command -v jq >/dev/null 2>&1; then
+      log_error "jq is required to read cosign's KMS signature bundle; install jq or cosign using a trusted package manager"
+      exit 1
+    fi
+    if ! $download_cmd "$cosign_download_url-kms.sigstore.json" >"$temp_dir/cosign-kms.sigstore.json"; then
+      log_error "Failed to download a cosign release-key signature; install cosign using a trusted package manager"
+      exit 1
+    fi
+    if ! jq -er '
+      select(.messageSignature.messageDigest.algorithm == "SHA2_256")
+      | .messageSignature.signature | strings | select(length > 0)
+    ' "$temp_dir/cosign-kms.sigstore.json" >"$cosign_signature"; then
+      log_error "Invalid cosign KMS signature bundle"
+      exit 1
+    fi
+  fi
+
+  if ! openssl base64 -d -A -in "$cosign_signature" -out "$temp_dir/cosign.sig.der" ||
+    ! openssl dgst -sha256 -verify "$script_dir/keys/cosign-release.pub" \
+      -signature "$temp_dir/cosign.sig.der" "$cosign_download"; then
+    log_error "Cosign release-key signature verification failed"
+    exit 1
+  fi
+}
+
 # Function to install cosign
 install_cosign() {
   # Check if cosign is already available and not forcing reinstall
@@ -348,6 +387,9 @@ install_cosign() {
     exit 1
   fi
 
+  # Authenticate the verifier itself before installing or executing it.
+  verify_cosign_download "$cosign_binary" "$cosign_url"
+
   # Move to final location and set permissions
   mv "$cosign_binary" "$BIN_DIR/cosign"
   chmod +x "$BIN_DIR/cosign"
@@ -396,9 +438,9 @@ install_mise() {
     # Install required dependencies and set up repository
     if run_with_sudo apt-get update -y && run_with_sudo apt-get install -y gpg wget curl; then
       if run_with_sudo install -dm 755 /etc/apt/keyrings; then
-        download_cmd=$(get_download_cmd)
-
-        if $download_cmd https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | run_with_sudo tee /etc/apt/keyrings/mise-archive-keyring.gpg >/dev/null; then
+        # Authenticate the repository with our reviewed key, not a live key download.
+        if gpg --batch --yes --dearmor --output "$temp_dir/mise-archive-keyring.gpg" "$script_dir/keys/mise-archive.asc" &&
+          run_with_sudo tee /etc/apt/keyrings/mise-archive-keyring.gpg <"$temp_dir/mise-archive-keyring.gpg" >/dev/null; then
           echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$repo_arch] https://mise.jdx.dev/deb stable main" | run_with_sudo tee /etc/apt/sources.list.d/mise.list
           if run_with_sudo apt-get update && try_package_install "mise" "apt" "run_with_sudo apt-get install -y mise"; then
             return 0
@@ -469,14 +511,25 @@ get_latest_version() {
 
 # Function to verify checksums (portable across systems)
 verify_checksum() {
-  # First parameter (archive file) is not used directly,
-  # but kept for compatibility with calling convention
-  checksums="$2"
+  checksum_archive="$1"
+  checksum_manifest="$2"
+  # Verify exactly the archive we will extract, not any other listed file.
+  archive_digest=$(awk -v file="$checksum_archive" '$2 == file || $2 == "*" file {print $1}' "$checksum_manifest")
+  case "$archive_digest" in
+  "" | *[!0-9a-fA-F]*)
+    log_error "Missing or invalid checksum for $checksum_archive"
+    return 1
+    ;;
+  esac
+  if [ "${#archive_digest}" -ne 64 ]; then
+    log_error "Expected exactly one SHA-256 checksum for $checksum_archive"
+    return 1
+  fi
 
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum -c "$checksums" --ignore-missing
+    printf '%s  %s\n' "$archive_digest" "$checksum_archive" | sha256sum -c -
   elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 -c "$checksums" --ignore-missing
+    printf '%s  %s\n' "$archive_digest" "$checksum_archive" | shasum -a 256 -c -
   else
     log_error "Neither sha256sum nor shasum is available for checksum verification"
     exit 1
@@ -515,14 +568,13 @@ download_chezmoi() {
   checksums="chezmoi_${version}_checksums.txt"
   signature_bundle="chezmoi_${version}_checksums.txt.sigstore.json"
   legacy_signature="chezmoi_${version}_checksums.txt.sig"
-  pubkey="chezmoi_cosign.pub"
 
   # Full paths in temporary directory
   archive_path="$temp_dir/$archive"
   checksums_path="$temp_dir/$checksums"
   signature_bundle_path="$temp_dir/$signature_bundle"
   legacy_signature_path="$temp_dir/$legacy_signature"
-  pubkey_path="$temp_dir/$pubkey"
+  pubkey_path="$script_dir/keys/chezmoi-cosign.pub"
 
   log_info "Downloading $archive..."
   if ! $download_cmd "$base_url/$archive" >"$archive_path"; then
@@ -539,12 +591,6 @@ download_chezmoi() {
 
   # Only download and verify signature if verification is enabled
   if [ "$VERIFY_SIGNATURES" = "true" ]; then
-    log_info "Downloading public key..."
-    if ! $download_cmd "$base_url/$pubkey" >"$pubkey_path"; then
-      log_error "Failed to download public key"
-      exit 1
-    fi
-
     # Current releases publish a Sigstore bundle. Retain support for older
     # releases that used a detached .sig so CHEZMOI_VERSION remains useful.
     log_info "Downloading signature bundle..."

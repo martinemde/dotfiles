@@ -5,10 +5,16 @@
     ':semanticCommits',
     ':disableDependencyDashboard',
   ],
-  schedule: ['before 9am on monday'],
+  schedule: ['before 9am'],
   labels: ['deps', 'automated'],
   prHourlyLimit: 2,
   prConcurrentLimit: 5,
+  automerge: false,
+
+  // Quarantine new releases; missing publication times must not bypass the wait.
+  minimumReleaseAge: '7 days',
+  minimumReleaseAgeBehaviour: 'timestamp-required',
+  internalChecksFilter: 'strict',
 
   // Managers enabled for this repo
   enabledManagers: [
@@ -38,32 +44,29 @@
     fileMatch: ['^\\.github/workflows/.*\\.ya?ml$'],
   },
   npm: {
-    fileMatch: ['^home/dot_config/dotfiles/package\\\\.json$'],
+    fileMatch: ['^package\\.json$', '^home/dot_config/dotfiles/package\\.json$'],
   },
 
-  // Grouping + automerge for safe/low-risk updates
+  // Group related updates for review; never automerge upstream code.
   packageRules: [
     // Docker digest pinning for reproducibility
     { matchCategories: ['docker'], pinDigests: true },
     {
       matchManagers: ['github-actions'],
       groupName: 'github-actions',
-      automerge: true,
-      automergeType: 'pr',
+      automerge: false,
       matchUpdateTypes: ['minor', 'patch', 'digest'],
     },
     {
       matchManagers: ['devcontainer'],
       groupName: 'devcontainer',
-      automerge: true,
-      automergeType: 'pr',
+      automerge: false,
       matchUpdateTypes: ['minor', 'patch', 'digest'],
     },
     {
       matchManagers: ['docker-compose'],
       groupName: 'docker-compose',
-      automerge: true,
-      automergeType: 'pr',
+      automerge: false,
       matchUpdateTypes: ['digest'],
     },
     {
@@ -82,13 +85,20 @@
       groupName: 'node-tools',
       rangeStrategy: 'pin',
       automerge: false,
-      matchPaths: ['home/dot_config/dotfiles/package.json'],
+      matchFileNames: ['package.json', 'home/dot_config/dotfiles/package.json'],
     },
     {
       matchManagers: ['custom.regex'],
       matchDatasources: ['npm'],
       matchFileNames: ['home/dot_pi/private_agent/settings.json'],
       groupName: 'pi-extensions',
+      automerge: false,
+    },
+    {
+      matchManagers: ['custom.regex'],
+      matchDatasources: ['github-release-attachments'],
+      matchFileNames: ['home/.chezmoiexternals/zellij.externals.toml'],
+      groupName: 'zellij-plugins',
       automerge: false,
     },
   ],
@@ -118,7 +128,7 @@
     // Handle aqua-prefixed tools in mise TOML files
     {
       customType: 'regex',
-      fileMatch: ['\\.mise\\.toml$', '^home/dot_config/mise/config\\.toml$'],
+      fileMatch: ['\\.mise\\.toml$', '^home/dot_config/mise/config\\.toml(?:\\.tmpl)?$'],
       matchStrings: [
         '"aqua:(?<depName>[^/]+/[^"]+)"\\s*=\\s*"(?<currentValue>v?[^"]+)"',
       ],
@@ -145,10 +155,10 @@
       matchStrings: [
         'ohmyzsh/ohmyzsh/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
       ],
-      datasourceTemplate: 'git-refs',
+      datasourceTemplate: 'github-digest',
       currentValueTemplate: 'master',
       depNameTemplate: 'ohmyzsh/ohmyzsh',
-      packageNameTemplate: 'https://github.com/ohmyzsh/ohmyzsh',
+      packageNameTemplate: 'ohmyzsh/ohmyzsh',
     },
     // Chezmoi external dependencies - zsh-autosuggestions archive tarball pin
     {
@@ -157,10 +167,10 @@
       matchStrings: [
         'zsh-users/zsh-autosuggestions/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
       ],
-      datasourceTemplate: 'git-refs',
+      datasourceTemplate: 'github-digest',
       currentValueTemplate: 'master',
       depNameTemplate: 'zsh-users/zsh-autosuggestions',
-      packageNameTemplate: 'https://github.com/zsh-users/zsh-autosuggestions',
+      packageNameTemplate: 'zsh-users/zsh-autosuggestions',
     },
     // Chezmoi external dependencies - zsh-syntax-highlighting archive tarball pin
     {
@@ -169,10 +179,10 @@
       matchStrings: [
         'zsh-users/zsh-syntax-highlighting/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
       ],
-      datasourceTemplate: 'git-refs',
+      datasourceTemplate: 'github-digest',
       currentValueTemplate: 'master',
       depNameTemplate: 'zsh-users/zsh-syntax-highlighting',
-      packageNameTemplate: 'https://github.com/zsh-users/zsh-syntax-highlighting',
+      packageNameTemplate: 'zsh-users/zsh-syntax-highlighting',
     },
     // Chezmoi external dependencies - tmux-plugins/tpm archive tarball pin
     {
@@ -181,10 +191,10 @@
       matchStrings: [
         'tmux-plugins/tpm/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
       ],
-      datasourceTemplate: 'git-refs',
+      datasourceTemplate: 'github-digest',
       currentValueTemplate: 'master',
       depNameTemplate: 'tmux-plugins/tpm',
-      packageNameTemplate: 'https://github.com/tmux-plugins/tpm',
+      packageNameTemplate: 'tmux-plugins/tpm',
     },
     // Chezmoi external dependencies - zsh-snap archive tarball pin
     {
@@ -193,10 +203,10 @@
       matchStrings: [
         'marlonrichert/zsh-snap/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
       ],
-      datasourceTemplate: 'git-refs',
+      datasourceTemplate: 'github-digest',
       currentValueTemplate: 'main',
       depNameTemplate: 'marlonrichert/zsh-snap',
-      packageNameTemplate: 'https://github.com/marlonrichert/zsh-snap',
+      packageNameTemplate: 'marlonrichert/zsh-snap',
     },
     // Chezmoi external dependencies - PR session naming code and license
     {
@@ -205,20 +215,21 @@
       matchStrings: [
         'lepht/pi-pr-session-title/raw/(?<currentDigest>[a-f0-9]{40})/',
       ],
-      datasourceTemplate: 'git-refs',
+      datasourceTemplate: 'github-digest',
       currentValueTemplate: 'main',
       depNameTemplate: 'lepht/pi-pr-session-title',
-      packageNameTemplate: 'https://github.com/lepht/pi-pr-session-title',
+      packageNameTemplate: 'lepht/pi-pr-session-title',
     },
-    // Chezmoi external dependencies - zellij plugin release binaries
-    // Tracks zellij-autolock, zjstatus, and zjframes via GitHub release tags in URLs
+    // Match each release URL and its adjacent checksum as one dependency.
+    // The datasource hashes matching release assets, even without API digests.
     {
       customType: 'regex',
       fileMatch: ['^home/\\.chezmoiexternals/zellij\\.externals\\.toml$'],
       matchStrings: [
-        'url = "https://github\\.com/(?<depName>[^/]+/[^/]+)/releases/download/(?<currentValue>v?[0-9.]+)/',
+        'url = "https://github\\.com/(?<depName>[^/]+/[^/]+)/releases/download/(?<currentValue>v?[0-9.]+)/[^"\\n]+"\\nchecksum\\.sha256 = "(?<currentDigest>[a-f0-9]{64})"',
       ],
-      datasourceTemplate: 'github-releases',
+      datasourceTemplate: 'github-release-attachments',
+      versioningTemplate: 'loose',
     },
   ],
 }
