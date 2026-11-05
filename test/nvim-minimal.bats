@@ -8,6 +8,6 @@
 
 @test "Neovim restore template references existing plugin sources" {
     command -v chezmoi >/dev/null 2>&1 || skip "chezmoi not installed"
-    run chezmoi execute-template --file home/.chezmoiscripts/run_onchange_after_install-nvim-plugins.sh.tmpl
+    run chezmoi --config /dev/null --config-format toml --source "$BATS_TEST_DIRNAME/../home" execute-template --file home/.chezmoiscripts/run_onchange_after_install-nvim-plugins.sh.tmpl
     [ "$status" -eq 0 ]
 }

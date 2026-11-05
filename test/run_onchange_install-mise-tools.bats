@@ -7,7 +7,7 @@ load test_helper
     local script_file="home/.chezmoiscripts/run_onchange_after_00-install-mise-tools.sh.tmpl"
 
     # Render our actual script (no template variables needed for this script)
-    run chezmoi execute-template --file "$script_file"
+    run chezmoi --config /dev/null --config-format toml --source "$BATS_TEST_DIRNAME/../home" execute-template --file "$script_file"
     [ "$status" -eq 0 ]
 
     assert_script_structure "$output"
@@ -16,7 +16,7 @@ load test_helper
 
 @test "installs global tools outside the checkout using configured release-age policy" {
     local script="$TEST_TMPDIR/install-mise.sh"
-    chezmoi execute-template --file home/.chezmoiscripts/run_onchange_after_00-install-mise-tools.sh.tmpl >"$script"
+    chezmoi --config /dev/null --config-format toml --source "$BATS_TEST_DIRNAME/../home" execute-template --file home/.chezmoiscripts/run_onchange_after_00-install-mise-tools.sh.tmpl >"$script"
     mkdir -p "$TEST_TMPDIR/bin"
     cat >"$TEST_TMPDIR/bin/mise" <<'EOF'
 #!/bin/bash

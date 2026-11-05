@@ -15,7 +15,7 @@ This guide explains how Renovate is configured in this repository, how the custo
 
 File: `renovate.json5`
 
-- Extends: `config:recommended`, `:semanticCommits`, `:disableDependencyDashboard`
+- Extends: `config:recommended`, `:semanticCommits`; Dependency Dashboard enabled
 - Schedule: `before 9am`
 - Labels: `deps`, `automated`
 - PR limits: `prHourlyLimit: 2`, `prConcurrentLimit: 5`
@@ -43,6 +43,26 @@ Grouping and automerge rules:
 All updates require review. A matching hash proves byte integrity, not that upstream code is benign.
 
 ---
+
+## Hosted activation and visible evidence
+
+A valid config is not an installed updater. Install the
+[Renovate GitHub App](https://github.com/apps/renovate/installations/new) on
+`martinemde/dotfiles`, then inspect its
+[Mend job logs](https://developer.mend.io/github/martinemde/dotfiles).
+These settings require the account owner's authenticated browser; the local
+GitHub CLI token cannot inspect or grant this app installation.
+
+The Dependency Dashboard is enabled so the hosted bot can show pending updates,
+release-age waits and failures even before an update PR is ready. A dashboard or
+PR authored by Renovate, plus a successful hosted job, is the activation evidence.
+Routine PRs still follow the daily window, seven-day age rule and review policy.
+
+The manual **Renovate validation** Actions workflow runs the real engine in full
+dry-run mode with a read-only token. Its logs expose manifest extraction, lookups
+and proposed updates. It cannot create branches, issues or PRs, and a green run
+is not proof that the hosted app is installed. Keep one writer: do not add a
+second scheduled self-hosted updater unless deliberately replacing the app.
 
 ## Update Security Decisions
 

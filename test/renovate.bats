@@ -14,6 +14,7 @@
     assert.equal(config.minimumReleaseAgeBehaviour, "timestamp-required");
     assert.equal(config.internalChecksFilter, "strict");
     assert.equal(config.automerge, false);
+    assert.equal(config.dependencyDashboard, true);
     assert.equal(config.osvVulnerabilityAlerts, true);
     assert.equal(config.vulnerabilityAlerts.minimumReleaseAge, null);
     assert.equal(config.vulnerabilityAlerts.automerge, false);
