@@ -29,22 +29,17 @@ brew "libffi" # FFI library
 brew "librdkafka" # Kafka library
 brew "libsodium" # crypto library
 brew "libyaml" # YAML library
-brew "luarocks" # Lua package manager
 brew "mas" # Mac App Store CLI
 brew "mise" # tool version manager
 brew "mosh" # mobile shell
-brew "mermaid-cli" # diagram generator
 brew "mupdf" # PDF viewer
 brew "nvm" # Node version manager
 brew "openssl@3" # crypto library
-brew "overmind" # process manager
 brew "pgvector" # PostgreSQL extension
 brew "poppler" # PDF library
 brew "rbspy" # Ruby profiler
 brew "readline" # line editing library
 brew "redis", restart_service: :changed # database
-brew "ruby-build" # Ruby builder
-brew "ruby-install" # Ruby installer
 brew "tesseract" # OCR tool
 brew "texinfo" # documentation
 brew "thefuck" # command corrector
@@ -56,14 +51,10 @@ brew "yamllint"  # YAML linter
 brew "zsh" # shell
 cask "1password" # password manager
 cask "1password-cli" # password CLI
-cask "amethyst" # window manager
 cask "betterdisplay" # display manager
-cask "colemak-dh" # keyboard layout
-cask "discord" # voice and text chat
 cask "finicky" # browser manager
 cask "keymapp" # key mapper
 cask "maccy" # clipboard
-cask "meld" # diff tool
 cask "ngrok" # tunneling tool
 cask "notunes" # Override Apple Music
 cask "obsidian" # notetaker
@@ -71,4 +62,3 @@ cask "raycast" # better spotlight
 cask "slack" # messaging
 cask "spotify" # music
 cask "stats" # system monitor
-cask "visual-studio-code" # editor
