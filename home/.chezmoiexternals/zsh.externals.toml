@@ -27,6 +27,6 @@ refreshPeriod = "168h"
 # renovate: repo=zsh-users/zsh-syntax-highlighting branch=master
 [".zsh/plugins/zsh-syntax-highlighting"]
 type = "archive"
-url = "https://github.com/zsh-users/zsh-syntax-highlighting/archive/5eb677bb0fa9a3e60f0eff031dc13926e093df92.tar.gz"
+url = "https://github.com/zsh-users/zsh-syntax-highlighting/archive/e6683f20e5c38d3e5447f45845d04ddda75d0f23.tar.gz"
 stripComponents = 1
 refreshPeriod = "168h"
