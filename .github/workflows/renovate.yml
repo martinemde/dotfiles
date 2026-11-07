@@ -24,6 +24,10 @@ jobs:
   renovate:
     # Stay quiet until the account owner installs and configures the App.
     if: github.event_name != 'schedule' || vars.RENOVATE_APP_ID != ''
+    strategy:
+      fail-fast: false
+      matrix:
+        repository: [dotfiles, martinemde.com]
     runs-on: ubuntu-latest
     container:
       # Actions command files are owned by the runner, not the image's default user.
@@ -32,6 +36,7 @@ jobs:
     env:
       LOG_LEVEL: debug
       RENOVATE_PLATFORM: github
+      RENOVATE_REPOSITORY: ${{ github.repository_owner }}/${{ matrix.repository }}
       RENOVATE_ONBOARDING: 'false'
       RENOVATE_REQUIRE_CONFIG: required
       RENOVATE_REPOSITORY_CACHE: disabled
@@ -59,6 +64,8 @@ jobs:
         with:
           app-id: ${{ vars.RENOVATE_APP_ID }}
           private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ matrix.repository }}
           permission-administration: read
           permission-checks: read
           permission-statuses: write
@@ -72,12 +79,12 @@ jobs:
         env:
           RENOVATE_TOKEN: ${{ github.token }}
           RENOVATE_DRY_RUN: full
-        run: renovate "$GITHUB_REPOSITORY"
+        run: renovate "$RENOVATE_REPOSITORY"
       - name: Update dependency branches, pull requests, and dashboard
         if: github.event_name == 'schedule' || !inputs.dry_run
         env:
           RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: renovate "$GITHUB_REPOSITORY"
+        run: renovate "$RENOVATE_REPOSITORY"
       - name: Summarize run
         if: always()
         env:

@@ -81,7 +81,14 @@ can be processed on the next run. The hosted Mend App is not required;
 do not enable both writers. Local overrides permit major updates and shorten core-tool
 aging; the shared preset retains conservative defaults for other consumers.
 
-Live runs need a dedicated GitHub App installed only on `martinemde/dotfiles`.
+The same workflow also runs against `martinemde/martinemde.com`, using the blog's
+own Renovate config rather than the dotfiles-specific managers. Separate matrix
+jobs keep a blog failure from stopping dotfiles updates. Each job gets a token
+scoped to its target repository; the existing App credentials stay in dotfiles.
+
+The existing GitHub App installation has account-wide repository access. The
+workflow deliberately targets only `martinemde/dotfiles` and
+`martinemde/martinemde.com`, and requests a single-repository token per job.
 The account owner must create and install it through GitHub's authenticated web
 settings; the current CLI OAuth token cannot create an App or its private key.
 Do not copy the CLI's broad personal OAuth token into an Actions secret.
@@ -99,9 +106,11 @@ These narrow [Renovate's GitHub App permissions](https://docs.renovatebot.com/mo
 to this review-only setup: CI owns checks; Renovate publishes release-age commit statuses. Organization membership
 and merge queues are not used here.
 
-3. Install the App on `martinemde`, select **Only select repositories**, and
-   select **dotfiles**. Disable or deselect this repository in the hosted Mend
-   Renovate App installation before enabling this writer.
+3. Install the App on `martinemde`. It currently has access to all repositories,
+   so adding the blog needs no installation or credential changes. For a new,
+   narrower installation, select only **dotfiles** and **martinemde.com**.
+   Disable or deselect both repositories in the hosted Mend Renovate App
+   installation before enabling this writer.
 4. In the new App's settings, generate and download a private key. In the
    repository's **Settings → Secrets and variables → Actions**, add secret
    `RENOVATE_APP_PRIVATE_KEY` containing the complete PEM file. Add repository
@@ -110,7 +119,7 @@ and merge queues are not used here.
    repeated credential failures. Keep the private key out of the repository and
    logs; remove any unneeded local copy after storing it securely.
 
-The token action limits each installation token to the current repository,
+The token action limits each installation token to the matrix target repository,
 requests only the listed permissions, and revokes it after
 the job. The workflow's own `GITHUB_TOKEN` stays read-only. An App token lets
 Renovate PRs trigger CI, unlike writes made with `GITHUB_TOKEN`.
