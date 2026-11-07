@@ -7,7 +7,7 @@
 # renovate: repo=marlonrichert/zsh-snap branch=main
 [".zsh/znap/zsh-snap"]
 type = "archive"
-url = "https://github.com/marlonrichert/zsh-snap/archive/25754a45d9ceafe6d7d082c9ebe40a08cb85a4f0.tar.gz"
+url = "https://github.com/marlonrichert/zsh-snap/archive/a738c4868d8fcdee2d019be10e1e43831f4fc93c.tar.gz"
 stripComponents = 1
 refreshPeriod = "168h"
 
