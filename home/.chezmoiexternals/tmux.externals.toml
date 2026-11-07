@@ -7,6 +7,6 @@
 # renovate: repo=tmux-plugins/tpm branch=master
 [".config/tmux/plugins/tpm"]
 type = "archive"
-url = "https://github.com/tmux-plugins/tpm/archive/99469c4a9b1ccf77fade25842dc7bafbc8ce9946.tar.gz"
+url = "https://github.com/tmux-plugins/tpm/archive/e261deb1b47614eed3400089ce7197dc68acc4eb.tar.gz"
 stripComponents = 1
 refreshPeriod = "168h"
