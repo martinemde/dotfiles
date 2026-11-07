@@ -120,15 +120,48 @@ PY
 }
 
 @test "Pi settings use exact extension pins managed by Renovate" {
-  jq -e '
-    .packages == [
-      "npm:pi-subagents@0.44.0",
-      "npm:pi-web-access@0.19.0"
-    ] and
-    has("lastChangelogVersion") == false
-  ' home/dot_pi/private_agent/settings.json
+  command -v bun >/dev/null 2>&1 || skip "Bun is not installed"
+  run env REPO_ROOT="$BATS_TEST_DIRNAME/.." bun --eval '
+    import { strict as assert } from "node:assert";
+    import { readFileSync } from "node:fs";
+    import { join } from "node:path";
+    import { runInNewContext } from "node:vm";
 
-  rg -F "'custom.regex'" renovate.json5
-  rg -F 'home\\/dot_pi\\/private_agent\\/settings\\.json' renovate.json5
-  rg -F "groupName: 'pi-extensions'" renovate.json5
+    const root = process.env.REPO_ROOT;
+    const file = "home/dot_pi/private_agent/settings.json";
+    const contents = readFileSync(join(root, file), "utf8");
+    const settings = JSON.parse(contents);
+    assert.equal(Object.hasOwn(settings, "lastChangelogVersion"), false);
+    const packages = settings.packages.map(pkg => {
+      const match = pkg.match(/^npm:(.+)@(\d+\.\d+\.\d+)$/);
+      assert(match, "Pi extensions must use exact npm version pins: " + pkg);
+      return { depName: match[1], currentValue: match[2] };
+    });
+    assert.deepEqual(packages.map(pkg => pkg.depName).sort(), ["pi-subagents", "pi-web-access"]);
+
+    const config = runInNewContext("(" + readFileSync(join(root, "renovate.json5"), "utf8") + ")");
+    const filePatterns = manager => (manager.managerFilePatterns ?? manager.fileMatch ?? [])
+      .map(pattern => new RegExp(pattern.startsWith("/") && pattern.endsWith("/")
+        ? pattern.slice(1, -1) : pattern));
+    assert(config.enabledManagers.includes("custom.regex"));
+    const managers = config.customManagers.filter(manager =>
+      filePatterns(manager).some(pattern => pattern.test(file)));
+    assert.equal(managers.length, 1);
+    const manager = managers[0];
+    assert.equal(manager.customType, "regex");
+    assert.equal(manager.datasourceTemplate, "npm");
+    assert.equal(manager.versioningTemplate, "npm");
+    const extracted = Array.from(manager.matchStrings).flatMap(pattern =>
+      [...contents.matchAll(new RegExp(pattern, "g"))].map(match => ({
+        depName: match.groups.depName,
+        currentValue: match.groups.currentValue,
+      })));
+    assert.deepEqual(extracted, packages);
+    assert(config.packageRules.some(rule =>
+      rule.matchManagers?.includes("custom.regex") &&
+      rule.matchDatasources?.includes("npm") &&
+      rule.matchFileNames?.includes(file) && rule.groupName === "pi-extensions"));
+  '
+  printf '%s\n' "$output"
+  [ "$status" -eq 0 ]
 }

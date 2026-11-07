@@ -17,10 +17,13 @@
       ".pi/agent/extensions/pr-session-title/upstream.ts",
     ]);
     const config = runInNewContext("(" + readFileSync(join(root, "renovate.json5"), "utf8") + ")");
+    const filePatterns = manager => (manager.managerFilePatterns ?? manager.fileMatch ?? [])
+      .map(pattern => new RegExp(pattern.startsWith("/") && pattern.endsWith("/")
+        ? pattern.slice(1, -1) : pattern));
     assert(config.enabledManagers.includes("custom.regex"));
     const manager = config.customManagers.find((manager) =>
       manager.depNameTemplate === "lepht/pi-pr-session-title" &&
-      manager.fileMatch.some((pattern) => new RegExp(pattern).test(file)));
+      filePatterns(manager).some(pattern => pattern.test(file)));
     assert(manager);
     assert.equal(manager.datasourceTemplate, "github-digest");
     assert.equal(manager.currentValueTemplate, "main");

@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""Exercise the pinned zsh-snap archive in an isolated home."""
+
+import io
+from pathlib import Path
+import subprocess
+import sys
+import tarfile
+import tempfile
+import tomllib
+from urllib.request import Request, urlopen
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def main():
+    externals = tomllib.loads((ROOT / "home/.chezmoiexternals/zsh.externals.toml").read_text())
+    entry = externals[".zsh/znap/zsh-snap"]
+    with urlopen(Request(entry["url"], headers={"User-Agent": "dotfiles-plugin-tests"}), timeout=60) as response:
+        data = response.read()
+    with tempfile.TemporaryDirectory(prefix="dotfiles-znap-") as temporary:
+        home = Path(temporary)
+        target = home / ".zsh/znap/zsh-snap"
+        target.mkdir(parents=True)
+        with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as archive:
+            for member in archive.getmembers():
+                parts = Path(member.name).parts[entry["stripComponents"]:]
+                if not parts:
+                    continue
+                destination = target.joinpath(*parts)
+                if not destination.resolve().is_relative_to(target.resolve()):
+                    raise ValueError("archive path escapes sandbox")
+                if member.isdir():
+                    destination.mkdir(parents=True, exist_ok=True)
+                elif member.isfile():
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    destination.write_bytes(archive.extractfile(member).read())
+                    destination.chmod(member.mode)
+        subprocess.run([sys.executable, "-B", str(ROOT / "test/znap-integration.py"), str(home)],
+                       cwd=ROOT, check=True)
+
+
+if __name__ == "__main__":
+    main()
