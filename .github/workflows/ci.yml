@@ -41,7 +41,7 @@ jobs:
       - name: Setup mise
         uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          version: 2026.11.1 # mise
+          version: 2026.11.4 # mise
       - name: Install test dependencies
         run: |
           sudo apt-get update
@@ -72,7 +72,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          version: 2026.11.1 # mise
+          version: 2026.11.4 # mise
       - name: Exercise tools from this checkout's manifests
         run: |
           read -r node uv < <(bun --eval 'const c = Bun.TOML.parse(await Bun.file("home/dot_config/mise/config.toml").text()); console.log(`node@${c.tools.node} uv@${c.tools.uv}`)')
@@ -89,7 +89,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          version: 2026.11.1 # mise
+          version: 2026.11.4 # mise
       - name: Install shell test dependency
         run: sudo apt-get update && sudo apt-get install -y zsh tmux
       - name: Exercise pinned zsh-snap cache behavior
