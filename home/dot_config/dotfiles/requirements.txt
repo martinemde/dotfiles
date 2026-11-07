@@ -2,4 +2,4 @@
 # Python tools pin manifest for uv-installed CLI tools
 
 # https://github.com/simonw/claude-code-transcripts
-claude-code-transcripts==0.5
+claude-code-transcripts==0.6
