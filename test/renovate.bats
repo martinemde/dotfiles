@@ -39,11 +39,6 @@
     assert.equal(config.statusCheckNames, undefined);
     const mergePolicy = config.packageRules.find(rule => rule.automerge === true);
     assert.equal(mergePolicy.automerge, true);
-    const terminalPolicy = config.packageRules.at(-1);
-    assert.equal(terminalPolicy.automerge, false);
-    for (const file of ["home/.chezmoiexternals/pi.externals.toml", "home/dot_pi/private_agent/settings.json", "home/.chezmoiexternals/zellij.externals.toml"]) {
-      assert(terminalPolicy.matchFileNames.includes(file));
-    }
     assert.deepEqual(Array.from(mergePolicy.matchUpdateTypes), ["minor", "patch", "digest"]);
     for (const file of ["package.json", "home/dot_config/dotfiles/package.json"]) {
       assert(filePatterns(config.npm).some(pattern => pattern.test(file)), file);

@@ -103,19 +103,23 @@ async function update(manager = 'mise', packageFile = miseFile, dep = mise.deps[
   assert.ok(result);
   return result;
 }
-for (const updateType of ['minor', 'patch', 'digest']) {
+for (const updateType of ['minor', 'patch', 'digest', 'major']) {
   const effective = await update('mise', miseFile, mise.deps[0], { updateType });
   assert.equal(effective.automerge, true, updateType);
   assert.equal(effective.platformAutomerge, false);
   assert.equal(effective.automergeType, 'pr');
   assert.equal(effective.automergeStrategy, 'squash');
 }
-assert.equal((await update('mise', miseFile, mise.deps[0], { updateType: 'major', newVersion: '2.0.0' })).automerge, false);
+for (const depName of ['jdx/mise', 'twpayne/chezmoi', 'astral-sh/uv', 'oven-sh/bun']) {
+  const effective = await update('custom.regex', 'versions.toml', {depName, datasource: 'github-releases', currentValue: '1.0.0'});
+  assert.equal(effective.minimumReleaseAge, '12 hours', depName);
+}
+assert.equal((await update()).minimumReleaseAge, '7 days', 'ordinary tools retain the default delay');
 for (const updateType of ['minor', 'patch', 'digest', 'major']) {
   assert.equal((await update('mise', miseFile, mise.deps[0], { updateType, isVulnerabilityAlert: true, automerge: true })).automerge, false, `security ${updateType}`);
 }
 for (const file of ['home/.chezmoiexternals/pi.externals.toml', 'home/dot_pi/private_agent/settings.json', 'home/.chezmoiexternals/zellij.externals.toml']) {
-  assert.equal((await update('custom.regex', file, {depName: 'example/plugin', datasource: 'github-releases', currentValue: '1.0.0'})).automerge, false, file);
+  assert.equal((await update('custom.regex', file, {depName: 'example/plugin', datasource: 'github-releases', currentValue: '1.0.0'})).automerge, true, file);
 }
 assert.equal((await update('renovate-config', 'renovate.json5', preset)).automerge, false);
 const misePolicy = await applyPackageRules({ ...config, manager: 'mise', packageFile: miseFile, depName: mise.deps[0].depName });

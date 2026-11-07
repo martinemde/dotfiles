@@ -7,7 +7,7 @@ This guide explains how Renovate is configured in this repository, how the custo
 - Renovate config lives at `renovate.json5` and runs every 30 minutes, opening labeled PRs (`deps`, `automated`) with low concurrency.
 - We pin everything important to immutable versions or digests for reproducibility and supply‑chain safety.
 - Standard managers are enabled (pip, mise, docker-compose, devcontainer, actions) and custom regex managers cover Chezmoi externals, Pi extensions, and select version files.
-- Renovate automerges minor, patch, and digest updates after CI; majors and security alerts require review.
+- Renovate automerges major, minor, patch, and digest updates after CI. Shared-policy and security-alert updates require review.
 
 ---
 
@@ -38,14 +38,14 @@ Grouping and automerge rules:
 - `pip_requirements`: grouped as `python-tools` (minor/patch/digest automerge)
 - `npm`: grouped as `node-tools` (minor/patch/digest automerge)
 - `mise`: grouped as `mise-tools` (minor/patch/digest automerge)
-- Pi extensions: grouped as `pi-extensions`, review-only
+- Pi extensions: grouped as `pi-extensions`, eligible for automerge
 - `custom.jsonata`: tmux plugin repository/branch/commit data in `home/.chezmoidata/tmux-plugins.yaml`
 - `renovate-config`: reviewed shared-preset updates; never automatic policy adoption
 
 Minor, patch, and digest updates use Renovate-managed squash merges after required
 integrity, ShellCheck, unit, plugin and four tool-integration checks pass. The stable
 `test` aggregate also requires all those jobs. Platform automerge is
-disabled: Renovate checks and merges on its next run. Majors, initial pin updates,
+disabled: Renovate checks and merges on its next run. Initial pin updates, shared-policy
 and vulnerability-alert updates remain review-only. The active GitHub ruleset requires each of these checks on `main`; administrators
 can still bypass it for direct maintenance.
 A matching hash proves byte integrity, not that upstream code is benign.
@@ -78,8 +78,8 @@ substitute for the seven-day quarantine, so we retain the current commit-age pol
 The **Renovate** Actions workflow is the intended writer. It runs at minutes 7 and 37 of every hour
 UTC, with no separate update-time window so dashboard requests and passing CI
 can be processed on the next run. The hosted Mend App is not required;
-do not enable both writers. The seven-day age rule, low PR limits, and manual
-major/security review policy remain in `renovate.json5`.
+do not enable both writers. Local overrides permit major updates and shorten core-tool
+aging; the shared preset retains conservative defaults for other consumers.
 
 Live runs need a dedicated GitHub App installed only on `martinemde/dotfiles`.
 The account owner must create and install it through GitHub's authenticated web
@@ -153,10 +153,12 @@ matching remain on Almanac's roadmap, so this is not a replacement security scan
 
 ## Update Security Decisions
 
-New releases wait seven days before Renovate proposes them. Missing timestamps are
+Mise, chezmoi, uv, and Bun use a 12-hour delay; other releases retain seven days.
+This explicit core-tool list trades quicker fixes for less observation time. It is
+not a claim that core tools are immune to compromise. Missing timestamps are
 not accepted (`minimumReleaseAgeBehaviour: timestamp-required`), and strict internal
 checks suppress pending versions. Existing update grouping remains restricted to the
-same update types; minor, patch, and digest updates can automerge after CI. A delay is not a signature
+same update types; major, minor, patch, and digest updates can automerge after CI. A delay is not a signature
 or a vulnerability scan.
 
 Known vulnerability fixes bypass the release delay, normal schedule, and normal
@@ -224,18 +226,18 @@ tests that also accept its config migration.
 
 Linux GHA is the required target. Local tests passed for current tool versions,
 proposed formatter/transcript/Cosign versions, and zsh-snap; Linux outcomes must
-be checked after deployment. Runtime Node and uv follow the existing seven-day
-mise policy. Downloads require the network; test workloads use local fixtures,
+be checked after deployment. Runtime Node keeps seven days; uv uses 12 hours. Downloads require the network; test workloads use local fixtures,
 not model accounts, cloud signing, or GitHub writes. Checkout and mise-action
 updates exercise themselves in CI. Claude authentication and live Renovate writes
 still require observing those workflows, not merely this suite.
 
-Pi and Zellij updates are explicitly review-only until reliable runtime coverage
-exists. Stock Pi 0.79.7 lacks lifecycle events required by the terminal-title
+Pi and Zellij updates are eligible for automerge despite incomplete runtime coverage.
+For these personal dotfiles, normal use detects failures that CI cannot, and exact
+pins allow rollback. Manual version review would not prove compatibility. Stock Pi 0.79.7 lacks lifecycle events required by the terminal-title
 extension; its existing optional integration tests expose that incompatibility.
 Zellij status rendering was observed, but the autolock transition test remains
-unvalidated. Those draft tests are not required gates. Major updates and security
-alerts also remain review-only; the seven-day delay and PR limits are unchanged.
+unvalidated. Those draft tests are not required gates. Major updates can automerge;
+security alerts and shared-policy changes still require review. PR limits are unchanged.
 A green run is compatibility evidence, not a security audit or a Mac visual check.
 
 ## Custom Version Manifests

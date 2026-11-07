@@ -36,6 +36,15 @@
     ],
   },
   packageRules: [
+    // Personal dotfiles favor tested updates and rollback over manual version review.
+    {
+      matchUpdateTypes: ["major"],
+      automerge: true,
+    },
+    {
+      matchPackageNames: ["mise", "jdx/mise", "chezmoi", "twpayne/chezmoi", "uv", "astral-sh/uv", "bun", "oven-sh/bun"],
+      minimumReleaseAge: "12 hours",
+    },
     {
       matchPackageNames: ["jdx/mise"],
       groupName: "mise runtime",
@@ -44,6 +53,11 @@
     {
       matchFileNames: ["home/dot_config/mise/config.toml"],
       lockFileMaintenance: { enabled: false },
+    },
+    // Major-update permission must not override the shared security-review exception.
+    {
+      matchJsonata: ["isVulnerabilityAlert = true"],
+      automerge: false,
     },
     // Policy changes need review even when the preset publishes a minor release.
     {
@@ -96,15 +110,7 @@
       matchFileNames: ["home/.chezmoiexternals/zellij.externals.toml"],
       groupName: "zellij-plugins",
     },
-    // Terminal plugin compatibility is not yet covered by a reliable CI test.
-    {
-      matchFileNames: [
-        'home/.chezmoiexternals/pi.externals.toml',
-        'home/dot_pi/private_agent/settings.json',
-        'home/.chezmoiexternals/zellij.externals.toml',
-      ],
-      automerge: false,
-    },
+
   ],
   customManagers: [
     {
