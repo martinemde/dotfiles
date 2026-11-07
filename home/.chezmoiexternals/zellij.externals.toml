@@ -8,8 +8,8 @@
 # renovate: depName=fresh2dev/zellij-autolock
 [".config/zellij/plugins/zellij-autolock.wasm"]
 type = "file"
-url = "https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm"
-checksum.sha256 = "69c95607bfd97e075d6762a44fdbc703a82a3c4909dbbbe43952f020487b8ea4"
+url = "https://github.com/fresh2dev/zellij-autolock/releases/download/0.3.0/zellij-autolock.wasm"
+checksum.sha256 = "217e071b785981efda480b279d1a98e86da21971cf0bc7edd45f8b7c6359ab02"
 refreshPeriod = "168h"
 
 # zjstatus: Themable status bar for zellij (loaded via default layout)
@@ -17,6 +17,6 @@ refreshPeriod = "168h"
 # renovate: datasource=github-releases depName=dj95/zjstatus
 [".config/zellij/plugins/zjstatus.wasm"]
 type = "file"
-url = "https://github.com/dj95/zjstatus/releases/download/v0.23.0/zjstatus.wasm"
-checksum.sha256 = "e006901223524239db618021e4cc5d17f82dc4bfae5432895ba41f03f13861ff"
+url = "https://github.com/dj95/zjstatus/releases/download/v0.25.0/zjstatus.wasm"
+checksum.sha256 = "282ceab219e56e1908c9fac33907241fe6c3e1ef7d85faab3e5f438cef87b8fe"
 refreshPeriod = "168h"
