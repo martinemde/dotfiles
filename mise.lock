@@ -46,7 +46,7 @@ url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/bun-darwin-x6
 [[tools.chezmoi]]
 version = "2.73.3"
 backend = "aqua:twpayne/chezmoi"
-specifiers = ["latest"]
+specifiers = ["2.73.3"]
 
 [tools.chezmoi."platforms.linux-arm64"]
 checksum = "sha256:c9e6a6e71eb5291018e161a8426d7c313cd2e8553c2ca4029511fec2a33bc28c"

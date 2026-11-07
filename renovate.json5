@@ -1,24 +1,6 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:recommended", ":semanticCommits"],
-  dependencyDashboard: true,
-  labels: ["deps", "automated"],
-  prHourlyLimit: 2,
-  prConcurrentLimit: 5,
-  automerge: false,
-  automergeType: "pr",
-  automergeStrategy: "squash",
-  platformAutomerge: false,
-  osvVulnerabilityAlerts: true,
-  vulnerabilityAlerts: {
-    enabled: true,
-    minimumReleaseAge: null,
-    automerge: false,
-    addLabels: ["security"],
-  },
-  minimumReleaseAge: "7 days",
-  minimumReleaseAgeBehaviour: "timestamp-required",
-  internalChecksFilter: "strict",
+  extends: ["github>martinemde/renovate-config#v1.0.0"],
   enabledManagers: [
     "pip_requirements",
     "mise",
@@ -27,7 +9,14 @@
     "github-actions",
     "npm",
     "custom.regex",
+    "custom.jsonata",
+    "renovate-config",
   ],
+  constraints: { mise: "2026.11.1" },
+  lockFileMaintenance: { enabled: true, schedule: ["at any time"] },
+  mise: {
+    managerFilePatterns: ["/^\\.mise\\.toml$/", "/^home/dot_config/mise/config\\.toml$/"],
+  },
   "github-actions": {
     managerFilePatterns: ["/^\\.github/workflows/.*\\.ya?ml$/"],
   },
@@ -48,8 +37,18 @@
   },
   packageRules: [
     {
-      matchCategories: ["docker"],
-      pinDigests: true,
+      matchPackageNames: ["jdx/mise"],
+      groupName: "mise runtime",
+    },
+    // Global multi-backend lock coverage is incomplete; do not fabricate a lock.
+    {
+      matchFileNames: ["home/dot_config/mise/config.toml"],
+      lockFileMaintenance: { enabled: false },
+    },
+    // Policy changes need review even when the preset publishes a minor release.
+    {
+      matchManagers: ["renovate-config"],
+      automerge: false,
     },
     {
       matchManagers: ["github-actions"],
@@ -76,6 +75,10 @@
       groupName: "mise-tools",
     },
     {
+      matchPackageNames: ["chezmoi", "twpayne/chezmoi"],
+      groupName: "chezmoi",
+    },
+    {
       matchManagers: ["npm"],
       groupName: "node-tools",
       rangeStrategy: "pin",
@@ -93,10 +96,6 @@
       matchFileNames: ["home/.chezmoiexternals/zellij.externals.toml"],
       groupName: "zellij-plugins",
     },
-    {
-      matchUpdateTypes: ["minor", "patch", "digest"],
-      automerge: true,
-    },
     // Terminal plugin compatibility is not yet covered by a reliable CI test.
     {
       matchFileNames: [
@@ -108,6 +107,24 @@
     },
   ],
   customManagers: [
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^\\.github/workflows/ci\\.yml$/", "/^renovate\\.json5$/"],
+      matchStrings: [
+        'version: (?<currentValue>[0-9.]+) # mise',
+        'constraints:\\s*[{]\\s*mise:\\s*"(?<currentValue>[0-9.]+)"\\s*[,}]',
+      ],
+      depNameTemplate: "jdx/mise",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.+)$",
+    },
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^home/dot_config/dotfiles/cli-versions\\.toml$/"],
+      matchStrings: ['(?:^|\\n)chezmoi\\s*=\\s*"(?<currentValue>v?[^"\\n]+)"'],
+      depNameTemplate: "twpayne/chezmoi",
+      datasourceTemplate: "github-releases",
+    },
     {
       customType: "regex",
       managerFilePatterns: [
@@ -124,17 +141,6 @@
       managerFilePatterns: ["/^home/dot_config/dotfiles/cli-versions\\.toml$/"],
       matchStrings: ['(?:^|\\n)cosign\\s*=\\s*"(?<currentValue>v?[^"]+)"'],
       depNameTemplate: "sigstore/cosign",
-      datasourceTemplate: "github-releases",
-    },
-    {
-      customType: "regex",
-      managerFilePatterns: [
-        "/\\.mise\\.toml$/",
-        "/^home/dot_config/mise/config\\.toml(?:\\.tmpl)?$/",
-      ],
-      matchStrings: [
-        '"aqua:(?<depName>[^/]+/[^"]+)"\\s*=\\s*"(?<currentValue>v?[^"]+)"',
-      ],
       datasourceTemplate: "github-releases",
     },
     {
@@ -187,17 +193,13 @@
       packageNameTemplate: "zsh-users/zsh-syntax-highlighting",
     },
     {
-      customType: "regex",
-      managerFilePatterns: [
-        "/^home/\\.chezmoiexternals/tmux\\.externals\\.toml$/",
-      ],
+      customType: "jsonata",
+      fileFormat: "yaml",
+      managerFilePatterns: ["/^home/\\.chezmoidata/tmux-plugins\\.yaml$/"],
       matchStrings: [
-        "tmux-plugins/tpm/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz",
+        'tmuxPlugins.{"depName": repo, "currentValue": branch, "currentDigest": commit}',
       ],
       datasourceTemplate: "github-digest",
-      currentValueTemplate: "master",
-      depNameTemplate: "tmux-plugins/tpm",
-      packageNameTemplate: "tmux-plugins/tpm",
     },
     {
       customType: "regex",

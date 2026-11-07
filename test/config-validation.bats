@@ -228,7 +228,7 @@ render_to_temp() {
     skip "mise not installed"
   fi
 
-  local file="home/dot_config/mise/config.toml.tmpl"
+  local file="home/dot_config/mise/config.toml"
 
   # Render template
   run render_template "$file"

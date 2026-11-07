@@ -7,9 +7,10 @@ settings. Homebrew remains for apps and tools where it is the better fit. Do not
 add a second Homebrew declaration for these mise-managed tools.
 
 Use mise for versioned tools and runtimes; Homebrew still owns system libraries
-and macOS applications. Most global requests stay `latest` so routine updates do
-not depend on maintaining dozens of hand-written pins. Behaviour-dependent pins
-need a `# Pinned:` reason and Renovate coverage.
+and macOS applications. Global and project declarations use exact versions. Renovate owns routine
+updates; installation does not select a newly published version. Behaviour-dependent
+pins retain a `# Pinned:` reason. Keep installed versions when first pinning a tool;
+resolve global inventory outside project directories to avoid project overrides.
 
 ## Homebrew audit
 
@@ -34,10 +35,11 @@ still need a formula as another package's dependency; do not force-remove it.
 
 ## Download policy
 
-Both configs require mise 2026.10.25, the installed version used to check these
-settings. This is a compatibility floor, not a moving dependency pin.
+Both configs require mise 2026.10.25 as a compatibility floor, not an update pin.
+The exact-pin migration was checked with installed mise 2026.11.1.
 
-- Resolve floating requests with a seven-day release delay by default.
+- Keep the seven-day release delay for any explicitly requested floating resolution.
+  Routine exact-version updates go through Renovate's seven-day release policy.
 - Require precompiled CPython and its GitHub artifact attestation. Disable source
   compilation so unavailable precompiled builds fail instead of bypassing that
   check. Python alone opts out of the delay (`minimum_release_age = "0s"`).
@@ -87,7 +89,7 @@ They also check that the environment setting wins over project settings.
 
 ## Lock scope and updates
 
-The project `mise.lock` covers chezmoi, shfmt, and Bun on Linux x64/arm64 and macOS
+The project `mise.lock` covers exactly declared chezmoi, shfmt, and Bun on Linux x64/arm64 and macOS
 x64/arm64. Bun runs the Renovate extraction tests in CI; it is not a global install
 side effect. It records release URLs and SHA-256 checksums; chezmoi also records
 Cosign verification. The initial shfmt digests were compared with upstream
@@ -100,12 +102,15 @@ settings. Exact pins still require release-date review. Do not remove a checksum
 or provenance field to resolve a refresh failure: establish why upstream bytes
 or verification changed first.
 
-Global locks are deliberately deferred. The global source is a Chezmoi Go
-template, not parseable mise TOML. Its OS-specific tools also need render-aware
-refreshes; npm/PyPI dependency sidecars and Go's version-only lock coverage need
-review. Locking every global tool across platforms can download release
-artifacts for provenance checks. A partial, unmaintained global lock would hide
-stale versions behind `latest` rather than provide a dependable update path.
+Global locks are deliberately deferred. The main config is plain TOML so native
+Renovate discovery and version updates work without rendering. macOS trust-bundle
+environment values live in `conf.d/10-homebrew.toml.tmpl`; eza uses a Linux-only
+`os` tool option. Lock generation still needs backend and platform review, and
+can download release artifacts for provenance checks. Exact global declarations now prevent floating upgrades, but do not lock transitive
+dependencies. Go gopls has version-only lock coverage, and PyPI tools require native
+dependency sidecars; neither is equivalent to a checksummed prebuilt release URL.
+Do not add a partial global lock or enable blanket `--locked` enforcement merely
+to make this migration appear complete.
 
 No `locked = true` or `--locked` enforcement yet. A complete global lock and its
 verified refresh path must exist first. The global install script runs from
@@ -113,10 +118,16 @@ verified refresh path must exist first. The global install script runs from
 global config's release-age policy rather than a CLI override, which would mask
 Python's per-tool exception.
 
-Renovate handles project declarations and the template's explicit Aqua pin.
-Native lock refresh needs self-hosted approval for mise execution; this repo
-does not enable unsafe execution or assume hosted Renovate can refresh locks.
-Project lock refresh is an explicit review step until that is configured.
+Renovate handles project declarations and all exact global pins through its native
+mise manager. Keep explicit discovery for `home/dot_config/mise/config.toml`;
+the chezmoi `dot_config` source path is not a standard global mise path. The
+environment-only `conf.d` template is not a dependency manifest. The native Aqua manager uses GitHub tags rather than the
+former custom manager's GitHub releases, so check tag/version extraction on updates.
+Modern Renovate can invoke compatible mise in safe mode; safe-mode support is
+not a reason to authorize unsafe execution. Automatic global lock maintenance
+stays disabled until backend/platform coverage and the native artifact roundtrip
+are proved. Project lock maintenance is enabled with the pinned CI/Renovate mise version;
+review the generated lock changes. Global maintenance stays disabled.
 
 ## Sources
 
@@ -125,3 +136,26 @@ Project lock refresh is an explicit review step until that is configured.
 - [mise 2026.10.25 native self-update verification](https://github.com/jdx/mise/blob/v2026.10.25/src/cli/self_update.rs)
 - [mise 2026.10.25 lock and provenance behaviour](https://github.com/jdx/mise/blob/v2026.10.25/docs/dev-tools/mise-lock.md)
 - [Renovate's mise lock trust model](https://docs.renovatebot.com/modules/manager/mise/#trust-model-for-lock-file-updates)
+
+## Initial exact-version inventory
+
+Pins preserve active installed global versions from the Mac, not the newest
+installed directory or the root project's overrides. Linux-only eza 0.23.5 is
+seeded from the existing Homebrew version on that Mac; it is not evidence of a
+Linux mise installation. macOS continues to use Homebrew eza because Aqua's
+macOS recipe requires the unsupported Cargo package type.
+
+No user lock is committed until isolated generation succeeds for
+Linux and macOS and all required sidecars are reviewed. Refreshes must use the
+exact declarations without `--bump`, preserve verification, and not install tools.
+A lock refresh can still download release artifacts to verify provenance.
+Renovate discovery does not authorize execution: user lock maintenance remains
+manual, with no `allowedUnsafeExecutions` or arbitrary post-upgrade commands.
+
+An isolated no-install trial with the existing versions checked 181 targets, but
+reported Atuin 18.24.3 and Delta 0.20.1 unavailable for macOS x64, and envsense
+0.3.0 unavailable for Linux arm64. Ansible's dependency graph also failed the
+no-build check because PyYAML 6.0.3 has no compatible binary distribution for the
+selected Python 3.15.2 interpreter. The lock command can succeed while warning
+and keeping a version-only entry; a zero exit code is not complete lock coverage.
+No tool version or verification policy was changed to hide these gaps.

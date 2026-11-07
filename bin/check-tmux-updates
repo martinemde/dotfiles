@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""Download pinned tmux plugin archives and test them without installing anything."""
+
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+import tomllib
+from urllib.request import urlopen
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def main():
+    # Resolve mise before replacing HOME: shims cannot find its user configuration
+    # inside the sandbox, and must not auto-install tools there.
+    resolution_env = {**os.environ, "MISE_AUTO_INSTALL": "0"}
+    if shutil.which("mise"):
+        chezmoi = subprocess.run(
+            ["mise", "which", "chezmoi"], env=resolution_env, text=True,
+            capture_output=True, check=True).stdout.strip()
+    else:
+        chezmoi = shutil.which("chezmoi")
+    if not chezmoi:
+        raise RuntimeError("chezmoi is required")
+    with tempfile.TemporaryDirectory(prefix="tmux-plugin-check-") as tmp:
+        home = Path(tmp)
+        env = {"PATH": os.environ["PATH"], "TERM": "xterm-256color",
+               "HOME": str(home), "XDG_CONFIG_HOME": str(home / ".config"),
+               "XDG_DATA_HOME": str(home / ".local/share"),
+               "XDG_CACHE_HOME": str(home / ".cache"),
+               "XDG_STATE_HOME": str(home / ".local/state"),
+               "MISE_AUTO_INSTALL": "0", "CHEZMOI_BIN": chezmoi}
+        manifest = subprocess.run(
+            [chezmoi, "--config", "/dev/null", "--config-format", "toml",
+             "--source", str(ROOT / "home"), "execute-template"],
+            input=(ROOT / "home/.chezmoiexternals/tmux.externals.toml.tmpl").read_text(),
+            env=env, text=True, capture_output=True, check=True).stdout
+        sources = home / "sources"
+        sources.mkdir()
+        for target, entry in tomllib.loads(manifest).items():
+            name = Path(target).name
+            url = entry["url"]
+            if not re.fullmatch(
+                    rf"https://github[.]com/tmux-plugins/{re.escape(name)}/archive/[a-f0-9]{{40}}[.]tar[.]gz",
+                    url):
+                raise ValueError(f"unexpected archive URL: {url}")
+            archive = home / f"{name}.tar.gz"
+            with urlopen(url) as response, archive.open("wb") as output:
+                shutil.copyfileobj(response, output)
+            extracted = home / f"{name}-archive"
+            with tarfile.open(archive) as contents:
+                contents.extractall(extracted, filter="data")
+            top, = extracted.iterdir()
+            top.rename(sources / name)
+            print(f"Testing {url}", flush=True)
+        env["TMUX_PLUGIN_SOURCES"] = str(sources)
+        subprocess.run([sys.executable, str(ROOT / "test/tmux-plugins.py")],
+                       cwd=ROOT, env=env, check=True)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

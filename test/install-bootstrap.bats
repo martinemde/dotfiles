@@ -72,7 +72,7 @@ case "$1" in
       [ "$1" = mise ] && [ "$2" = apt ]
     }
     install_mise ;;
-  chezmoi)
+  chezmoi | install-chezmoi)
     cosign() {
       # The verifier must receive the vendored key, never a downloaded key.
       while [ "$#" -gt 0 ]; do
@@ -85,7 +85,30 @@ case "$1" in
       done
       return 1
     }
-    download_chezmoi ;;
+    if [ "$1" = install-chezmoi ]; then
+      CHEZMOI_VERSION="${FIXTURE_CHEZMOI_VERSION:-test}"
+      REINSTALL_TOOLS=false
+      SKIP_PACKAGE_MANAGER=false
+      PATH="$BIN_DIR:$PATH"
+      command() {
+        if [ "$1" = -v ] && [ "$2" = chezmoi ]; then
+          [ -x "$BIN_DIR/chezmoi" ] || return 1
+          printf '%s\n' "$BIN_DIR/chezmoi"
+        elif [ "$1" = -v ]; then
+          type "$2" >/dev/null 2>&1
+        else
+          "$@"
+        fi
+      }
+      try_package_manager() {
+        printf 'package-manager\n' >> "$FIXTURE/package-installs"
+        cp "$FIXTURE/chezmoi" "$BIN_DIR/chezmoi"
+        chmod +x "$BIN_DIR/chezmoi"
+      }
+      install_chezmoi
+    else
+      download_chezmoi
+    fi ;;
   checksum)
     cd "$FIXTURE"
     verify_checksum artifact checksums ;;
@@ -233,4 +256,43 @@ chezmoi_fixture() {
     [ "$status" -ne 0 ]
     [ ! -e "$FIXTURE/mise.list" ]
     [ ! -e "$FIXTURE/mise-archive-keyring.gpg" ]
+}
+
+@test "fresh pinned chezmoi installation bypasses package managers and verifies release bytes" {
+    chezmoi_fixture
+    run bootstrap install-chezmoi
+    [ "$status" -eq 0 ]
+    [ ! -e "$FIXTURE/package-installs" ]
+    cmp "$FIXTURE/chezmoi" "$FIXTURE/bin/chezmoi"
+    grep -q '/download/vtest/chezmoi_test_linux_amd64.tar.gz' "$FIXTURE/requests"
+}
+
+@test "fresh pinned chezmoi installation cannot bypass failed signature verification" {
+    chezmoi_fixture
+    export COSIGN_VERIFY_STATUS=1
+    run bootstrap install-chezmoi
+    [ "$status" -ne 0 ]
+    [ ! -e "$FIXTURE/package-installs" ]
+    [ ! -e "$FIXTURE/bin/chezmoi" ]
+}
+
+@test "latest chezmoi request may use an unversioned package manager" {
+    chezmoi_fixture
+    export FIXTURE_CHEZMOI_VERSION=latest
+    run bootstrap install-chezmoi
+    [ "$status" -eq 0 ]
+    [ -e "$FIXTURE/package-installs" ]
+    [ ! -e "$FIXTURE/requests" ]
+}
+
+@test "existing chezmoi is preserved without reconciling the requested pin" {
+    chezmoi_fixture
+    printf '#!/bin/sh\necho existing-version\n' > "$FIXTURE/bin/chezmoi"
+    chmod +x "$FIXTURE/bin/chezmoi"
+    cp "$FIXTURE/bin/chezmoi" "$FIXTURE/existing"
+    run bootstrap install-chezmoi
+    [ "$status" -eq 0 ]
+    cmp "$FIXTURE/existing" "$FIXTURE/bin/chezmoi"
+    [ ! -e "$FIXTURE/package-installs" ]
+    [ ! -e "$FIXTURE/requests" ]
 }

@@ -1,0 +1,92 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+# Compatibility floor for the verification and lock semantics tested here.
+min_version = "2026.10.25"
+
+[tools]
+"aqua:ajeetdsouza/zoxide" = "0.10.0"
+"aqua:ast-grep/ast-grep" = "0.51.0"
+"aqua:atuinsh/atuin" = "18.24.3"
+"aqua:aws/aws-cli" = "2.39.1"
+"aqua:bootandy/dust" = "1.2.6"
+"aqua:BurntSushi/ripgrep" = "15.2.0"
+"aqua:charmbracelet/glow" = "3.0.0"
+"aqua:cli/cli" = "2.103.3"
+"aqua:neovim/neovim" = "0.12.6"
+"aqua:eza-community/eza" = { version = "0.23.5", os = ["linux"] }
+"aqua:Kitware/CMake" = "4.4.5"
+"aqua:jgm/pandoc" = "3.13"
+"aqua:dandavison/delta" = "0.20.1"
+"aqua:eth-p/bat-extras" = "2024.08.24"
+"aqua:evilmartians/lefthook" = "2.2.2"
+"aqua:FiloSottile/mkcert" = "1.4.4"
+"aqua:git-lfs/git-lfs" = "3.8.1"
+"aqua:gitleaks/gitleaks" = "8.30.1"
+"aqua:hashicorp/terraform" = "1.17.1"
+"aqua:jesseduffield/lazygit" = "0.66.2"
+"aqua:jj-vcs/jj" = "0.46.0"
+"aqua:jqlang/jq" = "1.8.2"
+"aqua:junegunn/fzf" = "0.74.5"
+"aqua:koalaman/shellcheck" = "0.11.0"
+"aqua:mikefarah/yq" = "4.54.1"
+"aqua:muesli/duf" = "0.9.1"
+"aqua:pre-commit/pre-commit" = "4.7.0"
+"aqua:sharkdp/bat" = "0.26.1"
+"aqua:sharkdp/fd" = "10.5.0"
+"aqua:sigstore/cosign" = "3.1.4"
+"aqua:starship/starship" = "1.27.0"
+"aqua:superfly/flyctl" = "0.5.0"
+# Agent/env detection, used by zsh/aliases.zsh to skip agent-hostile aliases.
+# Pinned: the alias guard depends on `envsense check agent` exit-code semantics.
+"aqua:technicalpickles/envsense" = "0.3.0"
+"aqua:tree-sitter/tree-sitter" = "0.27.1"
+"aqua:zellij-org/zellij" = "0.45.1"
+"go:golang.org/x/tools/gopls" = "0.24.0"
+bun = "1.4.4"
+codex = "0.164.0"
+go = "1.27.3"
+node = "26.13.0"
+pnpm = "12.16.1"
+# Require artifact attestations for precompiled CPython instead of a release delay.
+python = { version = "3.15.2", minimum_release_age = "0s" }
+uv = "0.13.6"
+ansible-core = "2.21.5"
+
+[settings]
+# Keep shims, exec, and tasks from installing tools as a side effect.
+auto_install = false
+# A missing configured shim must not run an unrelated tool from PATH.
+not_found_system_fallback = false
+idiomatic_version_file_enable_tools = ["ruby"]
+# Exact pins and existing lock entries bypass the age filter; review those updates.
+minimum_release_age = "7d"
+locked_verify_provenance = true
+provenance_api_failures_fatal = true
+github_attestations = true
+slsa = true
+
+[settings.aqua]
+cosign = true
+github_attestations = true
+minisign = true
+slsa = true
+
+[settings.node]
+verify = true
+
+[settings.go]
+skip_checksum = false
+
+[settings.github]
+use_git_credentials = true
+
+[settings.python]
+# Do not silently fall back to an unverified source build.
+compile = false
+github_attestations = true
+
+# Applies only to mise self-update; package-manager updates keep their own policy.
+[settings.self_update]
+minimum_release_age = "0s"
+
+[settings.ruby]
+compile = false

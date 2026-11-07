@@ -30,6 +30,7 @@ jobs:
           shellcheck install.sh
           shellcheck bin/setup
           shellcheck bin/test
+          shellcheck bin/check-renovate-policy
 
   unit-tests:
     runs-on: ubuntu-latest
@@ -39,6 +40,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup mise
         uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        with:
+          version: 2026.11.1 # mise
       - name: Install test dependencies
         run: |
           sudo apt-get update
@@ -47,7 +50,11 @@ jobs:
         run: |
           image=$(bun --eval 'const w = Bun.YAML.parse(await Bun.file(".github/workflows/renovate.yml").text()); console.log(w.jobs.renovate.container.image)')
           docker run --rm -v "$PWD:/repo:ro" -w /repo "$image" renovate-config-validator --no-global renovate.json5
+      - name: Verify effective policy and native dependency extraction
+        run: bin/check-renovate-policy "$RUNNER_TEMP/renovate-resolved.json"
       - name: Run test suite
+        env:
+          RENOVATE_RESOLVED_CONFIG: ${{ runner.temp }}/renovate-resolved.json
         run: |
           ./bin/test
 
@@ -64,10 +71,13 @@ jobs:
         with:
           persist-credentials: false
       - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+        with:
+          version: 2026.11.1 # mise
       - name: Exercise tools from this checkout's manifests
         run: |
-          mise install node@latest uv@latest
-          mise exec node@latest uv@latest -- python3 bin/check-tool-updates ${{ matrix.tool }}
+          read -r node uv < <(bun --eval 'const c = Bun.TOML.parse(await Bun.file("home/dot_config/mise/config.toml").text()); console.log(`node@${c.tools.node} uv@${c.tools.uv}`)')
+          mise install "$node" "$uv"
+          mise exec "$node" "$uv" -- python3 bin/check-tool-updates ${{ matrix.tool }}
 
   plugin-integration:
     runs-on: ubuntu-latest
@@ -78,10 +88,14 @@ jobs:
         with:
           persist-credentials: false
       - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+        with:
+          version: 2026.11.1 # mise
       - name: Install shell test dependency
-        run: sudo apt-get update && sudo apt-get install -y zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh tmux
       - name: Exercise pinned zsh-snap cache behavior
-        run: python3 bin/check-znap-update
+        run: |
+          python3 bin/check-znap-update
+          python3 bin/check-tmux-updates
 
   # Keep one stable required check; a failed or cancelled integration must block it.
   test:

@@ -1,0 +1,8 @@
+# Session persistence plugins; pins and tracked branches live in .chezmoidata.
+{{ range .tmuxPlugins }}
+[".config/tmux/plugins/{{ base .repo }}"]
+type = "archive"
+url = "https://github.com/{{ .repo }}/archive/{{ .commit }}.tar.gz"
+stripComponents = 1
+refreshPeriod = "168h"
+{{ end }}

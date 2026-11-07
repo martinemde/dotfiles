@@ -1,0 +1,10 @@
+{{ if eq .chezmoi.os "darwin" }}
+{{ $brewPrefix := "/usr/local" }}
+{{ if eq .chezmoi.arch "arm64" }}{{ $brewPrefix = "/opt/homebrew" }}{{ end }}
+[env]
+# Keep CLI trust on Homebrew's updated bundle, including its eMudhra exclusions.
+SSL_CERT_FILE = "{{ $brewPrefix }}/etc/ca-certificates/cert.pem"
+REQUESTS_CA_BUNDLE = "{{ $brewPrefix }}/etc/ca-certificates/cert.pem"
+NODE_OPTIONS = "--use-openssl-ca"
+
+{{ end }}

@@ -2,6 +2,12 @@
 
 @test "Renovate discovers manifests and keeps URL/checksum updates paired" {
   command -v bun >/dev/null 2>&1 || skip "Bun is not installed"
+  if [ -z "${RENOVATE_RESOLVED_CONFIG:-}" ]; then
+    export RENOVATE_RESOLVED_CONFIG="$BATS_TEST_TMPDIR/renovate-resolved.json"
+    run "$BATS_TEST_DIRNAME/../bin/check-renovate-policy" "$RENOVATE_RESOLVED_CONFIG"
+    printf '%s\n' "$output"
+    [ "$status" -eq 0 ] || return 1
+  fi
   run env REPO_ROOT="$BATS_TEST_DIRNAME/.." bun --eval '
     import { strict as assert } from "node:assert";
     import { readFileSync } from "node:fs";
@@ -9,10 +15,10 @@
     import { runInNewContext } from "node:vm";
 
     const root = process.env.REPO_ROOT;
-    const config = runInNewContext("(" + readFileSync(join(root, "renovate.json5"), "utf8") + ")");
+    const config = JSON.parse(readFileSync(process.env.RENOVATE_RESOLVED_CONFIG, "utf8"));
     const filePatterns = manager => (manager.managerFilePatterns ?? manager.fileMatch ?? [])
-      .map(pattern => new RegExp(pattern.startsWith("/") && pattern.endsWith("/")
-        ? pattern.slice(1, -1) : pattern));
+      .filter(pattern => pattern.startsWith("/") && pattern.endsWith("/"))
+      .map(pattern => new RegExp(pattern.slice(1, -1)));
     assert.equal(config.schedule, undefined);
     assert.equal(config.minimumReleaseAge, "7 days");
     assert.equal(config.minimumReleaseAgeBehaviour, "timestamp-required");
@@ -43,15 +49,13 @@
       assert(filePatterns(config.npm).some(pattern => pattern.test(file)), file);
     }
 
-    const miseFile = "home/dot_config/mise/config.toml.tmpl";
-    const aqua = config.customManagers.find(manager =>
-      manager.matchStrings.some(pattern => pattern.includes("aqua:")));
-    assert(filePatterns(aqua).some(pattern => pattern.test(miseFile)));
-    const mise = readFileSync(join(root, miseFile), "utf8");
-    const envsense = [...mise.matchAll(new RegExp(aqua.matchStrings[0], "g"))]
-      .find(match => match.groups.depName === "technicalpickles/envsense");
-    assert(envsense);
-    assert.match(envsense.groups.currentValue, /^v?\d+\.\d+\.\d+$/);
+    const miseFile = "home/dot_config/mise/config.toml";
+    assert(filePatterns(config.mise).some(pattern => pattern.test(miseFile)));
+    const mise = Bun.TOML.parse(readFileSync(join(root, miseFile), "utf8"));
+    for (const tool of Object.values(mise.tools)) {
+      const version = typeof tool === "string" ? tool : tool.version;
+      assert.notEqual(version, "latest");
+    }
 
     const file = "home/.chezmoiexternals/zellij.externals.toml";
     const contents = readFileSync(join(root, file), "utf8");

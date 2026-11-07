@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+cd "$(dirname "$0")/.."
+image=$(bun --eval 'const w = Bun.YAML.parse(await Bun.file(".github/workflows/renovate.yml").text()); console.log(w.jobs.renovate.container.image)')
+output="${1:-}"
+if [[ -n "$output" ]]; then
+  container="dotfiles-policy-$$"
+  trap 'docker rm -f "$container" >/dev/null' EXIT
+  docker run --name "$container" -v "$PWD:/repo:ro" -w /repo \
+    -e OUTPUT_CONFIG=/tmp/resolved.json --entrypoint node "$image" test/renovate-policy.mjs
+  docker cp "$container:/tmp/resolved.json" "$output"
+else
+  docker run --rm -v "$PWD:/repo:ro" -w /repo --entrypoint node "$image" test/renovate-policy.mjs
+fi

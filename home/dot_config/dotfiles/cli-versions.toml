@@ -1,3 +1,4 @@
 # CLI version pins consumed by installer/scripts (e.g., cosign)
 # Managed by Renovate via custom regex manager. See docs/renovate.md.
 cosign = "v3.1.4"
+chezmoi = "2.73.3"

@@ -5,7 +5,7 @@
 # This script installs Chezmoi (https://chezmoi.io) and initializes your
 # dotfiles from this repository. It follows security best practices:
 #   - Installs cosign for signature verification
-#   - Tries package managers first (Homebrew, apt, dnf, pacman, apk)
+#   - Downloads the pinned Chezmoi release; tries package managers only for latest
 #   - Downloads from GitHub releases with proper signature verification
 #   - Uses cosign to verify downloaded binaries
 #
@@ -18,11 +18,11 @@
 #      - Apply all configurations automatically
 #
 # ENVIRONMENT VARIABLES:
-#   CHEZMOI_VERSION: Override the version to install (default: latest)
-#   COSIGN_VERSION: Override the cosign version to install (default: latest)
+#   CHEZMOI_VERSION: Override the version to install (default: manifest pin, or latest without manifest)
+#   COSIGN_VERSION: Override the version to install (default: manifest pin, or latest without manifest)
 #   BIN_DIR: Override installation directory (default: ~/.local/bin)
 #   VERIFY_SIGNATURES: Disable signature verification (default: true)
-#   SKIP_PACKAGE_MANAGER: Force binary download (default: false)
+#   SKIP_PACKAGE_MANAGER: Skip package managers for latest requests (default: false)
 #   DEBUG: Enable debug output
 #
 # EXAMPLE USAGE:
@@ -110,12 +110,16 @@ OPTIONS:
 
 ENVIRONMENT VARIABLES:
     REINSTALL_TOOLS        Force reinstallation even if tools are already installed (default: false)
-    CHEZMOI_VERSION         Override the version to install (default: latest)
-    COSIGN_VERSION          Override the cosign version to install (default: latest)
+    CHEZMOI_VERSION         Override the manifest pin (latest without manifest)
+    COSIGN_VERSION          Override the manifest pin (latest without manifest)
     BIN_DIR                 Override installation directory (default: ~/.local/bin)
     VERIFY_SIGNATURES       Disable signature verification (default: true)
-    SKIP_PACKAGE_MANAGER    Force binary download (default: false)
+    SKIP_PACKAGE_MANAGER    Skip package managers for latest requests (default: false)
     DEBUG                   Enable debug output
+
+Exact Chezmoi versions use verified release downloads. Only latest requests may
+use an unversioned package-manager install. Existing tools are kept unless
+REINSTALL_TOOLS=true; the manifest does not reconcile installed versions.
 
 EXAMPLES:
     ./install.sh                                    # Install normally
@@ -651,8 +655,9 @@ install_chezmoi() {
     log_info "Force installing chezmoi..."
   fi
 
-  # Try package manager first unless skipped
-  if [ "$SKIP_PACKAGE_MANAGER" != "true" ] && try_package_manager; then
+  # Package managers do not honor our exact release pin. Only an explicit
+  # latest request (also the manifest-absent fallback) may use their versions.
+  if [ "$CHEZMOI_VERSION" = "latest" ] && [ "$SKIP_PACKAGE_MANAGER" != "true" ] && try_package_manager; then
     # Verify chezmoi is available
     if command -v chezmoi >/dev/null 2>&1; then
       log_info "Chezmoi installation verified"
@@ -662,8 +667,10 @@ install_chezmoi() {
     fi
   fi
 
-  # Fallback to downloading from GitHub
-  if [ "$SKIP_PACKAGE_MANAGER" = "true" ]; then
+  # Exact pins always use the verified release download path.
+  if [ "$CHEZMOI_VERSION" != "latest" ]; then
+    log_info "Installing pinned chezmoi release $CHEZMOI_VERSION from GitHub..."
+  elif [ "$SKIP_PACKAGE_MANAGER" = "true" ]; then
     log_info "Package manager installation skipped, downloading from GitHub..."
   else
     log_info "Package manager installation failed, downloading from GitHub..."
@@ -701,7 +708,11 @@ main() {
 
   # Set configuration variables after parsing arguments
   readonly BIN_DIR="${BIN_DIR:-$HOME/.local/bin}"
-  readonly CHEZMOI_VERSION="${CHEZMOI_VERSION:-latest}"
+  CHEZMOI_VERSION_FROM_FILE=""
+  if [ -f "$script_dir/home/dot_config/dotfiles/cli-versions.toml" ]; then
+    CHEZMOI_VERSION_FROM_FILE="$(grep '^chezmoi' "$script_dir/home/dot_config/dotfiles/cli-versions.toml" | cut -d'"' -f2 2>/dev/null || echo "")"
+  fi
+  readonly CHEZMOI_VERSION="${CHEZMOI_VERSION:-${CHEZMOI_VERSION_FROM_FILE:-latest}}"
   # Try to read cosign version from versions file, fallback to latest
   COSIGN_VERSION_FROM_FILE=""
   if [ -f "$script_dir/home/dot_config/dotfiles/cli-versions.toml" ]; then

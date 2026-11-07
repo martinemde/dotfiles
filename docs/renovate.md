@@ -15,7 +15,7 @@ This guide explains how Renovate is configured in this repository, how the custo
 
 File: `renovate.json5`
 
-- Extends: `config:recommended`, `:semanticCommits`; Dependency Dashboard enabled
+- Extends: `github>martinemde/renovate-config#v1.0.0`; shared policy is versioned and preset updates require review
 - Run interval: every 30 minutes; no update-time window
 - Labels: `deps`, `automated`
 - PR limits: `prHourlyLimit: 2`, `prConcurrentLimit: 5`
@@ -24,7 +24,7 @@ Enabled managers and file discovery:
 
 - `pip_requirements`: `home/dot_config/dotfiles/requirements.txt`
 - `npm`: `package.json`, `home/dot_config/dotfiles/package.json`
-- `mise`: `.mise.toml`; custom Aqua regex covers `home/dot_config/mise/config.toml.tmpl`
+- `mise`: `.mise.toml` and plain `home/dot_config/mise/config.toml`; native extraction covers all tool declarations
 - `docker-compose`: `home/dot_config/docker-compose/*.yml`
 - `devcontainer`: `.devcontainer/devcontainer.json`
 - `github-actions`: `.github/workflows/*.yml` (with digest pinning)
@@ -38,16 +38,40 @@ Grouping and automerge rules:
 - `pip_requirements`: grouped as `python-tools` (minor/patch/digest automerge)
 - `npm`: grouped as `node-tools` (minor/patch/digest automerge)
 - `mise`: grouped as `mise-tools` (minor/patch/digest automerge)
-- Pi extensions: grouped as `pi-extensions` (minor/patch/digest automerge)
+- Pi extensions: grouped as `pi-extensions`, review-only
+- `custom.jsonata`: tmux plugin repository/branch/commit data in `home/.chezmoidata/tmux-plugins.yaml`
+- `renovate-config`: reviewed shared-preset updates; never automatic policy adoption
 
-Minor, patch, and digest updates use Renovate-managed squash merges after the
-`download-integrity`, `shellcheck`, and `test` checks pass. Platform automerge is
+Minor, patch, and digest updates use Renovate-managed squash merges after required
+integrity, ShellCheck, unit, plugin and four tool-integration checks pass. The stable
+`test` aggregate also requires all those jobs. Platform automerge is
 disabled: Renovate checks and merges on its next run. Majors, initial pin updates,
-and vulnerability-alert updates remain review-only. GitHub branch protection requires these three checks on `main`; administrators
+and vulnerability-alert updates remain review-only. The active GitHub ruleset requires each of these checks on `main`; administrators
 can still bypass it for direct maintenance.
 A matching hash proves byte integrity, not that upstream code is benign.
 
 ---
+
+## Shared policy and lock scope
+
+The shared preset separates account-wide policy from dotfiles-specific managers
+and compatibility exceptions. Its `v*` tags reject updates/deletion via a no-bypass
+ruleset; administrators can still change rules. Consumers track reviewed releases
+with Renovate's own config manager, explicitly review-only. Required GitHub checks
+and App installation remain per repository, not properties of the preset.
+
+Mise is pinned to 2026.11.1 for CI and Renovate lock generation. Project lock
+maintenance is enabled in safe mode. Global lock maintenance stays disabled:
+several current tool versions lack desktop-platform assets, and the current
+Ansible dependency graph lacks a Python 3.15 wheel. Exact global declarations
+are still reviewed updates; they are not a complete transitive lock. See `mise.md`.
+The shell template was split into plain tool declarations and a Mac-only environment
+fragment so native Renovate can parse and update tools without executing templates.
+
+Branch dependencies continue using `github-digest`, which can retrieve commit
+timestamps. Do not assume every datasource publishes timestamps: strict missing-time
+handling holds updates pending. A weekly batch is a scheduling choice, not a
+substitute for the seven-day quarantine, so we retain the current commit-age policy.
 
 ## Self-hosted activation and visible evidence
 
@@ -165,15 +189,14 @@ Review both fields and upstream release changes before merging. These are integr
 checks, not signed provenance; a compromised upstream can publish malicious bytes
 and a matching hash.
 
-Project `mise.lock` refresh is explicit: use the command in `docs/mise.md` with the
-seven-day delay after changing `.mise.toml`. Native Renovate lockfile refresh exists,
-but requires operator authorization for unsafe execution. It is not enabled here:
-the hosted runner's authorization and delay propagation have not been verified.
-Renovate's release-age check does not cover `lockFileMaintenance`, so ordinary
-Renovate age settings would not secure that refresh command. Do not enable
-`allowedUnsafeExecutions` or arbitrary post-upgrade commands merely to bypass
-that boundary. The user Go template has no committed lock yet; `latest`
-there is not a reproducible pin.
+Project `mise.lock` refresh uses Renovate's supported `MISE_SAFE=1` path with
+mise 2026.11.1; arbitrary unsafe execution is not enabled. Renovate does not pass
+`MISE_MINIMUM_RELEASE_AGE` to its safe-mode artifact command, and safe mode ignores
+project settings. Lock maintenance therefore has no independent seven-day age
+guarantee. Current project declarations are all exact pins; declaration updates
+still use Renovate's quarantine. Review generated checksum/provenance changes,
+and do not introduce floating project constraints without resolving this gap.
+Global locks remain deferred for the concrete platform/graph gaps in `mise.md`.
 
 Sources: [release age](https://docs.renovatebot.com/configuration-options/#minimumreleaseage),
 [GitHub digest](https://docs.renovatebot.com/modules/datasource/github-digest/),
@@ -223,10 +246,10 @@ These files purposely centralize versions so Renovate can update them automatica
   - Holds pinned CLI versions used by the installer and scripts.
   - Currently: `cosign` (used for signature verification). Renovate updates via GitHub Releases.
 
-- `.mise.toml` and `home/dot_config/mise/config.toml.tmpl`
-  - Define tool versions managed by [mise]. Most user tools intentionally track `latest`; behavior-sensitive tools are pinned.
-  - Supports native mise tools (e.g., `python = "3.13.7"`) and the explicit Aqua backend (`"aqua:owner/repo"`).
-  - Renovate updates native project tools via the Mise manager and Aqua-prefixed template pins via a custom regex manager (GitHub Releases datasource). The native manager cannot parse the Go template.
+- `.mise.toml` and `home/dot_config/mise/config.toml`
+  - Exact tool versions, discovered by the native mise manager.
+  - Mac-only environment interpolation lives separately in `conf.d/10-homebrew.toml.tmpl`.
+  - The initial pins preserve installed versions; Linux eza uses the observed Mac Homebrew version 0.23.5.
 
 - `home/dot_config/dotfiles/requirements.txt`
   - Pinned versions for Python tools (installed via uv tool install). Updated by Renovate's pip manager.
@@ -262,11 +285,10 @@ Defined in `renovate.json5`:
 - Datasource: `github-releases`, `depNameTemplate: sigstore/cosign`
 - Note: line-anchored via `(?:^|\n)`, not an inline `(?m)` flag. `renovate-config-validator` (and Renovate itself when the native `re2` binding is unavailable) falls back to JS `RegExp`, which rejects inline flags like `(?m)`. Avoid `(?m)`/`(?s)`/`(?i)` in `matchStrings` so managers validate under both engines.
 
-2. Aqua-prefixed tools in mise TOML (GitHub Releases)
+2. Mise runtime version coordination (GitHub Releases)
 
-- Files: `.mise.toml`, `home/dot_config/mise/config.toml.tmpl`
-- Pattern: `"aqua:(?<depName>[^/]+/[^\"]+)"\s*=\s*"(?<currentValue>v?[^\"]+)"`
-- Datasource: `github-releases` (e.g., `aqua:mikefarah/yq` → `mikefarah/yq`)
+- CI mise-action inputs and Renovate's mise constraint update together from `jdx/mise`.
+- Native mise extraction replaces the old Aqua-specific regex; each tool is discovered once.
 
 3. Optional Go/Node tool manifests (present if we add these files later)
 
@@ -310,7 +332,7 @@ Note: When adding new externals, add a matching regex rule so Renovate can keep 
 - GitHub Actions: digest pinning and minor/patch updates grouped for review.
 - Python tools: PRs update `requirements.txt` pinned versions.
 - Node.js tools: PRs update `package.json` pinned versions.
-- Mise tools: PRs update `.mise.toml` and `home/dot_config/mise/config.toml.tmpl` pins.
+- Mise tools: PRs update `.mise.toml` and `home/dot_config/mise/config.toml` pins.
 - CLI versions: PRs update `cli-versions.toml` (e.g., `cosign`).
 - Chezmoi externals: PRs replace commit SHAs in tarball URLs or `revision = "..."`.
 - Pi extensions: PRs update exact npm pins in `home/dot_pi/private_agent/settings.json`.
@@ -401,7 +423,7 @@ gh api repos/zsh-users/zsh-syntax-highlighting/commits/master --jq .sha
 
 ## Maintenance Tips
 
-- Keep behavior-sensitive versions pinned. `latest` in the user mise template is intentional and is not controlled by Renovate.
+- Keep managed tool declarations exact and Renovate-discoverable; review preset and unsupported-runtime changes manually.
 - When adding a new external or bespoke versions file, add a matching `customManagers` rule.
 - Keep tag+digest for images: readable tag for humans, digest for reproducibility.
 - Use the gh commands above to sanity‑check SHAs/tags when reviewing Renovate PRs.

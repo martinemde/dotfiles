@@ -65,6 +65,10 @@
             "type": "command",
             "command": "~/.claude/hooks/gh-via-local-shim.sh",
             "if": "Bash(gh *)"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.agents/hooks/install-policy.py"
           }
         ]
       }

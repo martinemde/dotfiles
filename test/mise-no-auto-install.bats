@@ -8,7 +8,7 @@ prepare_mise_fixture() {
     MISE_BIN="$(python3 -c 'import pathlib, sys; print(pathlib.Path(sys.argv[1]).resolve())' "$MISE_BIN")"
     export FIXTURE="$TEST_TMPDIR/mise"
     mkdir -p "$FIXTURE"/{config,data/shims,data/installs/node/1.0.0/bin,cache,state,project,bin}
-    chezmoi execute-template --file home/dot_config/mise/config.toml.tmpl >"$FIXTURE/rendered.toml"
+    cp home/dot_config/mise/config.toml "$FIXTURE/rendered.toml"
     python3 - "$FIXTURE" <<'PY'
 import pathlib, sys, tomllib
 root = pathlib.Path(sys.argv[1])

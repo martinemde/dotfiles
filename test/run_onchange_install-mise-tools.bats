@@ -37,7 +37,7 @@ EOF
     for os in linux darwin; do
         chezmoi --config /dev/null --config-format toml \
             --override-data "{\"chezmoi\":{\"os\":\"$os\",\"arch\":\"arm64\"}}" \
-            execute-template --file home/dot_config/mise/config.toml.tmpl >"$TEST_TMPDIR/$os.toml"
+            execute-template --file home/dot_config/mise/config.toml >"$TEST_TMPDIR/$os.toml"
     done
 
     run python3 -c '
@@ -62,15 +62,16 @@ for name in sys.argv[1:]:
     for os in linux darwin; do
         chezmoi --config /dev/null --config-format toml \
             --override-data "{\"chezmoi\":{\"os\":\"$os\",\"arch\":\"arm64\"}}" \
-            execute-template --file home/dot_config/mise/config.toml.tmpl >"$TEST_TMPDIR/$os.toml"
+            execute-template --file home/dot_config/mise/config.toml >"$TEST_TMPDIR/$os.toml"
     done
 
     run python3 -c '
 import pathlib, sys, tomllib
 for name in sys.argv[1:]:
     config = tomllib.loads(pathlib.Path(name).read_text())
-    assert config["tools"]["python"] == {"version": "latest", "minimum_release_age": "0s"}
-    assert config["tools"]["uv"] == "latest"
+    assert config["tools"]["python"]["minimum_release_age"] == "0s"
+    assert config["tools"]["python"]["version"] != "latest"
+    assert config["tools"]["uv"] != "latest"
     settings = config["settings"]
     assert settings["python"]["compile"] is False
     assert settings["python"]["github_attestations"] is True

@@ -7,7 +7,7 @@
 - Understand before executing. Surface better alternatives early if they exist. Once the intention is clear, proceed with the best approach.
 - When in doubt, ask.
 
-Install tools with `mise use TOOL@VERSION`, scoped to the project. For JS/TS, use bun or pnpm depending on what the project uses, and start new projects with pnpm.
+Before installing a tool or fetching a one-off executable, use the `installing-tools` skill. Keep project dependencies in their existing manifests and user-wide tools in managed dotfiles. For JS/TS, use bun or pnpm depending on what the project uses, and start new projects with pnpm.
 
 ## Working in Repos
 

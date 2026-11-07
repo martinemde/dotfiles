@@ -2,7 +2,7 @@
 
 # Run after the mise configuration and tools have been applied.
 
-# python version hash: {{ include "dot_config/mise/config.toml.tmpl" | regexFind "python = \"[^\"]*\"" | sha256sum }}
+# python version hash: {{ include "dot_config/mise/config.toml" | regexFind "python = \"[^\"]*\"" | sha256sum }}
 # python tools requirements hash: {{ include "dot_config/dotfiles/requirements.txt" | sha256sum }}
 
 [ -n "${DEBUG:-}" ] && set -o xtrace
