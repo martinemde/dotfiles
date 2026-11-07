@@ -3,16 +3,16 @@
 {
   "name": "Dotfiles Development",
   // Use Debian bookworm base image
-  "image": "mcr.microsoft.com/devcontainers/base:bookworm@sha256:c4114d60c29077df6cafa9651fb61faaace557c054311dae4227f01c6e54f4d9",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm@sha256:99f5250dd2d5f8b11046d5662dd94c1e3c1dae56b560c7caad5ceb7edf349046",
   // Features to add to the dev container. More info: https://containers.dev/features.
   "features": {
     "ghcr.io/devcontainers-extra/features/mise:1@sha256:5c389ab1e3c8e44e5e0ff119f6868d54dbb781bc860bd8587dc66209cb8c4a8c": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2@sha256:c36ff66a35d1c40409a0fc1a7995616eaaa76574953b6ed675d8622e2d0bbcc5": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2@sha256:25b9f05705ffba7dbe503230ac76081419306f8c8bc88e0ce78c4ecd99a0c78c": {
       "version": "latest",
       "enableNonRootDocker": "true"
     },
-    "ghcr.io/devcontainers/features/git:1@sha256:f24645e64ad39a596131a50ec96f7d5cf7a2a87544cce772dd4b7182a233e98a": {},
-    "ghcr.io/devcontainers/features/github-cli:1@sha256:ca677566507c4118e4368cd76a4800807e911e5e350cc3525fb67ebc9132dfa1": {}
+    "ghcr.io/devcontainers/features/git:1@sha256:fd75977de13a9979000e0e78baf949adb0ca71d2398995fa22e0a36d7e7e7fe2": {},
+    "ghcr.io/devcontainers/features/github-cli:1@sha256:bd7ab48a832228f633239277552c30b353867fef2e5b037e064b4e64f0b843f2": {}
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
