@@ -1,0 +1,167 @@
+#!/usr/bin/env python3
+"""Live, sandboxed functional checks for Renovate tool updates (one mode per job)."""
+
+import argparse
+import json
+import os
+from pathlib import Path
+import platform
+import shutil
+import subprocess
+import sys
+import tempfile
+import tomllib
+import urllib.request
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def run(*args, cwd, env, input=None, succeeds=True):
+    print("+", *map(str, args), flush=True)
+    result = subprocess.run(list(map(str, args)), cwd=cwd, env=env, input=input,
+                            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if result.stdout:
+        print(result.stdout, end="")
+    if result.stderr:
+        print(result.stderr, end="", file=sys.stderr)
+    if succeeds and result.returncode:
+        raise RuntimeError(f"command failed ({result.returncode}): {args}")
+    if not succeeds and not result.returncode:
+        raise RuntimeError(f"tampered artifact was accepted: {args}")
+    return result.stdout
+
+
+def node(work, env):
+    for label, manifest, config in (
+        ("project", ROOT / "package.json", ROOT / ".prettierrc"),
+        ("global", ROOT / "home/dot_config/dotfiles/package.json",
+         ROOT / "home/dot_config/prettier/dot_prettierrc.mjs"),
+    ):
+        target = work / label
+        target.mkdir()
+        shutil.copyfile(manifest, target / "package.json")
+        config_copy = target / ("prettier.config.mjs" if label == "global" else ".prettierrc")
+        shutil.copyfile(config, config_copy)
+        run("bun", "install", "--ignore-scripts", "--minimum-release-age", "604800", cwd=target, env=env)
+        deps = json.loads(manifest.read_text())["devDependencies"]
+        for name, version in deps.items():
+            actual = json.loads((target / "node_modules" / name / "package.json").read_text())["version"]
+            # Main's root manifest still permits ranges; Renovate pins exact versions.
+            if not version.startswith(("^", "~")) and actual != version:
+                raise RuntimeError(f"{name}: expected {version}, installed {actual}")
+        prettier = target / "node_modules/.bin/prettier"
+        samples = {"sample.js": "const value={answer:42}\n", "sample.toml": "answer=42\n"}
+        if label == "global":
+            samples["sample.html"] = '<div class="p-4 flex">hello</div>\n'
+        for name, content in samples.items():
+            formatted = run(prettier, "--config", config_copy, "--stdin-filepath", name,
+                            cwd=target, env=env, input=content)
+            if formatted == content:
+                raise RuntimeError(f"formatter did not transform {label}/{name}")
+            if name.endswith(".toml"):
+                assert tomllib.loads(formatted) == {"answer": 42}
+            if name.endswith(".html"):
+                assert 'class="flex p-4"' in formatted, "Tailwind plugin failed to sort classes"
+            again = run(prettier, "--config", config_copy, "--stdin-filepath", name,
+                        cwd=target, env=env, input=formatted)
+            assert again == formatted, f"formatting is not idempotent: {label}/{name}"
+
+
+def mise(work, env):
+    tools = tomllib.loads((ROOT / ".mise.toml").read_text())["tools"]
+    for tool in ("bun", "shfmt"):
+        binary = shutil.which(tool)
+        assert binary, f"install project tool first: {tool}"
+        version = run(binary, "--version" if tool == "bun" else "-version", cwd=work, env=env).strip()
+        assert version.lstrip("v") == tools[tool].lstrip("v"), (tool, version, tools[tool])
+    assert run("bun", "-e", "console.log(JSON.stringify({answer: 6 * 7}))", cwd=work, env=env).strip() == '{"answer":42}'
+    formatted = run("shfmt", "-i", "2", cwd=work, env=env, input="if true;then\necho ok\nfi\n")
+    assert formatted == "if true; then\n  echo ok\nfi\n"
+    assert run("shfmt", "-i", "2", cwd=work, env=env, input=formatted) == formatted
+
+
+def python(work, env):
+    venv = work / "venv"
+    run("uv", "venv", "--python", shutil.which("python3"), venv, cwd=work, env=env)
+    run("uv", "pip", "install", "--python", venv / "bin/python", "--exclude-newer", "P7D",
+        "-r", ROOT / "home/dot_config/dotfiles/requirements.txt", cwd=work, env=env)
+    fixture = work / "session.jsonl"
+    entries = [
+        {"type": "user", "timestamp": "2026-01-01T00:00:00Z", "message": {"role": "user", "content": "Functional transcript question"}},
+        {"type": "assistant", "timestamp": "2026-01-01T00:00:01Z", "message": {"role": "assistant", "content": [{"type": "text", "text": "Functional transcript answer"}]}},
+    ]
+    fixture.write_text("\n".join(map(json.dumps, entries)) + "\n")
+    output = work / "html"
+    run(venv / "bin/claude-code-transcripts", "json", fixture, "-o", output, cwd=work, env=env)
+    assert (output / "index.html").is_file()
+    pages = "\n".join(p.read_text() for p in output.glob("*.html"))
+    assert "Functional transcript question" in pages
+    assert "Functional transcript answer" in pages
+
+
+def cosign(work, env):
+    version = tomllib.loads((ROOT / "home/dot_config/dotfiles/cli-versions.toml").read_text())["cosign"]
+    os_name = {"Linux": "linux", "Darwin": "darwin"}[platform.system()]
+    arch = {"x86_64": "amd64", "arm64": "arm64", "aarch64": "arm64"}[platform.machine()]
+    url = f"https://github.com/sigstore/cosign/releases/download/{version}/cosign-{os_name}-{arch}"
+    binary = work / "cosign"
+    urllib.request.urlretrieve(url, binary)
+    # Source without calling main: use the production release-key verifier, not a test copy.
+    installer = (ROOT / "install.sh").read_text()
+    assert installer.rstrip().endswith('main "$@"')
+    library = work / "install-library.sh"
+    library.write_text(installer.rstrip().removesuffix('main "$@"'))
+    # The installer derives readonly script_dir from $0.
+    shutil.copytree(ROOT / "keys", work / "keys")
+    run("sh", "-c", '. "$1"; temp_dir="$3/downloads"; mkdir -p "$temp_dir"; download_cmd="curl -fsSL"; verify_cosign_download "$4" "$5"',
+        str(library), library, ROOT, work, binary, url, cwd=work, env=env)
+    binary.chmod(0o700)
+    run(binary, "version", cwd=work, env=env)
+    env = dict(env, COSIGN_PASSWORD="")
+    run(binary, "generate-key-pair", cwd=work, env=env)
+    blob = work / "blob"
+    blob.write_text("functional signature fixture\n")
+    flags = []
+    if int(version.lstrip("v").split(".")[0]) >= 3:
+        flags = ["--use-signing-config=false", "--new-bundle-format=false"]
+    run(binary, "sign-blob", *flags, "--yes", "--key", work / "cosign.key", "--tlog-upload=false",
+        "--output-signature", work / "blob.sig", blob, cwd=work, env=env)
+    verify = (binary, "verify-blob", "--key", work / "cosign.pub", "--signature", work / "blob.sig",
+              "--insecure-ignore-tlog", "--insecure-ignore-sct", "--offline", blob)
+    run(*verify, cwd=work, env=env)
+    blob.write_text("tampered fixture\n")
+    run(*verify, cwd=work, env=env, succeeds=False)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("mode", choices=("node", "mise", "python", "cosign"))
+    args = parser.parse_args()
+    # Resolve tool shims before replacing HOME or leaving the project directory.
+    binaries = {}
+    for name in ("bun", "shfmt", "uv", "node"):
+        binary = shutil.which(name)
+        if binary and "shims" not in Path(binary).parts:
+            binaries[name] = Path(binary)
+        else:
+            result = subprocess.run(["mise", "which", name], cwd=ROOT, capture_output=True, text=True)
+            if result.returncode == 0:
+                binaries[name] = Path(result.stdout.strip())
+    with tempfile.TemporaryDirectory(prefix="dotfiles-tool-check-") as temporary:
+        work = Path(temporary)
+        home = work / "home"
+        home.mkdir()
+        bindir = work / "bin"
+        bindir.mkdir()
+        for name, binary in binaries.items():
+            (bindir / name).symlink_to(binary)
+        env = dict(os.environ, HOME=str(home), XDG_CONFIG_HOME=str(home / ".config"),
+                   XDG_CACHE_HOME=str(home / ".cache"), XDG_DATA_HOME=str(home / ".local/share"),
+                   UV_CACHE_DIR=str(work / "uv-cache"), BUN_INSTALL_CACHE_DIR=str(work / "bun-cache"),
+                   MISE_AUTO_INSTALL="0", PATH=str(bindir) + os.pathsep + os.environ["PATH"])
+        globals()[args.mode](work, env)
+    print(f"PASS: {args.mode}")
+
+
+if __name__ == "__main__":
+    main()

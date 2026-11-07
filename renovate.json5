@@ -97,6 +97,15 @@
       matchUpdateTypes: ["minor", "patch", "digest"],
       automerge: true,
     },
+    // Terminal plugin compatibility is not yet covered by a reliable CI test.
+    {
+      matchFileNames: [
+        'home/.chezmoiexternals/pi.externals.toml',
+        'home/dot_pi/private_agent/settings.json',
+        'home/.chezmoiexternals/zellij.externals.toml',
+      ],
+      automerge: false,
+    },
   ],
   customManagers: [
     {

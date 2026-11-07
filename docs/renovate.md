@@ -182,6 +182,39 @@ Sources: [release age](https://docs.renovatebot.com/configuration-options/#minim
 
 ---
 
+## Functional merge checks
+
+The required `test` check aggregates the unit suite, download integrity,
+ShellCheck, tool integrations, and the zsh-snap integration. Failed, cancelled,
+or skipped dependencies block it. New tools need their own behavior checks;
+a green suite does not establish compatibility for dependencies it never runs.
+
+Tool checks install from the PR checkout into temporary directories. They exercise
+Prettier with the project and user plugins (JS, TOML, Tailwind HTML), Bun execution,
+shfmt formatting, transcript JSONL-to-HTML conversion, and authenticated Cosign
+release downloads followed by local signing, verification, and tamper rejection.
+The zsh-snap check renders the actual tools config, runs cached initialization
+across shells, and verifies regeneration after removing a cache. Tool-init output
+is a fixture; the cache implementation is real. Renovate config is validated by
+the same container image used for live updates, with semantic extraction/policy
+tests that also accept its config migration.
+
+Linux GHA is the required target. Local tests passed for current tool versions,
+proposed formatter/transcript/Cosign versions, and zsh-snap; Linux outcomes must
+be checked after deployment. Runtime Node and uv follow the existing seven-day
+mise policy. Downloads require the network; test workloads use local fixtures,
+not model accounts, cloud signing, or GitHub writes. Checkout and mise-action
+updates exercise themselves in CI. Claude authentication and live Renovate writes
+still require observing those workflows, not merely this suite.
+
+Pi and Zellij updates are explicitly review-only until reliable runtime coverage
+exists. Stock Pi 0.79.7 lacks lifecycle events required by the terminal-title
+extension; its existing optional integration tests expose that incompatibility.
+Zellij status rendering was observed, but the autolock transition test remains
+unvalidated. Those draft tests are not required gates. Major updates and security
+alerts also remain review-only; the seven-day delay and PR limits are unchanged.
+A green run is compatibility evidence, not a security audit or a Mac visual check.
+
 ## Custom Version Manifests
 
 These files purposely centralize versions so Renovate can update them automatically:
