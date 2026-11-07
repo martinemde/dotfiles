@@ -1,111 +1,100 @@
 {
-  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-  extends: [
-    'config:recommended',
-    ':semanticCommits',
-  ],
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended", ":semanticCommits"],
   dependencyDashboard: true,
-  labels: ['deps', 'automated'],
+  labels: ["deps", "automated"],
   prHourlyLimit: 2,
   prConcurrentLimit: 5,
   automerge: false,
-  automergeType: 'pr',
-  automergeStrategy: 'squash',
+  automergeType: "pr",
+  automergeStrategy: "squash",
   platformAutomerge: false,
-
-  // Known vulnerability fixes skip the normal release quarantine and queue.
   osvVulnerabilityAlerts: true,
   vulnerabilityAlerts: {
     enabled: true,
     minimumReleaseAge: null,
     automerge: false,
-    addLabels: ['security'],
+    addLabels: ["security"],
   },
-
-  // Quarantine new releases; missing publication times must not bypass the wait.
-  minimumReleaseAge: '7 days',
-  minimumReleaseAgeBehaviour: 'timestamp-required',
-  internalChecksFilter: 'strict',
-
-  // Managers enabled for this repo
+  minimumReleaseAge: "7 days",
+  minimumReleaseAgeBehaviour: "timestamp-required",
+  internalChecksFilter: "strict",
   enabledManagers: [
-    'pip_requirements',
-    'mise',
-    'docker-compose',
-    'devcontainer',
-    'github-actions',
-    'npm',
-    'custom.regex',
+    "pip_requirements",
+    "mise",
+    "docker-compose",
+    "devcontainer",
+    "github-actions",
+    "npm",
+    "custom.regex",
   ],
-
-  // Actions: pin to digests for reproducibility
-  'github-actions': { pinDigests: true },
-
-  // File discovery
+  "github-actions": {
+    managerFilePatterns: ["/^\\.github/workflows/.*\\.ya?ml$/"],
+  },
   pip_requirements: {
-    fileMatch: ['^home/dot_config/dotfiles/requirements\\.txt$'],
+    managerFilePatterns: ["/^home/dot_config/dotfiles/requirements\\.txt$/"],
   },
   devcontainer: {
-    fileMatch: ['^\\.devcontainer/devcontainer\\.json$'],
+    managerFilePatterns: ["/^\\.devcontainer/devcontainer\\.json$/"],
   },
-  'docker-compose': {
-    fileMatch: ['^home/dot_config/docker-compose/.*\\.ya?ml$'],
-  },
-  'github-actions': {
-    fileMatch: ['^\\.github/workflows/.*\\.ya?ml$'],
+  "docker-compose": {
+    managerFilePatterns: ["/^home/dot_config/docker-compose/.*\\.ya?ml$/"],
   },
   npm: {
-    fileMatch: ['^package\\.json$', '^home/dot_config/dotfiles/package\\.json$'],
+    managerFilePatterns: [
+      "/^package\\.json$/",
+      "/^home/dot_config/dotfiles/package\\.json$/",
+    ],
   },
-
-  // Group related updates; majors remain review-only.
   packageRules: [
-    // Docker digest pinning for reproducibility
-    { matchCategories: ['docker'], pinDigests: true },
     {
-      matchManagers: ['github-actions'],
-      groupName: 'github-actions',
-      matchUpdateTypes: ['minor', 'patch', 'digest'],
+      matchCategories: ["docker"],
+      pinDigests: true,
     },
     {
-      matchManagers: ['devcontainer'],
-      groupName: 'devcontainer',
-      matchUpdateTypes: ['minor', 'patch', 'digest'],
+      matchManagers: ["github-actions"],
+      groupName: "github-actions",
+      matchUpdateTypes: ["minor", "patch", "digest"],
     },
     {
-      matchManagers: ['docker-compose'],
-      groupName: 'docker-compose',
-      matchUpdateTypes: ['digest'],
+      matchManagers: ["devcontainer"],
+      groupName: "devcontainer",
+      matchUpdateTypes: ["minor", "patch", "digest"],
     },
     {
-      matchManagers: ['pip_requirements'],
-      groupName: 'python-tools',
-      matchUpdateTypes: ['minor', 'patch'],
+      matchManagers: ["docker-compose"],
+      groupName: "docker-compose",
+      matchUpdateTypes: ["digest"],
     },
     {
-      matchManagers: ['mise'],
-      groupName: 'mise-tools',
+      matchManagers: ["pip_requirements"],
+      groupName: "python-tools",
+      matchUpdateTypes: ["minor", "patch"],
     },
     {
-      matchManagers: ['npm'],
-      groupName: 'node-tools',
-      rangeStrategy: 'pin',
-      matchFileNames: ['package.json', 'home/dot_config/dotfiles/package.json'],
+      matchManagers: ["mise"],
+      groupName: "mise-tools",
     },
     {
-      matchManagers: ['custom.regex'],
-      matchDatasources: ['npm'],
-      matchFileNames: ['home/dot_pi/private_agent/settings.json'],
-      groupName: 'pi-extensions',
+      matchManagers: ["npm"],
+      groupName: "node-tools",
+      rangeStrategy: "pin",
+      matchFileNames: ["package.json", "home/dot_config/dotfiles/package.json"],
     },
     {
-      matchManagers: ['custom.regex'],
-      matchDatasources: ['github-release-attachments'],
-      matchFileNames: ['home/.chezmoiexternals/zellij.externals.toml'],
-      groupName: 'zellij-plugins',
+      matchManagers: ["custom.regex"],
+      matchDatasources: ["npm"],
+      matchFileNames: ["home/dot_pi/private_agent/settings.json"],
+      groupName: "pi-extensions",
     },
     {
-      matchUpdateTypes: ['minor', 'patch', 'digest'],
+      matchManagers: ["custom.regex"],
+      matchDatasources: ["github-release-attachments"],
+      matchFileNames: ["home/.chezmoiexternals/zellij.externals.toml"],
+      groupName: "zellij-plugins",
+    },
+    {
+      matchUpdateTypes: ["minor", "patch", "digest"],
       automerge: true,
     },
     // Terminal plugin compatibility is not yet covered by a reliable CI test.
@@ -118,134 +107,134 @@
       automerge: false,
     },
   ],
-
-  // Custom managers to pin nonstandard files
   customManagers: [
-    // Pi extensions are exact npm pins; Pi leaves them untouched during self-update.
     {
-      customType: 'regex',
+      customType: "regex",
       managerFilePatterns: [
-        '/^home\\/dot_pi\\/private_agent\\/settings\\.json$/',
+        "/^home\\/dot_pi\\/private_agent\\/settings\\.json$/",
       ],
       matchStrings: [
         '"npm:(?<depName>(?:@[^/"\\s]+/)?[^@"\\s]+)@(?<currentValue>[^"\\s]+)"',
       ],
-      datasourceTemplate: 'npm',
-      versioningTemplate: 'npm',
+      datasourceTemplate: "npm",
+      versioningTemplate: "npm",
     },
-    // Pin cosign version in a versions file (see step 4)
     {
-      customType: 'regex',
-      fileMatch: ['^home/dot_config/dotfiles/cli-versions\\.toml$'],
+      customType: "regex",
+      managerFilePatterns: ["/^home/dot_config/dotfiles/cli-versions\\.toml$/"],
       matchStrings: ['(?:^|\\n)cosign\\s*=\\s*"(?<currentValue>v?[^"]+)"'],
-      depNameTemplate: 'sigstore/cosign',
-      datasourceTemplate: 'github-releases',
+      depNameTemplate: "sigstore/cosign",
+      datasourceTemplate: "github-releases",
     },
-    // Handle aqua-prefixed tools in mise TOML files
     {
-      customType: 'regex',
-      fileMatch: ['\\.mise\\.toml$', '^home/dot_config/mise/config\\.toml(?:\\.tmpl)?$'],
+      customType: "regex",
+      managerFilePatterns: [
+        "/\\.mise\\.toml$/",
+        "/^home/dot_config/mise/config\\.toml(?:\\.tmpl)?$/",
+      ],
       matchStrings: [
         '"aqua:(?<depName>[^/]+/[^"]+)"\\s*=\\s*"(?<currentValue>v?[^"]+)"',
       ],
-      datasourceTemplate: 'github-releases',
+      datasourceTemplate: "github-releases",
     },
-    // Optional: Go tools (see step 3b)
     {
-      customType: 'regex',
-      fileMatch: ['^home/dot_config/go-tools/tools\\.txt$'],
-      matchStrings: ['^(?<depName>[^\\s@]+)@(?<currentValue>v?[^\\s#]+)'],
-      datasourceTemplate: 'go',
+      customType: "regex",
+      managerFilePatterns: ["/^home/dot_config/go-tools/tools\\.txt$/"],
+      matchStrings: ["^(?<depName>[^\\s@]+)@(?<currentValue>v?[^\\s#]+)"],
+      datasourceTemplate: "go",
     },
-    // Optional: Node tools in tools.txt (see step 3a alt)
     {
-      customType: 'regex',
-      fileMatch: ['^home/dot_config/node-tools/tools\\.txt$'],
-      matchStrings: ['^(?<depName>[^@\\n]+)@(?<currentValue>[^\\n#]+)'],
-      datasourceTemplate: 'npm',
+      customType: "regex",
+      managerFilePatterns: ["/^home/dot_config/node-tools/tools\\.txt$/"],
+      matchStrings: ["^(?<depName>[^@\\n]+)@(?<currentValue>[^\\n#]+)"],
+      datasourceTemplate: "npm",
     },
-    // Chezmoi external dependencies - ohmyzsh tarball pin
     {
-      customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternal\\.toml\\.tmpl$'],
+      customType: "regex",
+      managerFilePatterns: ["/^home/\\.chezmoiexternal\\.toml\\.tmpl$/"],
       matchStrings: [
-        'ohmyzsh/ohmyzsh/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
+        "ohmyzsh/ohmyzsh/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz",
       ],
-      datasourceTemplate: 'github-digest',
-      currentValueTemplate: 'master',
-      depNameTemplate: 'ohmyzsh/ohmyzsh',
-      packageNameTemplate: 'ohmyzsh/ohmyzsh',
+      datasourceTemplate: "github-digest",
+      currentValueTemplate: "master",
+      depNameTemplate: "ohmyzsh/ohmyzsh",
+      packageNameTemplate: "ohmyzsh/ohmyzsh",
     },
-    // Chezmoi external dependencies - zsh-autosuggestions archive tarball pin
     {
-      customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternals/zsh\\.externals\\.toml$'],
+      customType: "regex",
+      managerFilePatterns: [
+        "/^home/\\.chezmoiexternals/zsh\\.externals\\.toml$/",
+      ],
       matchStrings: [
-        'zsh-users/zsh-autosuggestions/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
+        "zsh-users/zsh-autosuggestions/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz",
       ],
-      datasourceTemplate: 'github-digest',
-      currentValueTemplate: 'master',
-      depNameTemplate: 'zsh-users/zsh-autosuggestions',
-      packageNameTemplate: 'zsh-users/zsh-autosuggestions',
+      datasourceTemplate: "github-digest",
+      currentValueTemplate: "master",
+      depNameTemplate: "zsh-users/zsh-autosuggestions",
+      packageNameTemplate: "zsh-users/zsh-autosuggestions",
     },
-    // Chezmoi external dependencies - zsh-syntax-highlighting archive tarball pin
     {
-      customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternals/zsh\\.externals\\.toml$'],
+      customType: "regex",
+      managerFilePatterns: [
+        "/^home/\\.chezmoiexternals/zsh\\.externals\\.toml$/",
+      ],
       matchStrings: [
-        'zsh-users/zsh-syntax-highlighting/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
+        "zsh-users/zsh-syntax-highlighting/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz",
       ],
-      datasourceTemplate: 'github-digest',
-      currentValueTemplate: 'master',
-      depNameTemplate: 'zsh-users/zsh-syntax-highlighting',
-      packageNameTemplate: 'zsh-users/zsh-syntax-highlighting',
+      datasourceTemplate: "github-digest",
+      currentValueTemplate: "master",
+      depNameTemplate: "zsh-users/zsh-syntax-highlighting",
+      packageNameTemplate: "zsh-users/zsh-syntax-highlighting",
     },
-    // Chezmoi external dependencies - tmux-plugins/tpm archive tarball pin
     {
-      customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternals/tmux\\.externals\\.toml$'],
+      customType: "regex",
+      managerFilePatterns: [
+        "/^home/\\.chezmoiexternals/tmux\\.externals\\.toml$/",
+      ],
       matchStrings: [
-        'tmux-plugins/tpm/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
+        "tmux-plugins/tpm/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz",
       ],
-      datasourceTemplate: 'github-digest',
-      currentValueTemplate: 'master',
-      depNameTemplate: 'tmux-plugins/tpm',
-      packageNameTemplate: 'tmux-plugins/tpm',
+      datasourceTemplate: "github-digest",
+      currentValueTemplate: "master",
+      depNameTemplate: "tmux-plugins/tpm",
+      packageNameTemplate: "tmux-plugins/tpm",
     },
-    // Chezmoi external dependencies - zsh-snap archive tarball pin
     {
-      customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternals/zsh\\.externals\\.toml$'],
+      customType: "regex",
+      managerFilePatterns: [
+        "/^home/\\.chezmoiexternals/zsh\\.externals\\.toml$/",
+      ],
       matchStrings: [
-        'marlonrichert/zsh-snap/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz',
+        "marlonrichert/zsh-snap/archive/(?<currentDigest>[a-f0-9]{7,40})\\.tar\\.gz",
       ],
-      datasourceTemplate: 'github-digest',
-      currentValueTemplate: 'main',
-      depNameTemplate: 'marlonrichert/zsh-snap',
-      packageNameTemplate: 'marlonrichert/zsh-snap',
+      datasourceTemplate: "github-digest",
+      currentValueTemplate: "main",
+      depNameTemplate: "marlonrichert/zsh-snap",
+      packageNameTemplate: "marlonrichert/zsh-snap",
     },
-    // Chezmoi external dependencies - PR session naming code and license
     {
-      customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternals/pi\\.externals\\.toml$'],
+      customType: "regex",
+      managerFilePatterns: [
+        "/^home/\\.chezmoiexternals/pi\\.externals\\.toml$/",
+      ],
       matchStrings: [
-        'lepht/pi-pr-session-title/raw/(?<currentDigest>[a-f0-9]{40})/',
+        "lepht/pi-pr-session-title/raw/(?<currentDigest>[a-f0-9]{40})/",
       ],
-      datasourceTemplate: 'github-digest',
-      currentValueTemplate: 'main',
-      depNameTemplate: 'lepht/pi-pr-session-title',
-      packageNameTemplate: 'lepht/pi-pr-session-title',
+      datasourceTemplate: "github-digest",
+      currentValueTemplate: "main",
+      depNameTemplate: "lepht/pi-pr-session-title",
+      packageNameTemplate: "lepht/pi-pr-session-title",
     },
-    // Match each release URL and its adjacent checksum as one dependency.
-    // The datasource hashes matching release assets, even without API digests.
     {
-      customType: 'regex',
-      fileMatch: ['^home/\\.chezmoiexternals/zellij\\.externals\\.toml$'],
+      customType: "regex",
+      managerFilePatterns: [
+        "/^home/\\.chezmoiexternals/zellij\\.externals\\.toml$/",
+      ],
       matchStrings: [
         'url = "https://github\\.com/(?<depName>[^/]+/[^/]+)/releases/download/(?<currentValue>v?[0-9.]+)/[^"\\n]+"\\nchecksum\\.sha256 = "(?<currentDigest>[a-f0-9]{64})"',
       ],
-      datasourceTemplate: 'github-release-attachments',
-      versioningTemplate: 'loose',
+      datasourceTemplate: "github-release-attachments",
+      versioningTemplate: "loose",
     },
   ],
 }
