@@ -77,3 +77,34 @@
   printf '%s\n' "$output"
   [ "$status" -eq 0 ]
 }
+
+@test "Renovate separates read-only validation from App-authenticated writes" {
+  command -v bun >/dev/null 2>&1 || skip "Bun is not installed"
+  run env REPO_ROOT="$BATS_TEST_DIRNAME/.." bun --eval '
+    import { strict as assert } from "node:assert";
+    import { readFileSync } from "node:fs";
+    import { join } from "node:path";
+
+    const workflow = Bun.YAML.parse(readFileSync(join(process.env.REPO_ROOT, ".github/workflows/renovate.yml"), "utf8"));
+    assert.equal(workflow.on.workflow_dispatch.inputs.dry_run.default, true);
+    assert(workflow.on.schedule.length);
+    assert(Object.values(workflow.permissions).every(permission => permission === "read"));
+    const job = workflow.jobs.renovate;
+    assert(job.if.includes("vars.RENOVATE_APP_ID"));
+    assert.equal(job.env.RENOVATE_TOKEN, undefined);
+    const dry = job.steps.find(step => step.env?.RENOVATE_DRY_RUN);
+    const token = job.steps.find(step => step.id === "app-token");
+    const live = job.steps.find(step => step.env?.RENOVATE_TOKEN?.includes("app-token.outputs.token"));
+    assert.equal(dry.env.RENOVATE_TOKEN, "${{ github.token }}");
+    assert.equal(dry.env.RENOVATE_DRY_RUN, "full");
+    assert.equal(live.env.RENOVATE_DRY_RUN, undefined);
+    assert.equal(live.if, token.if);
+    // Omitting owner and repositories scopes the token to the current repository.
+    assert.equal(token.with.owner, undefined);
+    assert.equal(token.with.repositories, undefined);
+    assert.equal(token.with["permission-workflows"], "write");
+    assert.equal(token.with["permission-vulnerability-alerts"], "read");
+  '
+  printf '%s\n' "$output"
+  [ "$status" -eq 0 ]
+}

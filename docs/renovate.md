@@ -44,25 +44,82 @@ All updates require review. A matching hash proves byte integrity, not that upst
 
 ---
 
-## Hosted activation and visible evidence
+## Self-hosted activation and visible evidence
 
-A valid config is not an installed updater. Install the
-[Renovate GitHub App](https://github.com/apps/renovate/installations/new) on
-`martinemde/dotfiles`, then inspect its
-[Mend job logs](https://developer.mend.io/github/martinemde/dotfiles).
-These settings require the account owner's authenticated browser; the local
-GitHub CLI token cannot inspect or grant this app installation.
+The **Renovate** Actions workflow is the intended writer. It runs daily at 06:23
+UTC, within the config's `before 9am` window. The hosted Mend App is not required;
+do not enable both writers. The seven-day age rule, low PR limits, and manual
+review policy remain in `renovate.json5`.
 
-The Dependency Dashboard is enabled so the hosted bot can show pending updates,
-release-age waits and failures even before an update PR is ready. A dashboard or
-PR authored by Renovate, plus a successful hosted job, is the activation evidence.
-Routine PRs still follow the daily window, seven-day age rule and review policy.
+Live runs need a dedicated GitHub App installed only on `martinemde/dotfiles`.
+The account owner must create and install it through GitHub's authenticated web
+settings; the current CLI OAuth token cannot create an App or its private key.
+Do not copy the CLI's broad personal OAuth token into an Actions secret.
 
-The manual **Renovate validation** Actions workflow runs the real engine in full
-dry-run mode with a read-only token. Its logs expose manifest extraction, lookups
-and proposed updates. It cannot create branches, issues or PRs, and a green run
-is not proof that the hosted app is installed. Keep one writer: do not add a
-second scheduled self-hosted updater unless deliberately replacing the app.
+1. In [personal developer settings](https://github.com/settings/apps), create a new
+   GitHub App owned by `martinemde`, not an organization. Give it a distinct name
+   and this repository's URL as its homepage. Disable the webhook; no callback
+   or user authorization is needed for installation tokens.
+2. Allow installation only on this account. Grant these repository permissions:
+
+- Contents, pull requests, issues, and workflows: read and write.
+- Administration, checks, commit statuses, and Dependabot alerts: read. Metadata read is automatic.
+
+These narrow [Renovate's GitHub App permissions](https://docs.renovatebot.com/modules/platform/github/#running-as-a-github-app)
+to this review-only setup: CI owns checks and statuses, and organization membership
+and merge queues are not used here.
+
+3. Install the App on `martinemde`, select **Only select repositories**, and
+   select **dotfiles**. Disable or deselect this repository in the hosted Mend
+   Renovate App installation before enabling this writer.
+4. In the new App's settings, generate and download a private key. In the
+   repository's **Settings → Secrets and variables → Actions**, add secret
+   `RENOVATE_APP_PRIVATE_KEY` containing the complete PEM file. Add repository
+   variable `RENOVATE_APP_ID` containing the App ID (not its installation ID).
+   Set the ID last: scheduled runs are skipped while it is absent, avoiding
+   daily credential failures. Keep the private key out of the repository and
+   logs; remove any unneeded local copy after storing it securely.
+
+The token action limits each installation token to the current repository,
+requests only the listed permissions, and revokes it after
+the job. The workflow's own `GITHUB_TOKEN` stays read-only. An App token lets
+Renovate PRs trigger CI, unlike writes made with `GITHUB_TOKEN`.
+
+Manual dispatch defaults to `dry_run: true`: it validates config and runs the
+engine with a read-only token, without needing App credentials. To activate,
+run once with `dry_run: false` after configuring the App. A missing ID or key
+fails that live run with an explicit setup error. A successful live job and an
+App-authored Dependency Dashboard or PR are activation evidence; a green dry
+run is not. The dashboard exposes pending updates, release-age waits, and
+failures even when no PR is ready.
+
+Until those credentials exist and a live run succeeds, updating remains blocked.
+Setup is not evidence that Renovate has actually written to GitHub.
+
+### Almanac pilot
+
+[`martinemde/almanac`](https://github.com/martinemde/almanac) complements Renovate;
+it does not discover dependency updates. Start with its standalone `report` verb,
+not the repair daemon. This verb cannot write or call a model and needs no database,
+broker, webhook ingress, or sandbox. Full deployment is deliberately deferred.
+
+The report needs `ALMANAC_OWNER=martinemde`, `ALMANAC_READ_ONLY=1`, and
+`ALMANAC_RENOVATE_AUTHOR` matching the new Renovate App's actual bot login.
+Authentication accepts either `GITHUB_TOKEN` or the App ID, installation ID, and
+private key through `GITHUB_APP_*`. Keep credentials out of this repository.
+Do not copy the personal CLI OAuth token into automation.
+
+The report scans accessible owner repositories; it does not support a repository
+filter. App authentication installed on one selected repository is the cleanest
+one-repository pilot. Actions' repository `GITHUB_TOKEN` is not a drop-in: token
+authentication uses the user repositories endpoint. Verify the report with actual
+PRs before scheduling it; an empty result does not prove PR evaluation works.
+
+No Almanac binary or reporting service is deployed here yet. After Renovate's App
+and bot login are established, build the report binary from reviewed, pinned source
+and choose its execution host. Use only the report verb; no repair, merge, or live
+mode is authorized by this pilot. Broader vulnerability inventory and advisory
+matching remain on Almanac's roadmap, so this is not a replacement security scanner.
 
 ## Update Security Decisions
 
