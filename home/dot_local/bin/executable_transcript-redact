@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+"""Mask Gitleaks findings in coding-agent transcripts without moving byte offsets."""
+
+import argparse
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+
+
+PATTERNS = (
+    ".claude/projects/**/*.jsonl",
+    ".claude/history.jsonl",
+    ".codex/sessions/**/*.jsonl",
+    ".codex/sessions/**/rollout-*.json",
+    ".codex/archived_sessions/**/*.jsonl",
+    ".codex/archived_sessions/**/rollout-*.json",
+    ".codex/history.jsonl",
+    ".codex/session_index.jsonl",
+    ".prime/*/sessions/*.jsonl",
+    ".prime/*/session-artifacts/**/*.jsonl",
+)
+STRING = re.compile(rb'"(?:[^"\\]|\\.)*"', re.DOTALL)
+KEY_SUFFIX = re.compile(rb"\s*:")
+
+
+def validate(data, path):
+    try:
+        if path.suffix == ".jsonl":
+            for line in data.splitlines():
+                if line.strip():
+                    json.loads(line)
+        else:
+            json.loads(data)
+    except (ValueError, UnicodeError):
+        raise ValueError(f"Invalid JSON in {path}; no secret-bearing details shown") from None
+
+
+def strings(data):
+    for match in STRING.finditer(data):
+        # Only values, never object keys or structural identifiers encoded as keys.
+        if KEY_SUFFIX.match(data, match.end()):
+            continue
+        yield match, json.loads(match.group())
+
+
+def discover(home):
+    paths = sorted({p for pattern in PATTERNS for p in home.glob(pattern)})
+    return [p for p in paths if p.is_file() and not any(
+        parent.is_symlink() for parent in (p, *p.parents)
+        if parent != home and home in parent.parents
+    )]
+
+
+def scan_text(documents):
+    # Include decoded JSON with key context, raw JSON, and decoded tool-output text.
+    parts = []
+    for data in documents:
+        parts.append(data.decode("utf-8"))
+        try:
+            records = [json.loads(data)]
+        except ValueError:
+            records = [json.loads(line) for line in data.splitlines() if line.strip()]
+        parts.extend(json.dumps(record, ensure_ascii=False) for record in records)
+        parts.extend(value for _, value in strings(data))
+    return "\n".join(parts).encode("utf-8", errors="surrogatepass")
+
+
+def detect(text, gitleaks):
+    # Built-in rules only: home/repository allowlists must not hide transcripts.
+    # Neither reports nor source content are written to disk or echoed to the caller.
+    env = os.environ.copy()
+    env.pop("GITLEAKS_CONFIG", None)
+    env["GITLEAKS_CONFIG_TOML"] = "[extend]\nuseDefault = true\n"
+    with tempfile.TemporaryDirectory(prefix="transcript-redact-") as directory:
+        result = subprocess.run(
+            [gitleaks, "stdin", "--no-banner", "--log-level", "error",
+             "--ignore-gitleaks-allow", "--gitleaks-ignore-path", directory,
+             "--max-decode-depth", "0", "--report-format", "json", "--report-path", "-"],
+            input=text, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            env=env, cwd=directory,
+        )
+    if result.returncode not in (0, 1):
+        raise ValueError("Gitleaks failed; output suppressed to avoid exposing secrets")
+    try:
+        findings = json.loads(result.stdout or b"[]")
+        return {item["Secret"] for item in findings if item["Secret"]}
+    except (ValueError, KeyError, TypeError):
+        raise ValueError("Invalid Gitleaks report; output suppressed") from None
+
+
+def character_spans(raw):
+    """Map decoded characters to raw UTF-8/JSON escape byte spans."""
+    i = 1
+    while i < len(raw) - 1:
+        start = i
+        if raw[i] == 92:
+            i += 6 if raw[i + 1] == 117 else 2
+            if raw[start:start + 2] == b"\\u":
+                code = int(raw[start + 2:start + 6], 16)
+                if 0xD800 <= code <= 0xDBFF and raw[i:i + 2] == b"\\u":
+                    low = int(raw[i + 2:i + 6], 16)
+                    if 0xDC00 <= low <= 0xDFFF:
+                        i += 6
+        else:
+            byte = raw[i]
+            i += 1 if byte < 128 else 2 if byte < 224 else 3 if byte < 240 else 4
+        yield start, i
+
+
+def mask(data, secrets):
+    output = bytearray(data)
+    occurrences = 0
+    for match, value in strings(data):
+        covered = set()
+        for secret in secrets:
+            start = 0
+            while (index := value.find(secret, start)) >= 0:
+                covered.update(range(index, index + len(secret)))
+                occurrences += 1
+                start = index + 1
+        raw_covered = set()
+        raw = match.group()
+        for secret in secrets:
+            encoded = secret.encode("utf-8", errors="surrogatepass")
+            start = 1
+            while (index := raw.find(encoded, start, len(raw) - 1)) >= 0:
+                raw_covered.update(range(index, index + len(encoded)))
+                start = index + 1
+        if covered or raw_covered:
+            for index, (start, end) in enumerate(character_spans(raw)):
+                if index in covered or any(i in raw_covered for i in range(start, end)):
+                    output[match.start() + start:match.start() + end] = b"X" * (end - start)
+    return bytes(output), occurrences
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--home", type=Path, default=Path.home(), help="Home directory to scan")
+    parser.add_argument("--write", action="store_true", help="Apply byte-preserving masking (default: preview)")
+    parser.add_argument("--agents-stopped", action="store_true", help="Confirm all affected agents and daemons are stopped")
+    args = parser.parse_args()
+    if args.write and not args.agents_stopped:
+        parser.error("--write requires --agents-stopped; exit all affected agents first")
+    gitleaks = shutil.which("gitleaks")
+    if not gitleaks:
+        parser.error("gitleaks is required; install it through the managed mise configuration")
+    home = args.home.expanduser().resolve()
+    originals = {path: path.read_bytes() for path in discover(home)}
+    for path, data in originals.items():
+        validate(data, path)
+    text = scan_text(originals.values())
+    secrets = detect(text, gitleaks) if text else set()
+    changes = {}
+    pending = secrets
+    while pending:
+        progress = False
+        for path, original in originals.items():
+            data = changes.get(path, original)
+            masked, _ = mask(data, pending)
+            if masked != data:
+                validate(masked, path)
+                if len(masked) != len(original):
+                    raise ValueError("Masking changed byte length; refusing writes")
+                changes[path] = masked
+                progress = True
+        if not progress:
+            raise ValueError("Verification found unmaskable findings; no files written")
+        remaining = scan_text(changes.get(path, data) for path, data in originals.items())
+        pending = detect(remaining, gitleaks)
+        secrets.update(pending)
+    for path in changes:
+        print(f"{'Mask' if args.write else 'Would mask'} {path.relative_to(home)}")
+    if args.write:
+        # Check the complete set before the first write; offline operation is mandatory.
+        if any(path.read_bytes() != data for path, data in originals.items()):
+            raise ValueError("Transcripts changed during scan; stop agents and retry")
+        for path, data in changes.items():
+            fd, temporary = tempfile.mkstemp(prefix=".transcript-redact-", dir=path.parent)
+            try:
+                with os.fdopen(fd, "wb") as handle:
+                    handle.write(data)
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                    os.fchmod(handle.fileno(), stat.S_IMODE(path.stat().st_mode))
+                os.replace(temporary, path)
+            finally:
+                if os.path.exists(temporary):
+                    os.unlink(temporary)
+    print(f"{'Masked' if args.write else 'Preview'}: {len(changes)} files; "
+          f"{len(secrets)} distinct detected values; {len(originals)} transcript files scanned.")
+    print("Credential/config files, SQLite, caches, backups, and provider records are untouched.")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (ValueError, OSError) as error:
+        # OSError text may include paths, but never file contents or detector output.
+        print(f"transcript-redact: {error}", file=sys.stderr)
+        sys.exit(1)
