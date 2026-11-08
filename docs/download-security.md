@@ -37,8 +37,8 @@ publisher's code is safe. A correctly signed malicious release remains possible.
 
 ## Deliberately left out
 
-Global mise tools still request `latest`: there is no reviewed multi-platform
-lockfile for the Go-templated global configuration yet. The project lockfile does
+Global mise tools use exact versions, but there is no reviewed multi-platform
+lockfile for the global configuration yet. The project lockfile does
 not lock the tools installed into the user's home directory. Enforcing locked
 mode before those files and their refresh path exist would break fresh installs.
 

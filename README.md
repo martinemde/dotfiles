@@ -1,189 +1,34 @@
-# Dotfiles Redux
+# Dotfiles
 
-This repository contains my personal dotfiles for setting up a productive developer environment on macOS, Linux, and containerized setups using [Devcontainers](https://containers.dev/). The goal is to provide a stable and maintainable environment that prioritizes pragmatic defaults over heavy customization.
+Personal dotfiles for macOS, Linux, and containers, managed with [chezmoi](https://www.chezmoi.io/).
 
-## Philosophy
+## Install
 
-- **Pragmatic Minimalism**: I prefer focused, single-purpose tools over complex frameworks. Instead of importing bulky plugins or features I don't use, I choose excellent, well-maintained tools that do one thing well with minimal configuration. Examples include znap for fast plugin loading, starship for cross-shell prompts, and mise for reproducible tool management.
-- **Portability**: These dotfiles should work across macOS and Linux machines, as well as within containers. They are designed to be reliable whether installed system-wide or through a Devcontainer configuration.
-- **Consistency**: The configuration aims to make pairing with others easy by sticking to intuitive shortcuts and well-known conventions. While these dotfiles improve my workflow, I can still work effectively without them if necessary.
-- **Performance with Reliability**: Fast startup matters—this setup achieves 50-80% faster shell startup through caching and lazy-loading—but not at the cost of stability. I avoid risky optimizations and instead gain speed through minimalism and focused tooling. Runtime performance should not be significantly degraded by these configurations.
-
-## Goals
-
-1. **Stable setup** that rarely fails and is simple to maintain.
-2. **Easy installation** on a fresh Mac or Linux system, with support for Devcontainers for containerized development.
-3. **Shared tools** that follow common standards, enabling me to collaborate with others without friction.
-4. **Documentation** that clearly explains the rationale behind each configuration choice.
-
-## Installation
-
-### Quick Start
-
-```bash
-chezmoi init --apply $GITHUB_USERNAME
-```
-
-### Advanced Usage
-
-The installer supports various options and can pass arguments directly to `chezmoi init`:
-
-```bash
-# Force reinstall tools (if already installed)
-REINSTALL_TOOLS=true ./install.sh
-
-# Pass arguments to chezmoi init
-./install.sh -- --force          # Force chezmoi to overwrite existing files
-./install.sh -- --one-shot       # Use chezmoi's one-shot mode
-
-# Combine options
-REINSTALL_TOOLS=true ./install.sh -- --force
-```
-
-### Environment Variables
-
-You can customize the installation behavior with these environment variables:
-
-- `REINSTALL_TOOLS=true` - Force reinstallation of tools even if already present
-- `BIN_DIR=/custom/path` - Install binaries to a custom directory (default: `~/.local/bin`)
-- `DEBUG=1` - Enable debug output during installation
-- `VERIFY_SIGNATURES=false` - Disable signature verification (not recommended)
-
-#### Non-Interactive Installation
-
-For CI/CD or automated environments where no TTY is available, set these variables to bypass interactive prompts:
-
-- `GIT_USER_NAME="Your Name"` - Git user name for commits
-- `GIT_USER_EMAIL="your.email@example.com"` - Git user email for commits
-
-Example for CI environments:
-
-```bash
-GIT_USER_NAME="CI User" GIT_USER_EMAIL="ci@example.com" ./install.sh
-```
-
-For a complete list of options, run `./install.sh --help`.
-
-## Download verification
-
-Zellij plugins have SHA256 pins. Renovate proposes their release URLs and hashes
-in one update; CI downloads the assets and checks the pair. Tool and image updates
-require review, with a seven-day delay for routine new versions.
-
-Mise verifies the signatures/provenance its backends support. Attested precompiled
-Python and signed mise self-updates have no age delay; other tool selections keep
-the seven-day default. Renovate checks daily. Global tools still track `latest`;
-they are not yet fully hash-locked. Bun and uv package installs also apply a
-seven-day release delay, including their dependency resolution.
-
-Shims remain on PATH, but mise no longer installs missing tools as a side effect
-of running commands. Use explicit `mise install` or `mise upgrade`.
-
-For verification failures, investigate the upstream release instead of disabling
-checks or accepting a replacement hash. See [download trust](docs/download-security.md)
-for limits and [Renovate](docs/renovate.md) for the update path. After changing
-project mise versions, refresh `mise.lock` with the safe seven-day command in
-[Mise](docs/mise.md#lock-scope-and-updates).
-
-## Pi terminal title
-
-The personal extension in `home/dot_pi/private_agent/extensions/terminal-title.ts`
-shows `π ⠏ working | 42% | model xhigh | session name` (or `π ready` when
-settled). The working spinner uses Pi's default frames and 80 ms cadence. Reasoning
-models show their current effort level, which updates when you cycle it.
-Blocking extension questions and confirmations alternate `[.]` / `[!]` until
-answered or cancelled. Plain-text questions are not guessed from assistant prose.
-Context is percent used; `?%` means unknown, such as immediately after compaction.
-Unnamed sessions use the directory name. Run `/reload` in Pi after applying it.
-
-The sandboxed TUI integration test runs with `bats test/pi-terminal-title.bats`
-and requires an installed Pi and Python 3; it never calls a real model provider.
-
-## Pi PR session names
-
-[pi-pr-session-title](https://github.com/lepht/pi-pr-session-title) detects PR
-references in prompts (`PR 123`, `pull request 123`, `#123`, or GitHub PR URLs)
-and looks up the title with `gh`. `home/.chezmoiexternals/pi.externals.toml` pins
-its unmodified source and MIT license to a commit; Renovate updates both pins.
-The local `pr-session-title/index.ts` wrapper formats native session names as
-`pinwheel#123 — fix login race conditions`, which the terminal title displays too.
-It lowercases the PR subject and keeps at most five words, without another model
-request. Short subjects stay short; conventional-commit scopes are removed.
-
-Manual names win, including names set while a lookup is pending. Failed lookups
-leave the session unnamed. Detection uses prompt references, not the current
-branch's PR. Bare numbers need a GitHub checkout; URL references work anywhere.
-
-Apply `~/.pi/agent/extensions/pr-session-title` and run `/reload` in Pi. After
-applying, `bats test/pi-pr-session-title.bats test/pi-terminal-title.bats` exercises
-real Pi sessions and titles with a fake `gh` and an offline model provider. To test
-without installing the external, set `PI_PR_SESSION_TITLE_UPSTREAM` to a local copy
-of the pinned source. Tests themselves never download dependencies or call GitHub.
-
-## Prime in Coder
-
-`prime-coder` runs the local Prime UI against a daemon in Coder through an SSH
-Unix-socket forward. It uses the current `coder` login, Python 3, OpenSSH, and
-`fzf` for the workspace chooser; no separate server URL or credentials.
+With chezmoi installed:
 
 ```sh
-prime-coder                             # choose a workspace or create one
-prime-coder my-workspace                # open its prime-coder conversation
-prime-coder --forward-auth my-workspace # copy saved API keys, then connect
-prime-coder my-workspace --resume       # Prime's session picker
-prime-coder my-workspace list --all --json
-prime-coder my-workspace --help         # Prime's own help
+chezmoi init --apply martinemde
 ```
 
-Both installations are updated to latest stable at most once a day
-(`PRIME_CODER_UPDATE_INTERVAL` seconds; `0` checks every run), and immediately
-when local and remote versions differ. A remote daemon still running an older
-version is restarted when none of its sessions are live. The chooser lists
-running workspaces first, most recently used first, with their template. Coder
-prompts for the template and parameters when creating a workspace; the launcher
-sets no template, harness, or repository defaults. All templates appear in the
-chooser. Workspaces must provide Python 3, curl, and sh. If Prime is missing at
-`~/.local/bin/prime-agent`, the launcher installs it using the official
-`https://app.primeintellect.ai/prime-agent/install.sh` script.
-Existing stopped workspaces are started.
-Closing the UI removes the tunnel, not the remote agents or workspace. Compute
-continues billing until Coder stops it. In the chooser, press **Ctrl-X** on a
-workspace to stop it, with Coder's confirmation. This ends all running agents and
-commands there but preserves saved files. `coder stop WORKSPACE` also works.
+Otherwise, clone this repo and run `./install.sh`.
+See [installation](docs/installation.md) for prerequisites and options.
 
-Without additional arguments, the launcher creates or reopens the remote
-`prime-coder` session in the template's sole checkout (otherwise `~/workspace`).
-Arguments after the workspace are passed unchanged to the local Prime binary.
-The launcher does not forward the laptop's environment to remote workers.
-Initial launcher-created sessions disable telemetry.
+## Make changes
 
-Credentials stay local unless you put `--forward-auth` before the workspace name
-(or use `prime-coder --forward-auth` with the chooser). This copies all saved Prime
-API-key entries from `~/.prime/agent/auth.json` (or `PRIME_AGENT_CODING_AGENT_DIR`)
-over SSH stdin. OAuth/refresh tokens and `!command` keys are skipped; saved keys
-that name local environment variables are resolved locally. Environment-only keys
-are not copied. Missing usable saved keys fail the connection.
+Edit source files in `home/`, not the installed copies in `~/`.
 
-Forwarding replaces matching remote provider entries and preserves unrelated ones.
-The remote `~/.prime/agent/auth.json` is written atomically with mode `0600` using
-Prime's auth lock. Keys remain on the workspace after disconnect and refresh on
-each opted-in connect. Only use this with workspaces whose users and admins you
-trust; there is no ownership restriction. No credentials go in command arguments,
-launcher debug output, or the local UI environment. An already-running session may
-need its model reselected to pick up a rotated key. Remote environment overrides
-(such as `PRIME_API_KEY`) can still take precedence.
+```sh
+chezmoi diff
+chezmoi apply
+```
 
-This is a working-model launcher, not a remote-filesystem adapter: `--cwd`,
-`@files`, auth/settings, and some saved-session commands still run client-side.
-Explicit arguments that create a new session default to `/`; use the default
-conversation for the template checkout. Stock `--print` executes locally rather
-than on the forwarded daemon, so do not use it for remote commands. Some Prime maintenance commands ignore
-or reject explicit daemon sockets. A failed initial tunnel preflight stops the
-launcher, but Prime itself has no connect-only flag. Remote access to local files
-and cross-workspace subagents are deliberately out of scope.
+## Reference
 
-Offline checks: `bats test/prime-coder.bats`.
+- [Tool and setup notes](docs/)
+- [Download security](docs/download-security.md) and [updates](docs/renovate.md)
+- [Tests](docs/testing.md)
+- [Agent instructions](AGENTS.md)
 
 ## License
 
-This project is open source under the [ISC License](LICENSE.md), credited to Ivy Evans, Martin Emde.
+[ISC](LICENSE) — Ivy Evans, Martin Emde.

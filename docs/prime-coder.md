@@ -1,5 +1,72 @@
 # Prime Coder launcher
 
+## Usage
+
+`prime-coder` runs the local Prime UI against a daemon in Coder through an SSH
+Unix-socket forward. It requires a local `prime-agent`, the current `coder` login,
+Python 3, OpenSSH, and `fzf` for the workspace chooser; no separate server URL or credentials.
+
+```sh
+prime-coder                             # choose a workspace or create one
+prime-coder my-workspace                # open its prime-coder conversation
+prime-coder --forward-auth my-workspace # copy saved API keys, then connect
+prime-coder my-workspace --resume       # Prime's session picker
+prime-coder my-workspace list --all --json
+prime-coder my-workspace --help         # Prime's own help
+```
+
+Both installations are updated to latest stable at most once a day
+(`PRIME_CODER_UPDATE_INTERVAL` seconds; `0` checks every run), and immediately
+when local and remote versions differ. A remote daemon still running an older
+version is restarted when none of its sessions are live. The chooser lists
+running workspaces first, most recently used first, with their template. Coder
+prompts for the template and parameters when creating a workspace; the launcher
+sets no template, harness, or repository defaults. All templates appear in the
+chooser. Workspaces must provide Python 3, curl, and sh. If Prime is missing at
+`~/.local/bin/prime-agent`, the launcher installs it using the official
+`https://app.primeintellect.ai/prime-agent/install.sh` script.
+Existing stopped workspaces are started.
+Closing the UI removes the tunnel, not the remote agents or workspace. Compute
+continues billing until Coder stops it. In the chooser, press **Ctrl-X** on a
+workspace to stop it, with Coder's confirmation. This ends all running agents and
+commands there but preserves saved files. `coder stop WORKSPACE` also works.
+
+Without additional arguments, the launcher creates or reopens the remote
+`prime-coder` session in the sole Git checkout directly under `~/workspace`
+(or `~/workspace` otherwise).
+Arguments after the workspace are passed unchanged to the local Prime binary.
+The launcher does not forward the laptop's environment to remote workers.
+Initial launcher-created sessions disable telemetry.
+
+Credentials stay local unless you put `--forward-auth` before the workspace name
+(or use `prime-coder --forward-auth` with the chooser). This copies all saved Prime
+API-key entries from `~/.prime/agent/auth.json` (or `PRIME_AGENT_CODING_AGENT_DIR`)
+over SSH stdin. OAuth/refresh tokens and `!command` keys are skipped; saved keys
+that name local environment variables are resolved locally. Environment-only keys
+are not copied. Missing usable saved keys fail the connection.
+
+Forwarding replaces matching remote provider entries and preserves unrelated ones.
+The remote `~/.prime/agent/auth.json` is written atomically with mode `0600` using
+Prime's auth lock. Keys remain on the workspace after disconnect and refresh on
+each opted-in connect. Only use this with workspaces whose users and admins you
+trust; there is no ownership restriction. No credentials go in command arguments,
+launcher debug output, or the local UI environment. An already-running session may
+need its model reselected to pick up a rotated key. Remote environment overrides
+(such as `PRIME_API_KEY`) can still take precedence.
+
+This is a working-model launcher, not a remote-filesystem adapter: `--cwd`,
+`@files`, auth/settings, and some saved-session commands still run client-side.
+Explicit arguments that create a new session default to `/`; use the default
+conversation for the template checkout. Stock `--print` executes locally rather
+than on the forwarded daemon, so do not use it for remote commands. Some Prime maintenance commands ignore
+or reject explicit daemon sockets. A failed initial tunnel preflight stops the
+launcher, but Prime itself has no connect-only flag. Remote access to local files
+and cross-workspace subagents are deliberately out of scope.
+
+Offline checks: `bats test/prime-coder.bats`.
+
+## Design notes
+
 Keep the UI local and the native daemon/workers in Coder. OpenSSH forwards one
 Unix socket through `coder ssh --stdio`, using the existing Coder login. No bus,
 conversation database, credential sync, or Prime fork is needed for this proof.
