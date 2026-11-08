@@ -3,7 +3,6 @@
 .config/bat/config-llm
 .agents/skills/synced
 .config/nvim/lua/plugins/copilot-lsp.lua
-.config/nvim/lua/plugins/chezmoi.lua
 .config/nvim/lua/plugins/neo-tree.lua
 .config/nvim/lua/plugins/twilight.lua
 .config/nvim/lua/plugins/cmp.lua

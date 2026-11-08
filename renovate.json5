@@ -115,6 +115,14 @@
   customManagers: [
     {
       customType: "regex",
+      managerFilePatterns: ["/^home/dot_config/nvim/lua/plugins/chezmoi\\.lua$/"],
+      matchStrings: ['commit = "(?<currentDigest>[a-f0-9]{40})"'],
+      datasourceTemplate: "github-digest",
+      currentValueTemplate: "main",
+      depNameTemplate: "xvzc/chezmoi.nvim",
+    },
+    {
+      customType: "regex",
       managerFilePatterns: ["/^\\.github/workflows/ci\\.yml$/", "/^renovate\\.json5$/"],
       matchStrings: [
         'version: (?<currentValue>[0-9.]+) # mise',

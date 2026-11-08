@@ -22,6 +22,13 @@ chezmoi diff
 chezmoi apply
 ```
 
+## SSH
+
+`~/.ssh/config` is machine-local. Chezmoi manages shared settings in
+`~/.ssh/config.d/90-dotfiles.conf` and adds `Include config.d/*.conf` to the main
+config on apply if missing. Local settings come first and take precedence.
+Existing main-config content is kept, including settings from before this migration.
+
 ## Zellij
 
 The status bar uses the same Nerd Font OS icons as Starship, including Raspberry Pi OS.
