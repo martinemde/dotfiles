@@ -40,6 +40,11 @@ mask every matching value across the allowlisted files. Keep reports in memory;
 never echo detector output or save secret-bearing backups. Disable recursive
 Gitleaks decoding: encoded payload transformations need a separate mapping, not
 blind replacement. JSON escapes are mapped back to their original byte spans.
+Multiline findings can span JSON values or records. Match those against the raw
+file, masking string characters but not punctuation or intervening object keys.
+A secret used as an object key is masked too. Findings spanning artificial
+boundaries between files or scan representations still fail closed: they have
+no contiguous source span, so the command refuses writes rather than ignoring them.
 
 Codex maintains rollout byte offsets in SQLite. Replacing secrets with the literal
 `REDACTED` or reserializing JSON changes offsets. Replace each matching encoded

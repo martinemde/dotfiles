@@ -194,3 +194,95 @@ assert len(actual) == len(original)
 assert "PRIVATE KEY" not in json.loads(actual)["message"]
 PY
 }
+
+@test "transcript redaction masks findings spanning JSON values and object keys" {
+  prepare_redaction_fixture
+  local transcript="$TEST_HOME_DIR/.claude/projects/example/spans.jsonl"
+  python3 - "$transcript" <<'PY'
+import json
+from pathlib import Path
+import sys
+secret = "ghp_" + "aB3dE6gH9jK2mN5pQ8sT1vW4yZ7cF0iL3oR6"
+record = {secret: "copied credential",
+    "a": "-----BEGIN RSA PRIVATE KEY-----",
+    "b": "AbCdEf0123456789" * 8,
+    "c": "-----END RSA PRIVATE KEY-----", "note": "keep this"}
+Path(sys.argv[1]).write_text(json.dumps(record) + "\n")
+PY
+  cp "$transcript" "$TEST_TMPDIR/spans-before.jsonl"
+  run python3 "$REDACT_SCRIPT" --home "$TEST_HOME_DIR" --write --agents-stopped
+  [ "$status" -eq 0 ]
+  python3 - "$transcript" "$TEST_TMPDIR/spans-before.jsonl" <<'PY'
+import json
+from pathlib import Path
+import sys
+actual = Path(sys.argv[1]).read_bytes()
+original = Path(sys.argv[2]).read_bytes()
+assert len(actual) == len(original)
+record = json.loads(actual)
+assert record["note"] == "keep this"
+assert list(record)[1:] == ["a", "b", "c", "note"]
+assert "PRIVATE KEY" not in json.dumps(record)
+assert not any(key.startswith("ghp_") for key in record)
+PY
+}
+
+@test "transcript redaction masks multiline findings across records without changing keys" {
+  prepare_redaction_fixture
+  local transcript="$TEST_HOME_DIR/.claude/projects/example/records.jsonl"
+  python3 - "$transcript" <<'PY'
+import json
+from pathlib import Path
+import sys
+parts = ["-----BEGIN RSA PRIVATE KEY-----", "AbCdEf0123456789" * 8,
+         "-----END RSA PRIVATE KEY-----"]
+Path(sys.argv[1]).write_text("".join(json.dumps({"message": part, "id": i}) + "\n"
+                                     for i, part in enumerate(parts)))
+PY
+  cp "$transcript" "$TEST_TMPDIR/records-before.jsonl"
+  run python3 "$REDACT_SCRIPT" --home "$TEST_HOME_DIR" --write --agents-stopped
+  [ "$status" -eq 0 ]
+  python3 - "$transcript" "$TEST_TMPDIR/records-before.jsonl" <<'PY'
+import json
+from pathlib import Path
+import sys
+actual = Path(sys.argv[1]).read_bytes()
+original = Path(sys.argv[2]).read_bytes()
+assert len(actual) == len(original)
+records = [json.loads(line) for line in actual.splitlines()]
+assert [r["id"] for r in records] == [0, 1, 2]
+assert all(list(r) == ["message", "id"] for r in records)
+assert "PRIVATE KEY" not in json.dumps(records)
+PY
+}
+
+@test "unmappable cross-file findings abort before writing any transcripts" {
+  prepare_redaction_fixture
+  python3 - "$TEST_HOME_DIR" "$TEST_TMPDIR/split-before.json" <<'PY'
+import base64
+import json
+from pathlib import Path
+import sys
+home = Path(sys.argv[1])
+parts = ["-----BEGIN RSA PRIVATE KEY-----", "AbCdEf0123456789" * 8,
+         "-----END RSA PRIVATE KEY-----"]
+before = {}
+for i, part in enumerate(parts):
+    path = home / f".claude/projects/example/split-{i}.jsonl"
+    data = (json.dumps({"message": part}) + "\n").encode()
+    path.write_bytes(data)
+    before[str(path)] = base64.b64encode(data).decode()
+Path(sys.argv[2]).write_text(json.dumps(before))
+PY
+  run python3 "$REDACT_SCRIPT" --home "$TEST_HOME_DIR" --write --agents-stopped
+  [ "$status" -ne 0 ]
+  assert_fixture_unchanged
+  python3 - "$TEST_TMPDIR/split-before.json" <<'PY'
+import base64
+import json
+from pathlib import Path
+import sys
+for path, encoded in json.loads(Path(sys.argv[1]).read_text()).items():
+    assert Path(path).read_bytes() == base64.b64decode(encoded)
+PY
+}

@@ -115,27 +115,36 @@ def character_spans(raw):
 
 def mask(data, secrets):
     output = bytearray(data)
-    occurrences = 0
-    for match, value in strings(data):
-        covered = set()
-        for secret in secrets:
-            start = 0
-            while (index := value.find(secret, start)) >= 0:
-                covered.update(range(index, index + len(secret)))
-                occurrences += 1
-                start = index + 1
-        raw_covered = set()
+    # A multiline detector match can include JSON punctuation between values.
+    # Locate it in the source, but replace only string characters, never syntax.
+    encoded = re.compile(b"|".join(re.escape(s.encode("utf-8", errors="surrogatepass"))
+                                     for s in sorted(secrets, key=len, reverse=True)))
+    decoded = re.compile("|".join(re.escape(s) for s in sorted(secrets, key=len, reverse=True)))
+    raw_matches = list(encoded.finditer(data))
+    occurrences = len(raw_matches)
+    cursor = 0
+    for match in STRING.finditer(data):
         raw = match.group()
-        for secret in secrets:
-            encoded = secret.encode("utf-8", errors="surrogatepass")
-            start = 1
-            while (index := raw.find(encoded, start, len(raw) - 1)) >= 0:
-                raw_covered.update(range(index, index + len(encoded)))
-                start = index + 1
-        if covered or raw_covered:
-            for index, (start, end) in enumerate(character_spans(raw)):
-                if index in covered or any(i in raw_covered for i in range(start, end)):
-                    output[match.start() + start:match.start() + end] = b"X" * (end - start)
+        is_key = bool(KEY_SUFFIX.match(data, match.end()))
+        while cursor < len(raw_matches) and raw_matches[cursor].end() <= match.start():
+            cursor += 1
+        overlaps = []
+        for finding_index in range(cursor, len(raw_matches)):
+            finding = raw_matches[finding_index]
+            if finding.start() >= match.end():
+                break
+            # Do not mask ordinary structural keys inside a multiline finding.
+            if not is_key or (finding.start() > match.start() and finding.end() < match.end()):
+                overlaps.append((finding.start() - match.start(), finding.end() - match.start()))
+        value = json.loads(raw)
+        value_matches = list(decoded.finditer(value))
+        if not overlaps and not value_matches:
+            continue
+        occurrences += len(value_matches)
+        covered = {i for finding in value_matches for i in range(finding.start(), finding.end())}
+        for index, (start, end) in enumerate(character_spans(raw)):
+            if index in covered or any(start < right and end > left for left, right in overlaps):
+                output[match.start() + start:match.start() + end] = b"X" * (end - start)
     return bytes(output), occurrences
 
 
