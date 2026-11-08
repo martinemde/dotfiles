@@ -1,3 +1,14 @@
+{{- $os_icon := "󰌽" -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $os_icon = "󰀵" -}}
+{{- else if eq .chezmoi.os "linux" -}}
+{{-   $id := .chezmoi.osRelease.id | default "" -}}
+{{-   $icons := dict "fedora" "󰣛" "debian" "󰣚" "ubuntu" "󰕈" "raspbian" "" -}}
+{{-   $os_icon = get $icons $id | default $os_icon -}}
+{{-   if and (or (eq $id "debian") (eq $id "raspbian")) (contains "rpi" .chezmoi.kernel.osrelease) -}}
+{{-     $os_icon = "" -}}
+{{-   end -}}
+{{- end -}}
 // Default zellij layout with zjstatus status bar
 // Theme: catppuccin-espresso (matches themes.catppuccin-espresso in config.kdl)
 // zjstatus: https://github.com/dj95/zjstatus
@@ -6,10 +17,14 @@ layout {
         children
         pane size=1 borderless=true {
             plugin location="file:~/.config/zellij/plugins/zjstatus.wasm" {
-                format_left   "{mode}#[fg=#89B4FA,bold] {session}"
+                format_left   "#[fg=#CBA6F7] {{ $os_icon }} {mode}#[fg=#89B4FA,bold] {session}"
                 format_center "{tabs}"
                 format_right  "{command_git_branch} {datetime}"
                 format_space  ""
+
+                // Keep navigation; drop the clock/branch, then session/mode if crowded.
+                format_hide_on_overlength "true"
+                format_precedence "clr"
 
                 border_enabled  "false"
                 border_char     "─"
@@ -37,7 +52,7 @@ layout {
                 command_git_branch_rendermode  "static"
 
                 datetime        "#[fg=#6C7086,bold] {format} "
-                datetime_format "%A, %d %b %Y %H:%M"
+                datetime_format "%H:%M"
                 datetime_timezone "America/Los_Angeles"
             }
         }

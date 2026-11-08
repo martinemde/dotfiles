@@ -22,6 +22,16 @@ chezmoi diff
 chezmoi apply
 ```
 
+## Zellij
+
+The status bar uses the same Nerd Font OS icons as Starship, including Raspberry Pi OS.
+On narrow terminals, tabs take priority: branch/clock hide first, then OS/mode/session.
+The clock shows hours and minutes. zjstatus hides whole sections, not individual tab
+names; many tabs or a very long tab name can still exceed the screen width.
+
+Layout changes take effect in new sessions or tabs; existing status bars keep their
+loaded configuration.
+
 ## Reference
 
 - [Tool and setup notes](docs/)
