@@ -1,8 +1,6 @@
 name: Renovate
 
 on:
-  schedule:
-    - cron: '7,37 * * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -10,7 +8,7 @@ on:
         type: boolean
         default: true
 
-# Live writes use a repository-scoped GitHub App token, not GITHUB_TOKEN.
+# Live updates and App credentials belong to martinemde/renovate-config.
 permissions:
   contents: read
   pull-requests: read
@@ -22,12 +20,11 @@ concurrency:
 
 jobs:
   renovate:
-    # Stay quiet until the account owner installs and configures the App.
-    if: github.event_name != 'schedule' || vars.RENOVATE_APP_ID != ''
     strategy:
       fail-fast: false
       matrix:
-        repository: [dotfiles, martinemde.com]
+        repository:
+          [dotfiles, martinemde.com, micropub-publisher, almanac, containers, beelink]
     runs-on: ubuntu-latest
     container:
       # Actions command files are owned by the runner, not the image's default user.
@@ -47,53 +44,21 @@ jobs:
           persist-credentials: false
       - name: Validate repository configuration
         run: renovate-config-validator --no-global renovate.json5
-      - name: Check live credentials
-        if: github.event_name == 'schedule' || !inputs.dry_run
-        env:
-          APP_ID: ${{ vars.RENOVATE_APP_ID }}
-          APP_PRIVATE_KEY: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
-        run: |
-          if [ -z "$APP_ID" ] || [ -z "$APP_PRIVATE_KEY" ]; then
-            echo '::error::Live Renovate requires RENOVATE_APP_ID (repository variable) and RENOVATE_APP_PRIVATE_KEY (repository secret). See docs/renovate.md.'
-            exit 1
-          fi
-      - name: Create repository-scoped App token
-        if: github.event_name == 'schedule' || !inputs.dry_run
-        id: app-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          app-id: ${{ vars.RENOVATE_APP_ID }}
-          private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: ${{ matrix.repository }}
-          permission-administration: read
-          permission-checks: read
-          permission-statuses: write
-          permission-contents: write
-          permission-pull-requests: write
-          permission-issues: write
-          permission-workflows: write
-          permission-vulnerability-alerts: read
       - name: Plan dependency updates without writing to GitHub
         if: github.event_name == 'workflow_dispatch' && inputs.dry_run
         env:
           RENOVATE_TOKEN: ${{ github.token }}
           RENOVATE_DRY_RUN: full
         run: renovate "$RENOVATE_REPOSITORY"
-      - name: Update dependency branches, pull requests, and dashboard
-        if: github.event_name == 'schedule' || !inputs.dry_run
-        env:
-          RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: renovate "$RENOVATE_REPOSITORY"
       - name: Summarize run
         if: always()
         env:
-          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+          DRY_RUN: ${{ inputs.dry_run }}
           RESULT: ${{ job.status }}
         run: |
           if [ "$DRY_RUN" = true ]; then
             MODE='Read-only dry run; no branches, PRs, or dashboard issues are written.'
           else
-            MODE='Live run using the dedicated repository-scoped GitHub App.'
+            MODE='Configuration validation only; engine dry run was not requested.'
           fi
-          printf '## Renovate\n\n%s\n\nResult: **%s**.\n\nLive setup and activation evidence: `docs/renovate.md`.\n' "$MODE" "$RESULT" >> "$GITHUB_STEP_SUMMARY"
+          printf '## Renovate\n\n%s\n\nResult: **%s**.\n\nLive updates: `martinemde/renovate-config`.\n' "$MODE" "$RESULT" >> "$GITHUB_STEP_SUMMARY"

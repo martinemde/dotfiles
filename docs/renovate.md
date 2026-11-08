@@ -75,65 +75,20 @@ substitute for the seven-day quarantine, so we retain the current commit-age pol
 
 ## Self-hosted activation and visible evidence
 
-The **Renovate** Actions workflow is the intended writer. It runs at minutes 7 and 37 of every hour
-UTC, with no separate update-time window so dashboard requests and passing CI
-can be processed on the next run. The hosted Mend App is not required;
-do not enable both writers. Local overrides permit major updates and shorten core-tool
-aging; the shared preset retains conservative defaults for other consumers.
+Live Renovate runs are managed in
+[`martinemde/renovate-config`](https://github.com/martinemde/renovate-config).
+Its workflow owns scheduling, repository targets, and GitHub App credentials;
+configure and verify activation there, not in dotfiles. Do not enable a second
+writer such as the hosted Mend App for the same repositories.
 
-The same workflow also runs against `martinemde/martinemde.com`, using the blog's
-own Renovate config rather than the dotfiles-specific managers. Separate matrix
-jobs keep a blog failure from stopping dotfiles updates. Each job gets a token
-scoped to its target repository; the existing App credentials stay in dotfiles.
-
-The existing GitHub App installation has account-wide repository access. The
-workflow deliberately targets only `martinemde/dotfiles` and
-`martinemde/martinemde.com`, and requests a single-repository token per job.
-The account owner must create and install it through GitHub's authenticated web
-settings; the current CLI OAuth token cannot create an App or its private key.
-Do not copy the CLI's broad personal OAuth token into an Actions secret.
-
-1. In [personal developer settings](https://github.com/settings/apps), create a new
-   GitHub App owned by `martinemde`, not an organization. Give it a distinct name
-   and this repository's URL as its homepage. Disable the webhook; no callback
-   or user authorization is needed for installation tokens.
-2. Allow installation only on this account. Grant these repository permissions:
-
-- Contents, pull requests, issues, workflows, and commit statuses: read and write.
-- Administration, checks, and Dependabot alerts: read. Metadata read is automatic.
-
-These narrow [Renovate's GitHub App permissions](https://docs.renovatebot.com/modules/platform/github/#running-as-a-github-app)
-to this review-only setup: CI owns checks; Renovate publishes release-age commit statuses. Organization membership
-and merge queues are not used here.
-
-3. Install the App on `martinemde`. It currently has access to all repositories,
-   so adding the blog needs no installation or credential changes. For a new,
-   narrower installation, select only **dotfiles** and **martinemde.com**.
-   Disable or deselect both repositories in the hosted Mend Renovate App
-   installation before enabling this writer.
-4. In the new App's settings, generate and download a private key. In the
-   repository's **Settings → Secrets and variables → Actions**, add secret
-   `RENOVATE_APP_PRIVATE_KEY` containing the complete PEM file. Add repository
-   variable `RENOVATE_APP_ID` containing the App ID (not its installation ID).
-   Set the ID last: scheduled runs are skipped while it is absent, avoiding
-   repeated credential failures. Keep the private key out of the repository and
-   logs; remove any unneeded local copy after storing it securely.
-
-The token action limits each installation token to the matrix target repository,
-requests only the listed permissions, and revokes it after
-the job. The workflow's own `GITHUB_TOKEN` stays read-only. An App token lets
-Renovate PRs trigger CI, unlike writes made with `GITHUB_TOKEN`.
-
-Manual dispatch defaults to `dry_run: true`: it validates config and runs the
-engine with a read-only token, without needing App credentials. To activate,
-run once with `dry_run: false` after configuring the App. A missing ID or key
-fails that live run with an explicit setup error. A successful live job and an
-App-authored Dependency Dashboard or PR are activation evidence; a green dry
-run is not. The dashboard exposes pending updates, release-age waits, and
-failures even when no PR is ready.
-
-Until those credentials exist and a live run succeeds, updating remains blocked.
-Setup is not evidence that Renovate has actually written to GitHub.
+The dotfiles **Renovate** workflow is dispatch-only and read-only. It preserves
+the pinned engine image for local policy CI and validates repository config.
+Dispatch defaults to `dry_run: true`, running the engine against the existing
+repository matrix (including beelink) with `RENOVATE_DRY_RUN=full` and a read-only
+`GITHUB_TOKEN`. Setting `dry_run: false` only skips the engine dry run; it never
+enables writes. No App credentials belong in this repository. A green dry run
+is not evidence of live activation; check the central workflow and an App-authored
+Dependency Dashboard or PR.
 
 ### Almanac pilot
 
@@ -230,7 +185,7 @@ release downloads followed by local signing, verification, and tamper rejection.
 The zsh-snap check renders the actual tools config, runs cached initialization
 across shells, and verifies regeneration after removing a cache. Tool-init output
 is a fixture; the cache implementation is real. Renovate config is validated by
-the same container image used for live updates, with semantic extraction/policy
+the pinned container image in the read-only workflow, with semantic extraction/policy
 tests that also accept its config migration.
 
 Linux GHA is the required target. Local tests passed for current tool versions,
