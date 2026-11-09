@@ -40,6 +40,8 @@ paths = [
   '''dotfiles''',
   '''esdata''',
   '''go''',
+  '''(^|/)lode/mochila/ios/build(/|$)''',
+  '''(^|/)lode/mochila/macos/\.build(/|$)''',
   '''p''',
   '''scratch''',
   '''src''',
