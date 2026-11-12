@@ -120,6 +120,7 @@
       datasourceTemplate: "github-digest",
       currentValueTemplate: "main",
       depNameTemplate: "xvzc/chezmoi.nvim",
+      packageNameTemplate: "xvzc/chezmoi.nvim",
     },
     {
       customType: "regex",

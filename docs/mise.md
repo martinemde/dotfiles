@@ -103,8 +103,7 @@ or provenance field to resolve a refresh failure: establish why upstream bytes
 or verification changed first.
 
 Global locks are deliberately deferred. The main config is plain TOML so native
-Renovate discovery and version updates work without rendering. macOS trust-bundle
-environment values live in `conf.d/10-homebrew.toml.tmpl`; eza uses a Linux-only
+Renovate discovery and version updates work without rendering. eza uses a Linux-only
 `os` tool option. Lock generation still needs backend and platform review, and
 can download release artifacts for provenance checks. Exact global declarations now prevent floating upgrades, but do not lock transitive
 dependencies. Go gopls has version-only lock coverage, and PyPI tools require native

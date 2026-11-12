@@ -259,7 +259,6 @@ These files purposely centralize versions so Renovate can update them automatica
 
 - `.mise.toml` and `home/dot_config/mise/config.toml`
   - Exact tool versions, discovered by the native mise manager.
-  - Mac-only environment interpolation lives separately in `conf.d/10-homebrew.toml.tmpl`.
   - The initial pins preserve installed versions; Linux eza uses the observed Mac Homebrew version 0.23.5.
 
 - `home/dot_config/dotfiles/requirements.txt`
