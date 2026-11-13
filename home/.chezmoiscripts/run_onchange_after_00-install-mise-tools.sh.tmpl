@@ -2,7 +2,6 @@
 
 # Run after managed files so ~/.config/mise/config.toml exists on first apply.
 
-# mise env hash: {{ include "dot_config/mise/conf.d/10-homebrew.toml.tmpl" | sha256sum }}
 # mise config hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
 
 [ -n "${DEBUG:-}" ] && set -o xtrace

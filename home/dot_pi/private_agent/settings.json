@@ -18,7 +18,7 @@
   "compaction": {
     "enabled": true
   },
-  "packages": ["npm:pi-subagents@0.44.0", "npm:pi-web-access@0.19.0"],
+  "packages": ["npm:pi-subagents@0.86.0", "npm:pi-web-access@0.47.0"],
   "outputPad": 0,
   "tuiMode": "regular"
 }

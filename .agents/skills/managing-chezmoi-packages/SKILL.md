@@ -9,17 +9,17 @@ Pin to an immutable reference (version, `tag@sha256:` digest, or commit SHA) and
 Renovate can update it. Read the target manifest and `renovate.json5` before editing, and
 match the neighbouring entries.
 
-| What                                      | Manifest                                                    | Renovate                                    |
-| ----------------------------------------- | ----------------------------------------------------------- | ------------------------------------------- |
-| macOS brew/cask (unversioned)             | `home/dot_Brewfile`                                         | none                                        |
-| Mac App Store (unversioned)               | `home/dot_Brewfile.mas`                                     | none                                        |
-| CLI tools (user)                          | `home/dot_config/mise/config.toml` (`aqua:owner/repo`) | native mise (explicit source discovery)  |
-| CLI tools (this repo)                     | `.mise.toml`                                                | native mise                                 |
-| Python tools                              | `home/dot_config/dotfiles/requirements.txt`                 | pip_requirements                            |
-| Docker / devcontainer images              | `home/dot_config/docker-compose/*.yml`, `.devcontainer/`    | built-in; keep `tag@sha256:`                |
-| GitHub Actions                            | `.github/workflows/*.yml`                                   | built-in; pin to SHA with a version comment |
-| Installer-managed CLIs                    | `home/dot_config/dotfiles/cli-versions.toml`                | one custom regex per tool                   |
-| Files, archives, repos fetched by chezmoi | `home/.chezmoiexternals/<program>.externals.toml`           | one custom regex per dependency             |
+| What                                      | Manifest                                                 | Renovate                                    |
+| ----------------------------------------- | -------------------------------------------------------- | ------------------------------------------- |
+| macOS brew/cask (unversioned)             | `home/dot_Brewfile`                                      | none                                        |
+| Mac App Store (unversioned)               | `home/dot_Brewfile.mas`                                  | none                                        |
+| CLI tools (user)                          | `home/dot_config/mise/config.toml` (`aqua:owner/repo`)   | native mise (explicit source discovery)     |
+| CLI tools (this repo)                     | `.mise.toml`                                             | native mise                                 |
+| Python tools                              | `home/dot_config/dotfiles/requirements.txt`              | pip_requirements                            |
+| Docker / devcontainer images              | `home/dot_config/docker-compose/*.yml`, `.devcontainer/` | built-in; keep `tag@sha256:`                |
+| GitHub Actions                            | `.github/workflows/*.yml`                                | built-in; pin to SHA with a version comment |
+| Installer-managed CLIs                    | `home/dot_config/dotfiles/cli-versions.toml`             | one custom regex per tool                   |
+| Files, archives, repos fetched by chezmoi | `home/.chezmoiexternals/<program>.externals.toml`        | one custom regex per dependency             |
 
 User and project mise declarations use exact versions; Renovate owns updates. Keep
 existing active installed versions when converting a declaration, resolving global inventory
@@ -30,9 +30,8 @@ signed mise self-updates retain scoped zero-delay exceptions; do not extend thos
 optional-attestation backends. See `docs/mise.md` for verification limits.
 
 The native mise manager explicitly discovers `home/dot_config/mise/config.toml`.
-Keep tool declarations plain TOML; macOS trust-bundle values live in the separate
-`conf.d/10-homebrew.toml.tmpl`, and eza uses `os = ["linux"]`. Do not add a competing
-Aqua regex updater. Validate raw tool TOML and both OS env renders after editing.
+Keep tool declarations plain TOML; eza uses `os = ["linux"]`. Do not add a competing
+Aqua regex updater. Validate raw tool TOML after editing.
 Project tools have a cross-platform `mise.lock`; global tools do not yet have a
 reviewed complete lockfile and native dependency sidecars. Refresh project locks
 without installing or upgrading tools:

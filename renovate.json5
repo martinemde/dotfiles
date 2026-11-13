@@ -12,7 +12,7 @@
     "custom.jsonata",
     "renovate-config",
   ],
-  constraints: { mise: "2026.11.4" },
+  constraints: { mise: "2026.11.7" },
   lockFileMaintenance: { enabled: true, schedule: ["at any time"] },
   mise: {
     managerFilePatterns: ["/^\\.mise\\.toml$/", "/^home/dot_config/mise/config\\.toml$/"],
@@ -113,6 +113,15 @@
 
   ],
   customManagers: [
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^home/dot_config/nvim/lua/plugins/chezmoi\\.lua$/"],
+      matchStrings: ['commit = "(?<currentDigest>[a-f0-9]{40})"'],
+      datasourceTemplate: "github-digest",
+      currentValueTemplate: "main",
+      depNameTemplate: "xvzc/chezmoi.nvim",
+      packageNameTemplate: "xvzc/chezmoi.nvim",
+    },
     {
       customType: "regex",
       managerFilePatterns: ["/^\\.github/workflows/ci\\.yml$/", "/^renovate\\.json5$/"],

@@ -113,9 +113,14 @@
     assert.equal(dry.env.RENOVATE_DRY_RUN, "full");
     assert.equal(live.env.RENOVATE_DRY_RUN, undefined);
     assert.equal(live.if, token.if);
-    // Omitting owner and repositories scopes the token to the current repository.
-    assert.equal(token.with.owner, undefined);
-    assert.equal(token.with.repositories, undefined);
+    assert.deepEqual(job.strategy.matrix.repository, ["dotfiles", "martinemde.com"]);
+    assert.equal(job.strategy["fail-fast"], false);
+    // Each job gets a token scoped to exactly its target repository.
+    assert.equal(token.with.owner, "${{ github.repository_owner }}");
+    assert.equal(token.with.repositories, "${{ matrix.repository }}");
+    assert.equal(job.env.RENOVATE_REPOSITORY, "${{ github.repository_owner }}/${{ matrix.repository }}");
+    assert.equal(dry.run, `renovate "$RENOVATE_REPOSITORY"`);
+    assert.equal(live.run, dry.run);
     assert.equal(token.with["permission-workflows"], "write");
     assert.equal(token.with["permission-vulnerability-alerts"], "read");
   '

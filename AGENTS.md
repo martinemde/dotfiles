@@ -5,8 +5,11 @@ per-tool notes live in `README.md` and `docs/`.
 
 ## Version control
 
-Work directly on `main` in this personal repository. Do not create feature branches
-or pull requests. Preview pushes with `jj git push --bookmark main --dry-run`.
+In this repository, work directly on `main`. When work is complete, run the relevant
+checks, commit, and push to `main` unless the user says otherwise. If the change is
+broken or its checks fail, fix it before committing and pushing; if blocked, leave it
+uncommitted and report the problem. Do not create feature branches or pull requests.
+Preview pushes with `jj git push --bookmark main --dry-run`.
 
 ## Edit source files, not installed files
 
