@@ -38,7 +38,7 @@ min_version = "2026.10.25"
 # Agent/env detection, used by zsh/aliases.zsh to skip agent-hostile aliases.
 # Pinned: the alias guard depends on `envsense check agent` exit-code semantics.
 "aqua:technicalpickles/envsense" = "0.6.0"
-"aqua:tree-sitter/tree-sitter" = "0.27.1"
+"aqua:tree-sitter/tree-sitter" = "0.27.2"
 "aqua:zellij-org/zellij" = "0.45.1"
 "go:golang.org/x/tools/gopls" = "0.24.0"
 bun = "1.4.4"
