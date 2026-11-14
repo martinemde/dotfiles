@@ -1,6 +1,6 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["github>martinemde/renovate-config#v1.0.0"],
+  extends: ["github>martinemde/renovate-config#v1.1.0"],
   enabledManagers: [
     "pip_requirements",
     "mise",
@@ -36,10 +36,10 @@
     ],
   },
   packageRules: [
-    // Personal dotfiles favor tested updates and rollback over manual version review.
+    // Establishing a new immutable pin still needs review.
     {
-      matchUpdateTypes: ["major"],
-      automerge: true,
+      matchUpdateTypes: ["pin", "pinDigest"],
+      automerge: false,
     },
     {
       matchPackageNames: ["mise", "jdx/mise", "chezmoi", "twpayne/chezmoi", "uv", "astral-sh/uv", "bun", "oven-sh/bun"],
@@ -53,11 +53,6 @@
     {
       matchFileNames: ["home/dot_config/mise/config.toml"],
       lockFileMaintenance: { enabled: false },
-    },
-    // Major-update permission must not override the shared security-review exception.
-    {
-      matchJsonata: ["isVulnerabilityAlert = true"],
-      automerge: false,
     },
     // Policy changes need review even when the preset publishes a minor release.
     {

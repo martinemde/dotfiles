@@ -51,6 +51,8 @@ jobs:
           image=$(bun --eval 'const w = Bun.YAML.parse(await Bun.file(".github/workflows/renovate.yml").text()); console.log(w.jobs.renovate.container.image)')
           docker run --rm -v "$PWD:/repo:ro" -w /repo "$image" renovate-config-validator --no-global renovate.json5
       - name: Verify effective policy and native dependency extraction
+        env:
+          GITHUB_COM_TOKEN: ${{ github.token }}
         run: bin/check-renovate-policy "$RUNNER_TEMP/renovate-resolved.json"
       - name: Run test suite
         env:
