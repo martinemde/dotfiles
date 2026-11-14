@@ -11,7 +11,7 @@ chezmoi = "2.74.1"
 bun = "1.4.4"
 shfmt = "3.14.1"
 # Test runner for `bats test/`; CI installs it from apt.
-bats = "1.13.0"
+bats = "1.14.0"
 
 [settings]
 # Keep shims, exec, and tasks from installing tools as a side effect.
