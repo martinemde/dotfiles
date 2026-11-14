@@ -45,6 +45,8 @@ split-divider-color = "#585b70"
 # unfocused-split-fill = "#0a0a0e"
 # Don't alter unfocused splits at all (that's the shader's job)
 unfocused-split-opacity = 1.0
+# Hide split drag handles; splits can't be rearranged with the mouse
+drag-handle = never
 # Override default Catppuccin with a darker background
 # AKA Catppuccin Espresso
 background = "#11111b"
