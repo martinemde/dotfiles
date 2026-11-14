@@ -45,8 +45,8 @@ Grouping and automerge rules:
 Major, minor, patch, digest, and security updates use Renovate-managed squash merges after required
 integrity, ShellCheck, unit, plugin and four tool-integration checks pass. The stable
 `test` aggregate also requires all those jobs. Platform automerge is
-disabled: Renovate checks and merges on its next run. Initial pin and shared-policy updates remain review-only. The active GitHub ruleset requires each of these checks on `main`; administrators
-can still bypass it for direct maintenance.
+disabled: Renovate checks and merges on its next run. Initial pin and shared-policy updates remain review-only. The active GitHub ruleset requires each of these checks on `main`; neither administrators
+nor Renovate can bypass required CI.
 A matching hash proves byte integrity, not that upstream code is benign.
 
 ---
