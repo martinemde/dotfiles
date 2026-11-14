@@ -26,7 +26,7 @@ const read = (path) => readFile(new URL(path, root), 'utf8');
 GlobalConfig.set({ localDir: fileURLToPath(root) });
 const source = await read('renovate.json5');
 const local = parseJson(source, 'renovate.json5');
-const presetRef = 'github>martinemde/renovate-config#v1.0.0';
+const presetRef = 'github>martinemde/renovate-config#v1.1.0';
 assert.deepEqual(local.extends, [presetRef]);
 if (process.env.LOCAL_PRESET_PATH) {
   // Prepublication only: seed the normal resolver cache, not a second policy copy.
@@ -94,7 +94,7 @@ assert.deepEqual(tmux.deps.map(({depName, currentValue, currentDigest, datasourc
 const preset = extractPreset(source, 'renovate.json5').deps.find(dep => dep.depName === 'martinemde/renovate-config');
 assert.ok(config.enabledManagers.includes('renovate-config'));
 assert.equal(preset.datasource, 'github-tags');
-assert.equal(preset.currentValue, 'v1.0.0');
+assert.equal(preset.currentValue, 'v1.1.0');
 
 async function update(manager = 'mise', packageFile = miseFile, dep = mise.deps[0], overrides = {}) {
   const [result] = await flattenUpdates(config, {
@@ -116,12 +116,19 @@ for (const depName of ['jdx/mise', 'twpayne/chezmoi', 'astral-sh/uv', 'oven-sh/b
 }
 assert.equal((await update()).minimumReleaseAge, '7 days', 'ordinary tools retain the default delay');
 for (const updateType of ['minor', 'patch', 'digest', 'major']) {
-  assert.equal((await update('mise', miseFile, mise.deps[0], { updateType, isVulnerabilityAlert: true, automerge: true })).automerge, false, `security ${updateType}`);
+  assert.equal((await update('mise', miseFile, mise.deps[0], { updateType, isVulnerabilityAlert: true, automerge: true })).automerge, true, `security ${updateType}`);
 }
 for (const file of ['home/.chezmoiexternals/pi.externals.toml', 'home/dot_pi/private_agent/settings.json', 'home/.chezmoiexternals/zellij.externals.toml']) {
   assert.equal((await update('custom.regex', file, {depName: 'example/plugin', datasource: 'github-releases', currentValue: '1.0.0'})).automerge, true, file);
 }
-assert.equal((await update('renovate-config', 'renovate.json5', preset)).automerge, false);
+for (const isVulnerabilityAlert of [false, true]) {
+  for (const updateType of ['minor', 'major']) {
+    assert.equal((await update('renovate-config', 'renovate.json5', preset, { updateType, isVulnerabilityAlert })).automerge, false, 'policy updates require review');
+  }
+  for (const updateType of ['pin', 'pinDigest']) {
+    assert.equal((await update('mise', miseFile, mise.deps[0], { updateType, isVulnerabilityAlert })).automerge, false, 'new pins require review');
+  }
+}
 const misePolicy = await applyPackageRules({ ...config, manager: 'mise', packageFile: miseFile, depName: mise.deps[0].depName });
 assert.equal(misePolicy.lockFileMaintenance.enabled, false, 'global mise lock maintenance stays disabled');
 

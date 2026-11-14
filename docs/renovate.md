@@ -7,7 +7,7 @@ This guide explains how Renovate is configured in this repository, how the custo
 - Renovate config lives at `renovate.json5` and runs every 30 minutes, opening labeled PRs (`deps`, `automated`) with low concurrency.
 - We pin everything important to immutable versions or digests for reproducibility and supply‑chain safety.
 - Standard managers are enabled (pip, mise, docker-compose, devcontainer, actions) and custom regex managers cover Chezmoi externals, Pi extensions, and select version files.
-- Renovate automerges major, minor, patch, and digest updates after CI. Shared-policy and security-alert updates require review.
+- Renovate automerges major, minor, patch, and digest updates after CI. Shared-policy updates and new pins require review. Security fixes can automerge after CI.
 
 ---
 
@@ -15,7 +15,7 @@ This guide explains how Renovate is configured in this repository, how the custo
 
 File: `renovate.json5`
 
-- Extends: `github>martinemde/renovate-config#v1.0.0`; shared policy is versioned and preset updates require review
+- Extends: `github>martinemde/renovate-config#v1.1.0`; shared policy is versioned and preset updates require review
 - Run interval: every 30 minutes; no update-time window
 - Labels: `deps`, `automated`
 - PR limits: `prHourlyLimit: 2`, `prConcurrentLimit: 5`
@@ -32,21 +32,20 @@ Enabled managers and file discovery:
 
 Grouping and automerge rules:
 
-- `github-actions`: group minor/patch/digest updates; minor/patch/digest automerge
-- `devcontainer`: group minor/patch/digest updates; minor/patch/digest automerge
-- `docker-compose`: group digest updates; minor/patch/digest automerge
-- `pip_requirements`: grouped as `python-tools` (minor/patch/digest automerge)
-- `npm`: grouped as `node-tools` (minor/patch/digest automerge)
-- `mise`: grouped as `mise-tools` (minor/patch/digest automerge)
+- `github-actions`: group minor/patch/digest updates; major/minor/patch/digest automerge
+- `devcontainer`: group minor/patch/digest updates; major/minor/patch/digest automerge
+- `docker-compose`: group digest updates; major/minor/patch/digest automerge
+- `pip_requirements`: grouped as `python-tools` (major/minor/patch/digest automerge)
+- `npm`: grouped as `node-tools` (major/minor/patch/digest automerge)
+- `mise`: grouped as `mise-tools` (major/minor/patch/digest automerge)
 - Pi extensions: grouped as `pi-extensions`, eligible for automerge
 - `custom.jsonata`: tmux plugin repository/branch/commit data in `home/.chezmoidata/tmux-plugins.yaml`
 - `renovate-config`: reviewed shared-preset updates; never automatic policy adoption
 
-Minor, patch, and digest updates use Renovate-managed squash merges after required
+Major, minor, patch, digest, and security updates use Renovate-managed squash merges after required
 integrity, ShellCheck, unit, plugin and four tool-integration checks pass. The stable
 `test` aggregate also requires all those jobs. Platform automerge is
-disabled: Renovate checks and merges on its next run. Initial pin updates, shared-policy
-and vulnerability-alert updates remain review-only. The active GitHub ruleset requires each of these checks on `main`; administrators
+disabled: Renovate checks and merges on its next run. Initial pin and shared-policy updates remain review-only. The active GitHub ruleset requires each of these checks on `main`; administrators
 can still bypass it for direct maintenance.
 A matching hash proves byte integrity, not that upstream code is benign.
 
@@ -126,8 +125,8 @@ same update types; major, minor, patch, and digest updates can automerge after C
 or a vulnerability scan.
 
 Known vulnerability fixes bypass the release delay, normal schedule, and normal
-PR limits using Renovate's built-in vulnerability-alert defaults. They keep manual
-review and gain a `security` label. This was already Renovate's default exception;
+PR limits using Renovate's built-in vulnerability-alert defaults. They can automerge
+after required CI and gain a `security` label. This was already Renovate's default exception;
 we make the release-age exception explicit rather than claim a new fast path.
 Enable the GitHub dependency graph and Dependabot alerts, and grant Renovate read
 access to those alerts. Repository config alone cannot enable those settings.
@@ -148,7 +147,7 @@ before these changes.
 Zellij release URLs and adjacent `checksum.sha256` fields are extracted together
 using `github-release-attachments`. Renovate identifies the old asset by its hash
 and computes the next release asset hash, including releases without a GitHub API
-digest. Minor, patch, and digest updates automerge after CI. CI downloads the exact URLs and verifies
+digest. Major, minor, patch, digest, and security updates can automerge after CI. CI downloads the exact URLs and verifies
 their pinned SHA256 values. Upstream can return the old digest if it cannot map the
 old asset; CI rejects a resulting URL/hash mismatch. Keep URL and checksum adjacent.
 Review both fields and upstream release changes before merging. These are integrity
@@ -200,8 +199,8 @@ For these personal dotfiles, normal use detects failures that CI cannot, and exa
 pins allow rollback. Manual version review would not prove compatibility. Stock Pi 0.79.7 lacks lifecycle events required by the terminal-title
 extension; its existing optional integration tests expose that incompatibility.
 Zellij status rendering was observed, but the autolock transition test remains
-unvalidated. Those draft tests are not required gates. Major updates can automerge;
-security alerts and shared-policy changes still require review. PR limits are unchanged.
+unvalidated. Those draft tests are not required gates. Major and security updates can automerge;
+new pins and shared-policy changes still require review. PR limits are unchanged.
 A green run is compatibility evidence, not a security audit or a Mac visual check.
 
 ## Custom Version Manifests
@@ -230,7 +229,7 @@ These files purposely centralize versions so Renovate can update them automatica
   - Base image and all features pinned to immutable `@sha256:` digests. Updated by `devcontainer` manager.
 
 - `home/dot_config/docker-compose/*.yml`
-  - Service images pinned with tag+digest (e.g., `image: repo:tag@sha256:...`). Digest updates require review.
+  - Service images pinned with tag+digest (e.g., `image: repo:tag@sha256:...`). Digest updates can automerge after required CI.
 
 - `home/.chezmoiexternals/*.externals.toml`
   - All externals pinned to commit SHAs (archive or raw URLs) or release tags for reproducibility.
@@ -270,7 +269,7 @@ Defined in `renovate.json5`:
 - File: `home/dot_pi/private_agent/settings.json`
 - Pattern: `"npm:(?<depName>...)@(?<currentValue>...)"`
 - Datasource: `npm`
-- Package rule: group as `pi-extensions`; automerge minor, patch, and digest updates after CI
+- Package rule: group as `pi-extensions`; automerge major, minor, patch, digest, and security updates after CI
 
 5. Chezmoi externals pinned to SHAs (GitHub Digest)
 
@@ -282,7 +281,7 @@ Defined in `renovate.json5`:
 - File: `home/.chezmoiexternals/zellij.externals.toml`
 - Match the release URL and its adjacent SHA256 as one dependency.
 - Datasource: `github-release-attachments`; versioning: `loose`.
-- Package rule: group as `zellij-plugins`; automerge minor, patch, and digest updates after CI.
+- Package rule: group as `zellij-plugins`; automerge major, minor, patch, digest, and security updates after CI.
 - Verify proposed pairs with `python3 bin/check-zellij-plugins` (also run in CI).
 
 Each external has its own `customManagers` entry in `renovate.json5`, keyed to the file and URL it pins.
@@ -293,8 +292,8 @@ Note: When adding new externals, add a matching regex rule so Renovate can keep 
 
 ## End‑to‑End Flow (What Renovate Updates)
 
-- Docker/Devcontainer: reviewed PRs updating digests or minor/patch releases.
-- GitHub Actions: digest pinning and minor/patch updates grouped for review.
+- Docker/Devcontainer: CI-gated PRs updating digests or major/minor/patch releases.
+- GitHub Actions: new digest pins require review; minor/patch/digest updates are grouped.
 - Python tools: PRs update `requirements.txt` pinned versions.
 - Node.js tools: PRs update `package.json` pinned versions.
 - Mise tools: PRs update `.mise.toml` and `home/dot_config/mise/config.toml` pins.

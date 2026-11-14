@@ -27,7 +27,7 @@
     assert.equal(config.dependencyDashboard, true);
     assert.equal(config.osvVulnerabilityAlerts, true);
     assert.equal(config.vulnerabilityAlerts.minimumReleaseAge, null);
-    assert.equal(config.vulnerabilityAlerts.automerge, false);
+    assert.equal(config.vulnerabilityAlerts.automerge, true);
     assert(config.vulnerabilityAlerts.addLabels.includes("security"));
     const tools = JSON.parse(readFileSync(join(root, "home/dot_config/dotfiles/package.json"), "utf8"));
     for (const version of Object.values(tools.devDependencies)) {
@@ -39,7 +39,7 @@
     assert.equal(config.statusCheckNames, undefined);
     const mergePolicy = config.packageRules.find(rule => rule.automerge === true);
     assert.equal(mergePolicy.automerge, true);
-    assert.deepEqual(Array.from(mergePolicy.matchUpdateTypes), ["minor", "patch", "digest"]);
+    assert.deepEqual(Array.from(mergePolicy.matchUpdateTypes), ["minor", "patch", "digest", "major"]);
     for (const file of ["package.json", "home/dot_config/dotfiles/package.json"]) {
       assert(filePatterns(config.npm).some(pattern => pattern.test(file)), file);
     }
