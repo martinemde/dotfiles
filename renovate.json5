@@ -12,7 +12,7 @@
     "custom.jsonata",
     "renovate-config",
   ],
-  constraints: { mise: "2026.11.7" },
+  constraints: { mise: "2026.11.8" },
   lockFileMaintenance: { enabled: true, schedule: ["at any time"] },
   mise: {
     managerFilePatterns: ["/^\\.mise\\.toml$/", "/^home/dot_config/mise/config\\.toml$/"],
