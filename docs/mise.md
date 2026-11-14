@@ -12,6 +12,12 @@ updates; installation does not select a newly published version. Behaviour-depen
 pins retain a `# Pinned:` reason. Keep installed versions when first pinning a tool;
 resolve global inventory outside project directories to avoid project overrides.
 
+Chezmoi also needs a global declaration: installing it for this project creates a
+shim that shadows the bootstrap or Homebrew executable elsewhere. With system
+fallback disabled, that shim fails without a global version. The project and
+installer pins still select their own versions; keep the installed global version
+when first declaring it.
+
 ## Homebrew audit
 
 CMake and Pandoc join GitHub CLI and Neovim on explicit Aqua backends.
