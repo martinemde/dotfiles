@@ -139,15 +139,21 @@ worker correctly executes in its remote checkout. Remote login through the local
 UI remains unsupported.
 
 Credential forwarding is explicit on each connection, with no workspace-ownership
-check: the user decides which workspace to trust. Saved API keys travel on SSH
-stdin, not argv, logs or the UI environment. Merge under Prime's auth lock and
-atomically replace the private file so concurrent native auth writes do not lose
-unrelated entries. Retain keys after disconnect because remote agents keep running.
-OAuth/refresh tokens are deliberately excluded: two hosts refreshing one token
-can invalidate each other's sessions. Command-backed credentials are excluded too;
-copying their commands would execute them on a different host. Environment-only
-credentials and a second remote credential store were left out. Existing session
-streams can cache keys; model reselection may be needed after rotation.
+check: the user decides which workspace to trust. `--forward-auth` sends saved API
+keys and unexpired OAuth access over SSH stdin, not argv, logs or the UI environment.
+OAuth refresh tokens stay local: two hosts refreshing one token can invalidate
+each other's sessions. Access-only OAuth works until its recorded expiry. After
+local Prime renews the login, reconnect with `--forward-auth` to send fresh access.
+This is not automatic remote renewal. With this flag, a genuinely new `prime-coder`
+conversation also uses your local default provider/model. Live or saved conversations
+keep their selected model; no global settings or harness are copied.
+Matching remote credentials are replaced;
+unrelated entries remain. Merge under Prime's auth lock and atomically replace
+the private file. Credentials remain after disconnect because remote agents keep
+running. Expired/malformed OAuth and command-backed keys are skipped. Copying a
+credential command would execute it on a different host. Environment-only credentials
+and a second remote credential store were left out. Existing streams can cache keys;
+model reselection may be needed after rotation.
 
 The Prime fork (`martinemde/prime-agent`, branch
 `claude/project-thread-lvon8q`, not proposed upstream) removes the client's

@@ -274,6 +274,127 @@ class PrimeCoderTest(unittest.TestCase):
             self.assertNotIn("--forward-auth", self.ui_events()[-1]["args"])
         self.assert_cleanup()
 
+    def test_forward_auth_copies_live_oauth_metadata_but_not_refresh(self):
+        local = self.home / ".prime/agent"
+        local.mkdir(parents=True)
+        credential = {
+            "type": "oauth", "access": "live-oauth-access", "refresh": "local-only-refresh",
+            "expires": int((time.time() + 3600) * 1000), "accountId": "test-account",
+            "metadata": {"scope": "test-scope"},
+        }
+        saved = {"provider": credential}
+        path = local / "auth.json"
+        path.write_text(json.dumps(saved))
+        remote = self.remote / ".prime/agent/auth.json"
+        remote.write_text(json.dumps({"provider": {"type": "api_key", "key": "old-key"}}))
+
+        result = self.launch("--forward-auth", "dev", debug=True)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        forwarded = {key: value for key, value in credential.items() if key != "refresh"}
+        self.assertEqual(json.loads(remote.read_text()), {"provider": forwarded})
+        self.assertEqual(json.loads(path.read_text()), saved)
+        self.assertEqual(remote.stat().st_mode & 0o777, 0o600)
+        visible = result.stdout + result.stderr + json.dumps(self.events())
+        for secret in (credential["access"], credential["refresh"]):
+            self.assertNotIn(secret, visible)  # Includes command argv and UI environment.
+        self.assertNotIn(credential["refresh"], remote.read_text())
+        self.assert_cleanup()
+
+    def test_forward_auth_skips_unusable_credentials_and_fails_without_live_ones(self):
+        local = self.home / ".prime/agent"
+        local.mkdir(parents=True)
+        future = int((time.time() + 3600) * 1000)
+        saved = {
+            "expired": {"type": "oauth", "access": "expired-access", "refresh": "expired-refresh",
+                        "expires": int((time.time() - 3600) * 1000)},
+            "missing_expiry": {"type": "oauth", "access": "undated-access", "refresh": "undated-refresh"},
+            "invalid_expiry": {"type": "oauth", "access": "invalid-access", "expires": str(future)},
+            "missing_access": {"type": "oauth", "expires": future},
+            "empty_access": {"type": "oauth", "access": "", "expires": future},
+            "invalid_access": {"type": "oauth", "access": 123, "expires": future},
+            "command": {"type": "api_key", "key": "!never-run-this"},
+        }
+        path = local / "auth.json"
+        path.write_text(json.dumps(saved))
+        remote = self.remote / ".prime/agent/auth.json"
+        remote.write_text('{"untouched": true}')
+
+        result = self.launch("--forward-auth", "dev", debug=True)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("No saved API keys or unexpired OAuth access", result.stderr)
+        self.assertEqual(remote.read_text(), '{"untouched": true}')
+        self.assertEqual(self.ui_events(), [])
+        self.assertEqual(self.requests, [])
+        failure_output = result.stdout + result.stderr
+
+        static = {"type": "api_key", "key": "static-test-key"}
+        path.write_text(json.dumps({**saved, "static": static}))
+        remote.write_text("{}")
+        result = self.launch("--forward-auth", "dev", debug=True)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(remote.read_text()), {"static": static})
+        visible = failure_output + result.stdout + result.stderr + json.dumps(self.events())
+        for secret in ("expired-access", "expired-refresh", "undated-access", "undated-refresh",
+                       "invalid-access", "!never-run-this", "static-test-key"):
+            self.assertNotIn(secret, visible)
+        self.assert_cleanup()
+
+    def test_forward_auth_uses_local_model_defaults_for_new_conversation(self):
+        local = self.home / ".prime/agent"
+        local.mkdir(parents=True)
+        (local / "auth.json").write_text(json.dumps({
+            "openai-codex": {"type": "api_key", "key": "model-test-key"}}))
+        (local / "settings.json").write_text(json.dumps({
+            "defaultProvider": "openai-codex", "defaultModel": "gpt-6.1-sol"}))
+        self.config["sessions"] = []
+
+        result = self.launch("--forward-auth", "dev")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual([command["type"] for command in self.requests], ["list", "create"])
+        self.assertEqual(self.requests[-1]["config"], {
+            "cwd": str(self.remote / "workspace/project"),
+            "provider": "openai-codex", "model": "gpt-6.1-sol"})
+        self.assertNotIn("sessionPath", self.requests[-1])
+        self.assert_cleanup()
+
+    def test_forward_auth_preserves_saved_model_when_restoring_conversation(self):
+        local = self.home / ".prime/agent"
+        local.mkdir(parents=True)
+        (local / "auth.json").write_text(json.dumps({
+            "openai-codex": {"type": "api_key", "key": "model-test-key"}}))
+        (local / "settings.json").write_text(json.dumps({
+            "defaultProvider": "openai-codex", "defaultModel": "gpt-6.1-sol"}))
+        self.config["sessions"][0].update(workerPid=None, sessionFile="/saved/session.jsonl")
+
+        result = self.launch("--forward-auth", "dev")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual([command["type"] for command in self.requests], ["list", "create"])
+        self.assertEqual(self.requests[-1]["sessionPath"], "/saved/session.jsonl")
+        self.assertEqual(self.requests[-1]["config"], {
+            "cwd": str(self.remote / "workspace/project")})
+        self.assert_cleanup()
+
+    def test_new_conversation_keeps_remote_model_defaults_without_forward_auth(self):
+        local = self.home / ".prime/agent"
+        local.mkdir(parents=True)
+        (local / "settings.json").write_text(json.dumps({
+            "defaultProvider": "openai-codex", "defaultModel": "gpt-6.1-sol"}))
+        self.config["sessions"] = []
+
+        result = self.launch("dev")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual([command["type"] for command in self.requests], ["list", "create"])
+        self.assertEqual(self.requests[-1]["config"], {
+            "cwd": str(self.remote / "workspace/project")})
+        self.assertNotIn("sessionPath", self.requests[-1])
+        self.assert_cleanup()
+
     def test_forward_auth_resolves_saved_env_references_with_picker(self):
         local = self.home / ".prime/agent"
         local.mkdir(parents=True)
