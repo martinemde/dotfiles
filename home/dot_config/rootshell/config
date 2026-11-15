@@ -1,0 +1,652 @@
+# rootshell config
+#
+# Every uncommented key in this file is kept on the device where the file
+# lives and stops following iCloud until you remove it. Lines starting
+# with # are ignored. Repeat a key to give it several values.
+#
+
+# ---- AI Assistant ----
+# AI Presentation (default: sidebar)
+# ai-agent-presentation-mode = window
+# Approval Mode (default: ask_all)
+# ai-approval-mode = yolo
+# Bedrock Region
+# ai-bedrock-region = us-east-1
+# AI Commit Messages
+# ai-commit-message-enabled = false
+# Commit Message Model
+# ai-commit-message-model = ""
+# AI Model (default: gpt-6-astra)
+# ai-global-selected-model = gpt-5.6-luna
+# OpenRouter Favorites
+# ai-openrouter-favorites = 
+# Default Search Engine
+# ai-web-search-default-engine = duckduckgo
+# Enable Web Search
+# ai-web-search-enabled = true
+# AI Text Size (default: 14)
+# ai-agent-text-size = 13
+# Expert Consultation
+# voice-agent-consultation-mode = let_flash_decide
+# Voice (default: Kore)
+# voice-agent-voice = Erinome
+
+# ---- Clipboard ----
+# Clipboard Manager (default: false)
+# clipboard-manager-enabled = true
+# Require Biometrics to Open Clipboard
+# clipboard-manager-require-biometric = false
+# Keep Clipboard History
+# clipboard-manager-retention = week
+
+# ---- Coding Agents ----
+# Show Attention Badges
+# agent-attention-badges-enabled = true
+# Detect Coding Agents
+# agent-detection-enabled = true
+# Agent Sort
+# agent-inbox-sort = static
+# Look Up Project Details
+# agent-project-probes = true
+# Show Subscription Usage
+# agent-usage-tracking-enabled = true
+
+# ---- Connections ----
+# Auto Reconnect
+# auto-reconnect-enabled = true
+# Reconnect Attempts
+# auto-reconnect-max-attempts = 5
+# Keep SSH Alive in Background
+# background-session-keepalive-enabled = true
+# Post-Quantum Warning
+# hide-non-pq-kex-warning = false
+# Skip Hosts That Reject the Certificate
+# http-capture-auto-bypass-pinned = true
+# Local Capture DNS Servers
+# http-capture-direct-dns = 
+# Decrypt HTTP/2
+# http-capture-http2 = true
+# Look Up Server Locations
+# http-capture-server-location = true
+# Maximum Body Size (MB)
+# http-capture-max-body-mb = 10
+# Maximum Session Size (MB)
+# http-capture-max-session-mb = 500
+# Decrypted Hosts
+# http-capture-mitm-hosts = -*.apple.com, -*.icloud.com, -*.mzstatic.com, -*.apple-cloudkit.com
+# HTTP Capture Presentation
+# http-capture-presentation = sidebar
+# Record Packets for pcap
+# http-capture-record-packets = false
+# Sessions to Keep
+# http-capture-retained-sessions = 50
+# Show Network Favicons
+# http-capture-favicons = true
+# Skip Server Certificate Verification
+# http-capture-skip-upstream-verify = false
+# Sort Profiles By
+# profiles-sort-order = name
+# Force IPv4
+# ssh-force-ipv4-enabled = false
+# Connection Health Monitoring
+# ssh-health-monitoring-enabled = true
+# Probe Interval
+# ssh-health-probe-interval = 15
+# Saved Password Authentication
+# ssh-password-default-auth-requirement = none
+# Saved Password Storage
+# ssh-password-default-storage-level = backupOnly
+# OpenSSH Public Key Compatibility
+# ssh-public-key-auth-probe-enabled = false
+# Auto Recovery
+# vpn-auto-recovery = true
+
+# ---- Cursor ----
+# Cursor Blinking
+# cursor-style-blink = false
+# Blink Style
+# cursor-blink-mode = normal
+# Cursor Color
+# cursor-color = 
+# Cursor Effect
+# cursor-effect = none
+# Cursor Height
+# cursor-height = 0
+# Cursor Opacity
+# cursor-opacity = 0.8
+# Cursor Style
+# cursor-style = block
+# Text Under Cursor
+# cursor-text = 
+# Cursor Thickness
+# cursor-thickness = 0
+
+# ---- Dictation ----
+# Stop After Silence
+# dictation-auto-stop-silence = 4
+# Insert Text
+# dictation-commit-mode = preview
+# Dictation
+# dictation = true
+# Formatting
+# dictation-formatting = auto
+# Dictation Language (default: "")
+# dictation-language = en
+# Speech Model (default: parakeetV3)
+# dictation-model = parakeetV2English
+# Write Numbers as Digits
+# dictation-number-normalization = true
+# Phrase Pause
+# dictation-pause-duration = 0.8
+# Agent Quick Replies (default: false)
+# dictation-quick-replies = true
+# Remove Filler Words
+# dictation-remove-fillers = true
+# Learn Words from Screen
+# dictation-screen-vocabulary = true
+# Speech Detection Threshold
+# dictation-speech-threshold = 0.6
+# Spoken Code Idioms
+# dictation-spoken-code = true
+# Vocabulary
+# dictation-vocabulary = kubectl: cube control, cube cuddle, cube CTL, sudo: pseudo, sue do, ssh, git, grep, awk, sed, npm, npx, pnpm, yarn, brew, tmux: tee mux, T mux, nginx: engine x, systemctl: system control, system CTL, journalctl: journal control, chmod: change mode, C mod, chown: change own, zsh: Z shell, bash, vim, nvim: neovim, helix, rsync: R sync, curl, wget, jq, ripgrep, Docker, Kubernetes, Terraform, Ansible, Postgres, Redis, localhost, stdout, stderr, env, YAML, JSON, Claude Code, Codex
+# Vocabulary Boost (default: false)
+# dictation-vocabulary-boost = true
+# Voice Commands (default: false)
+# dictation-voice-commands = true
+
+# ---- Font ----
+# External Display Font Size
+# external-display-font-size = 0
+# Font
+# font-family = MonoLisaCode
+# Font Size (default: 13)
+# font-size = 9
+# Enable Ligatures
+# ligatures-enabled = true
+
+# ---- Gestures ----
+# Use Line Scrolling
+# line-scrollback-enabled = false
+# Rubber Band Scrolling
+# rubber-band-scrollback-enabled = true
+# Scroll Mode
+# scroll-mode-enabled = true
+# Pull Down for Tab Exposé
+# tab-expose-gesture-enabled = true
+# Two-Finger Long Press
+# two-finger-long-press-duration = 0.5
+
+# ---- Host Trust ----
+# Verify Host Keys via DNS
+# ssh-verify-host-key-dns = off
+# DNS Resolver
+# ssh-verify-host-key-dns-resolver = cloudflare
+
+# ---- Keyboard ----
+# Compose Autocorrect
+# compose-autocorrect-enabled = false
+# Double-Space Period Shortcut
+# double-space-for-period = false
+# Force ASCII Keyboard
+# force-ascii-keyboard = false
+# Option Key as Alt (default: false)
+# macos-option-as-alt = left
+# Character Preview
+# terminal-touch-keyboard-character-preview = true
+# Key Click Sounds
+# terminal-touch-keyboard-click-sound = false
+# Terminal Keyboard
+# terminal-touch-keyboard = false
+# Detached Keyboard Glass Style
+# terminal-touch-keyboard-floating-glass-style = regular
+# Detached Keyboard Tint Strength
+# terminal-touch-keyboard-floating-glass-tint-opacity = 0.25
+# Keyboard Key Glyphs
+# terminal-touch-keyboard-glyphs = true
+# Terminal Keyboard Haptics
+# terminal-touch-keyboard-haptics = false
+# Keyboard Height
+# terminal-touch-keyboard-height = compact
+# Front Display Keyboard Height
+# terminal-touch-keyboard-height-duo-front = 
+# Use in Text Fields
+# terminal-touch-keyboard-text-fields = true
+# Keyboard Layout
+# terminal-touch-keyboard-layout = us
+# Letter Prediction
+# terminal-touch-keyboard-letter-prediction = true
+# Phosphor Color
+# terminal-touch-keyboard-phosphor-color = green
+# Split Keyboard
+# terminal-touch-keyboard-split = false
+# Separate Keyboard State per Tab
+# terminal-touch-keyboard-state-per-tab = false
+# Theme-Aware Keycaps
+# terminal-touch-keyboard-steampunk-theme-aware-keycaps = false
+# Keyboard Style
+# terminal-touch-keyboard-style = flat
+# Terminal Keyboard Suggestions
+# terminal-touch-keyboard-suggestions = false
+# Use System Detached Keyboard
+# terminal-touch-keyboard-system-floating = true
+# Follow Terminal Theme
+# terminal-touch-keyboard-theme-aware = true
+# Writing Assistance
+# terminal-writing-assistance = off
+
+# ---- Toolbar Keys ----
+# Arrow Key Mode
+# arrow-joystick-mode = joystick
+# Open Drawer by Default
+# keyboard-toolbar-drawer-open-by-default = false
+# More Button Behavior
+# keyboard-toolbar-drawer-toggle-mode = stack
+# Persistent Toolbar
+# persistent-toolbar = false
+# Show Toolbar with Hardware Keyboard
+# show-toolbar-with-hardware-keyboard = false
+
+# ---- Live Activity ----
+# Live Activity Agent Messages
+# live-activity-agent-messages = off
+# Live Activity Coding Agents
+# live-activity-agents-enabled = false
+# Live Activity (default: false)
+# live-activity-enabled = true
+# Live Activity Network Info
+# live-activity-network-info-enabled = false
+# Live Activity Session Filter
+# live-activity-session-filter = diary
+# Live Activity WiFi Info
+# live-activity-wifi-info-enabled = false
+
+# ---- Locale ----
+# Clock Format
+# clock-format = system
+# Custom Locale
+# custom-locale = en_US.UTF-8
+# Locale
+# locale-mode = auto
+
+# ---- Multiplexers ----
+# Auto-hide herdr Gateway on Attach
+# herdr-auto-hide-gateway-on-attach = false
+# herdr Control Scrollback Limit
+# herdr-control-history-limit-bytes = 1048576
+# herdr Auto-Start Command
+# herdr-custom-command = ""
+# herdr Attach Mode
+# herdr-discovery-attach-mode = regular
+# Discover herdr Sessions
+# herdr-session-discovery-enabled = true
+# herdr Session Name
+# herdr-session-name = ""
+# Automatically Discover Local Sessions
+# local-session-discovery-enabled = false
+# Show Detach Banner
+# mux-detach-banner-enabled = true
+# Automatically Discover Remote Sessions
+# remote-session-discovery-enabled = true
+# Session Sort Order
+# session-discovery-sort-order = attachedFirst
+# Show Multiplexer Tabs in Exposé
+# tab-expose-multiplexer-enabled = true
+# Auto-hide Gateway on Attach
+# tmux-auto-hide-gateway-on-attach = false
+# tmux Auto-Start Command
+# tmux-custom-command = ""
+# tmux Attach Mode
+# tmux-discovery-attach-mode = regular
+# Discover tmux Sessions
+# tmux-session-discovery-enabled = true
+# tmux Session Name
+# tmux-session-name = ""
+# Multiplexer Close Tab Action (default: closeWindow)
+# multiplexer-tab-close-action = detachSessionAndCloseGateway
+# Discover zellij Sessions
+# zellij-session-discovery-enabled = true
+# zmx Auto-Start Command
+# zmx-custom-command = ""
+# Discover zmx Sessions
+# zmx-session-discovery-enabled = true
+# zmx Session Name
+# zmx-session-name = ""
+
+# ---- Notifications ----
+# Agent Inbox Presentation
+# agent-inbox-presentation = sidebar
+# Include the Question
+# agent-notification-include-prompt = true
+# Agent Notifications (default: blockedOnly)
+# agent-notification-policy = blockedAndDone
+# Push Only When in Background
+# push-agent-background-only = false
+# Show Agent Logos
+# push-agent-logos-enabled = true
+# SSH Session Reminders
+# ssh-notification-enabled = false
+# Detect Builds
+# task-detect-builds = true
+# Detect Infrastructure Commands
+# task-detect-infra = true
+# Detect Prompts
+# task-detect-prompts = true
+# Detect Tests
+# task-detect-tests = true
+# Detect Transfers
+# task-detect-transfers = true
+# Detect Long-Running Commands
+# task-detection-enabled = false
+# Task Notifications
+# task-notification-policy = blockedOnly
+# Terminal Notifications (default: false)
+# terminal-notification-enabled = true
+
+# ---- Colors ----
+# Generate Palette
+# palette-generate = false
+# Harmonious Palette
+# palette-harmonious = false
+
+# ---- Battery & Display ----
+# Always On Display
+# always-on-display-minutes = 0
+# Brightness Boost (default: 1)
+# brightness-gain = 1.5
+# Automatic Battery Saver
+# power-auto-saver = true
+# Refresh Rate on Battery
+# power-battery-refresh-rate = sixty
+# Maximum Refresh Rate
+# power-max-refresh-rate = auto
+
+# ---- Privacy ----
+# Redact Sensitive Text
+# auto-redact-enabled = false
+# IP Geolocation
+# geo-provider-type = ipinfo
+# Location Diary Mode
+# location-diary-auto-mode = false
+
+# ---- Prompt ----
+# Username
+# custom-username = ""
+# Blank Line Before Prompt
+# prompt-add-newline = true
+# Show Git Status
+# show-git-in-prompt = true
+# Prompt Theme
+# starship-theme = catppuccin
+# Right Prompt
+# use-right-prompt = false
+# Starship-style Prompt
+# use-starship-prompt = true
+# Transient Prompt
+# use-transient-prompt = false
+
+# ---- Roam ----
+# Overwrite Predictions
+# roam-default-predict-overwrite = false
+# Default Prediction Mode
+# roam-default-prediction-mode = adaptive
+# Enable Hole-Punch
+# roam-hole-punch-enabled = false
+# Use Alternate Screen
+# roam-mosh-alt-screen-enabled = true
+# Multipath TCP
+# roam-multipath-tcp-enabled = false
+# Default Transport
+# trzsz-default-transport-mode = kcp
+# UDP Port Range Max
+# trzsz-default-udp-port-max = 61999
+# UDP Port Range Min
+# trzsz-default-udp-port-min = 61000
+# Keep Input While Offline
+# trzsz-keep-pending-input = false
+
+# ---- Screen Sharing ----
+# Default Clipboard Sync
+# screen-sharing-clipboard-sync-default = automatic
+# Control+Option as Command
+# screen-sharing-control-option-as-command-default = true
+# Cursor Rendering
+# screen-sharing-cursor-rendering-default = local
+# Cursor Size
+# screen-sharing-cursor-size-default = medium
+# Floating Keyboard Toolbar
+# screen-sharing-floating-toolbar-default = true
+# Four-Finger Tab and Pane Swipes
+# screen-sharing-four-finger-navigation = false
+# KVM Local Cursor
+# screen-sharing-kvm-local-cursor-default = false
+# Default Panning Mode
+# screen-sharing-panning-default = edge
+# Default Pointer Mode
+# screen-sharing-pointer-mode-default = direct
+# Pointer Speed
+# screen-sharing-pointer-speed = 1
+# Route Reserved Shortcuts to VNC
+# screen-sharing-route-reserved-shortcuts-to-vnc-default = true
+# Show Held Button
+# screen-sharing-shows-held-button = true
+# Three-Finger Swipe Down
+# screen-sharing-swipe-down-action = applicationWindows
+# Three-Finger Swipe Left
+# screen-sharing-swipe-left-action = moveRightASpace
+# Three-Finger Swipe Right
+# screen-sharing-swipe-right-action = moveLeftASpace
+# Three-Finger Swipe Up
+# screen-sharing-swipe-up-action = missionControl
+# Touch Hold Delay
+# screen-sharing-touch-hold-delay = 0.3
+
+# ---- Selection ----
+# Copy on Select
+# copy-on-select = true
+# Selection Style
+# selection-appearance-mode = rootshell
+# Selection Background
+# selection-background = f5e0dc
+# Selection Foreground
+# selection-foreground = 1e1e2e
+# Use Native Selection Loupe
+# use-native-selection-loupe = false
+
+# ---- Session ----
+# Persist Scrollback History
+# scrollback-persistence-enabled = true
+# Restore Sessions on Launch
+# session-persistence-enabled = true
+
+# ---- Shaders & Effects ----
+# Background Effect
+# active-effect-id = 
+# Extend Effect Under Pinned Sidebar
+# background-effect-includes-pinned-sidebar = true
+# Text Above Effect
+# background-effect-text-above = true
+# Custom Keyboard Background
+# keyboard-background-effect = off
+# Keyboard Effect
+# keyboard-effect-id = follow-terminal
+# Shader Animation (default: true)
+# custom-shader-animation = always
+# Sidebar Effect
+# sidebar-effect-id = follow-terminal
+# Theme Gradient Backdrop
+# theme-gradient-backdrop = false
+
+# ---- Sidebar ----
+# Auto-Hide Sidebar After Selection
+# tab-sidebar-auto-hide-on-select = false
+# Large Sidebar Controls
+# tab-sidebar-large-controls = false
+# Pin Tab Sidebar
+# tab-sidebar-pinned = false
+# Sidebar Title Lines
+# tab-sidebar-row-lines = 1
+
+# ---- Sounds ----
+# Bell Sound
+# bell-sound-preset = hapticOnly
+# Bell Volume
+# bell-sound-volume = 0.699999988079071
+# Notification Sound
+# notification-sound-preset = systemDefault
+
+# ---- Tabs ----
+# Compact Tab Spacing (default: false)
+# compact-pill-tab-spacing = true
+# Open in Folder Placement
+# open-in-folder-placement = newTab
+# Show Group Menu
+# show-tab-scope-menu = true
+# Show Tab Shortcuts
+# show-tab-shortcut-indicators = false
+# Disable Tab Animations
+# tab-bar-animations-disabled = false
+# Show Top Tab Bar (default: false)
+# tab-bar-hidden = true
+# Tab Bar Position
+# tab-bar-position = top
+# Tab Exposé Captions
+# tab-expose-shows-captions = true
+# Tab Exposé Preview Size
+# tab-expose-zoom = 1
+# Tab Hover Preview Activation
+# tab-hover-preview-activation = shift
+# Tab Hover Preview Size
+# tab-hover-preview-zoom = 1
+# Tab Hover Previews
+# tab-hover-previews = true
+# Show Program Icons
+# tab-program-icons = true
+# Group Menu Size
+# tab-scope-menu-size = small
+# New Tab Action (default: localShell)
+# new-tab-action = tmuxTab
+# Agent Detail in Tabs
+# top-tab-agent-detail-mode = off
+# Tab Style (default: pills)
+# top-tab-style = ledger
+
+# ---- Terminal ----
+# Local Shell
+# local-shell-command = ""
+# Open Links from Programs
+# open-links-from-programs = false
+# Terminal Type (Local)
+# terminal-type-local = xterm-ghostty
+# Terminal Type (Remote)
+# terminal-type-remote = xterm-256color
+# Horizontal Padding
+# window-padding-x = 0
+# Vertical Padding
+# window-padding-y = 0
+
+# ---- Theme ----
+# Appearance
+# appearance-mode = automatic
+# Day Theme
+# day-night-theme-day-theme = Solarized Light
+# Match System Theme
+# day-night-theme-enabled = false
+# Night Theme
+# day-night-theme-night-theme = Catppuccin Mocha
+# Favorite Themes (default: )
+# favorite-theme-ids = Catppuccin Espresso
+# Tint by Host
+# host-tint = false
+# I'm no fun
+# im-no-fun = false
+# App Icon (default: "")
+# selected-app-icon-variant = AppIconUnderscore
+# Theme (default: Catppuccin Mocha)
+# theme = Catppuccin Espresso
+# Soft Scroll Edges
+# soft-scroll-edges = false
+# Theme-Aware UI
+# themed-ui = true
+
+# ---- File Transfer ----
+# Ask Before Uploading
+# attachment-upload-confirm = true
+# Default Upload Directory
+# attachment-upload-directory = /tmp/rootshell-uploads/
+# Insert Uploads As
+# attachment-upload-format = path
+# Concurrent Transfers
+# file-manager-concurrent-transfers = 2
+# Disconnect Idle Hosts After (Minutes)
+# file-manager-idle-disconnect = 10
+# File Manager Presentation
+# file-manager-presentation = sidebar
+# Preserve Permissions and Dates
+# file-manager-preserve-attributes = true
+# Show Hidden Files
+# file-manager-show-hidden = false
+
+# ---- Transparency ----
+# Transparent Backdrop
+# backdrop-transparency-enabled = true
+# Blur Radius
+# background-blur = 30
+# Background Opacity (default: 0.92)
+# background-opacity = 0.9
+# Background Blur
+# blur-enabled = true
+# Blur Style
+# blur-style = standard
+# Transparent Pinned Sidebar
+# pinned-sidebar-transparency-enabled = false
+# Translucent Tab Sidebar
+# tab-sidebar-translucent = true
+
+# ---- Visor ----
+# Visor Animation Duration
+# visor-animation-duration-ms = 200
+# Visor Auto-Hide
+# visor-autohide = true
+# Enable Visor
+# visor-enabled = false
+# Visor Hotkey
+# visor-hotkey-key-code = 53
+# Visor Hotkey Modifiers
+# visor-hotkey-modifiers = 512
+# Visor Edge
+# visor-position = top
+# Visor Slide Size
+# visor-primary-size = 30%
+# Visor Screen
+# visor-screen = main
+# Visor Cross Axis Size
+# visor-secondary-size = ""
+# Visor Space Behavior
+# visor-space-behavior = move
+# Visor Event Tap
+# visor-use-event-tap = false
+
+# ---- Window ----
+# Confirm Before Closing Pane
+# confirm-before-closing-pane = false
+# Confirm Before Closing Tab
+# confirm-before-closing-tab = false
+# Extend Under Home Indicator
+# extend-under-home-indicator = false
+# Full Screen Mode
+# full-screen-mode-enabled = false
+# Hide Title Bar (default: false)
+# hide-window-title-bar = true
+# Rounded Panes
+# rounded-panes = false
+# Show Remote Ports (default: false)
+# show-remote-ports = true
+# Split Border Color
+# split-focus-border-color = accent
+# Split Border Custom Color
+# split-focus-border-custom-color = 007AFF
+# Split Focus Border
+# split-focus-border-style = standard
+# Tabs in Title Bar (default: true)
+# tabs-in-titlebar-enabled = false
