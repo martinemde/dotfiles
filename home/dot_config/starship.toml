@@ -8,7 +8,6 @@ format = """
 $os\
 $user\
 $directory\
-${custom.jj}\
 $c\
 $rust\
 $ruby\
@@ -103,17 +102,6 @@ truncate_to_repo = false
 "Pictures" = " "
 "dotfiles" = "󰇙"
 "iCloud~md~obsidian" = "󰈗"
-
-# Custom jj (Jujutsu) module - replaces git_branch/git_status
-[custom.jj]
-format = '[$output]($style)'
-command = "jj-prompt"
-style = "fg:sapphire"
-ignore_timeout = false
-shell = ["bash"]
-use_stdin = false
-when = true
-require_repo = true
 
 [c]
 symbol = " "
