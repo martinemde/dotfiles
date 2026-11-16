@@ -1,0 +1,21 @@
+#!/bin/sh
+set -o errexit -o nounset
+[ -n "${DEBUG:-}" ] && set -o xtrace
+
+# Preserve hooks installed locally by Codex and other integrations.
+command -v jq >/dev/null
+jq -sS '
+  (.[0] // {}) |
+  .hooks.Stop = (
+    ((.hooks.Stop // []) | map(
+      .hooks |= map(select(.command != "rootshell-notify hook --agent codex")) |
+      select(.hooks | length > 0)
+    )) + [{"hooks": [{
+      "type": "command",
+      "command": "rootshell-notify hook --agent codex",
+      "async": false,
+      "timeout": 10,
+      "_rootshell": "push"
+    }]}]
+  )
+'

@@ -57,7 +57,45 @@
   "disableClaudeAiConnectors": true,
   "syncClaudeAiSkills": false,
   "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rootshell-notify hook --agent claude-code",
+            "async": true,
+            "timeout": 10,
+            "_rootshell": "push"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rootshell-notify hook --agent claude-code",
+            "async": true,
+            "timeout": 10,
+            "_rootshell": "push"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rootshell-notify hook --agent claude-code",
+            "async": true,
+            "timeout": 10,
+            "_rootshell": "push"
+          }
+        ]
+      },
       {
         "matcher": "Bash",
         "hooks": [
