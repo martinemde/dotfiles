@@ -89,7 +89,7 @@ format = '[ $user]($style)'
 
 [directory]
 style = "fg:sky"
-format = "[ $path ]($style)"
+format = "[ $path]($style)"
 truncation_length = 3
 truncation_symbol = ""
 fish_style_pwd_dir_length = 2
