@@ -39,6 +39,15 @@ names; many tabs or a very long tab name can still exceed the screen width.
 Layout changes take effect in new sessions or tabs; existing status bars keep their
 loaded configuration.
 
+## Herdr
+
+Chezmoi tracks `~/.config/herdr-app/settings.json`, `keys.json`, the custom
+Catppuccin Espresso theme, and the Zellij-style key mod. Session state, window
+positions, generated files, and bundled mods stay machine-local.
+
+Run `chezmoi update` on another computer to pull and apply these settings.
+The configured MonoLisa fonts must already be installed there.
+
 ## Reference
 
 - [Tool and setup notes](docs/)
