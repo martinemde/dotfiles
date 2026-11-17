@@ -1,0 +1,9 @@
+{
+  "place": "none",
+  "title": "Coder workspace",
+  "overlay": {
+    "kind": "dialog",
+    "width": 550,
+    "height": 390
+  }
+}
