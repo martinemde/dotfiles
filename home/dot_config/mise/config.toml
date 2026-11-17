@@ -45,7 +45,7 @@ bun = "1.4.4"
 chezmoi = "2.74.1"
 codex = "0.164.0"
 dua = "3.0.1"
-go = "1.27.3"
+go = "1.27.4"
 node = "26.13.1"
 pnpm = "12.19.0"
 # Require artifact attestations for precompiled CPython instead of a release delay.
