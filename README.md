@@ -48,6 +48,17 @@ positions, generated files, and bundled mods stay machine-local.
 Run `chezmoi update` on another computer to pull and apply these settings.
 The configured MonoLisa fonts must already be installed there.
 
+## Dvorak colon (macOS)
+
+Chezmoi installs **Dvorak colon** in `~/Library/Keyboard Layouts/`. It is Apple's
+Dvorak layout with only `:` and `;` swapped, including Caps Lock, Command, and
+Control variants. Option characters and dead-key accents are unchanged.
+
+After `chezmoi init --apply martinemde` (or `chezmoi update` on an existing Mac),
+add **Dvorak colon** in System Settings → Keyboard → Text Input → Edit.
+Log out and back in if it does not appear. Selecting the input source stays
+machine-local; Linux and containers do not install the bundle.
+
 ## Reference
 
 - [Tool and setup notes](docs/)
