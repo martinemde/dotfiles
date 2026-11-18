@@ -8,7 +8,7 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "prettier": "3.9.10",
+    "prettier": "3.10.0",
     "prettier-plugin-toml": "4.1.0"
   }
 }
