@@ -19,11 +19,15 @@ const { extractPackageFile: extractRegex } = await load('modules/manager/custom/
 const { parse: parseToml } = await load('util/toml');
 const { parseYaml } = await load('util/yaml');
 const { matchRegexOrGlob } = await load('util/string-match');
+const hostRules = await load('util/host-rules');
 const { init: initLogger } = await load('logger/index');
 initLogger();
 const root = new URL('../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
 GlobalConfig.set({ localDir: fileURLToPath(root) });
+// Renovate only applies GITHUB_COM_TOKEN to github.com in its full run; this harness
+// bypasses that, so preset fetches were unauthenticated and hit the API rate limit.
+if (process.env.GITHUB_COM_TOKEN) hostRules.add({ matchHost: 'github.com', token: process.env.GITHUB_COM_TOKEN });
 const source = await read('renovate.json5');
 const local = parseJson(source, 'renovate.json5');
 const presetRef = 'github>martinemde/renovate-config#v1.1.0';
