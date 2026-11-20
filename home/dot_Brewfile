@@ -40,6 +40,7 @@ brew "poppler" # PDF library
 brew "rbspy" # Ruby profiler
 brew "readline" # line editing library
 brew "redis", restart_service: :changed # database
+brew "sigrok-cli" # logic analyzer capture
 brew "tesseract" # OCR tool
 brew "texinfo" # documentation
 brew "thefuck" # command corrector
