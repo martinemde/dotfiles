@@ -32,7 +32,9 @@ are retained where they do not conflict with an action.
 Outside the menu:
 
 - Ctrl+h/l: focus a pane left/right, or switch to the previous/next tab in
-  the same space if no pane is in that direction. Tab switching wraps.
+  the same space if no pane is in that direction. Enter the previous tab at
+  its right edge and the next tab at its left edge, not at its last focus.
+  Tab switching wraps and skips settled tabs.
 - Ctrl+j/k and Ctrl+arrows: focus panes without switching tabs.
 - Ctrl+i: move the current tab left, wrapping.
 
@@ -79,4 +81,4 @@ splits, repeated pane focus and cycle, tab creation/navigation/selection/rename,
 pane swapping, half-page scroll, native find input, Ctrl+arrow navigation,
 Ctrl+i tab movement, and pane close. Screenshots confirmed the menu and find bar.
 The Ctrl+h/l commands were also exercised in a disposable three-tab space:
-within-tab movement, edge fallback, remembered focus, and wrapping.
+within-tab movement, edge entry regardless of remembered focus, and wrapping.

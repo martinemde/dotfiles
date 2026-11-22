@@ -4,9 +4,31 @@ import {
   closeOverlay,
   focused,
   nextCommand,
+  panes,
   props,
   run,
+  spaces,
 } from 'herdr';
+
+function enterAdjacentTab({ space, tab }, direction) {
+  const tabs = spaces().find((s) => s.id === space)?.tabs;
+  if (!tabs) return;
+  const goingLeft = direction === 'left';
+  if (goingLeft) tabs.reverse();
+  const index = tabs.findIndex((t) => t.id === tab);
+  if (index < 0) return;
+  const target = [...tabs.slice(index + 1), ...tabs.slice(0, index)].find(
+    (t) => !t.settled
+  );
+  if (!target) return;
+
+  // Herdr walks split children left-to-right or top-to-bottom. The first
+  // pane touches the left edge, and the last pane touches the right edge.
+  const destination = panes().filter((p) => p.tab === target.id);
+  const edge = goingLeft ? destination.at(-1) : destination[0];
+  // Focusing by pane ID also selects its tab, without showing remembered focus first.
+  if (edge) run('pane.focus', { pane: edge.pane });
+}
 
 export default class PaneNavigation extends View {
   init(_, cx) {
@@ -25,7 +47,7 @@ export default class PaneNavigation extends View {
         before.pane === after?.pane &&
         before.tab === after.tab
       ) {
-        run(direction === 'left' ? 'tab.prev' : 'tab.next');
+        enterAdjacentTab(after, direction);
       }
       closeOverlay(overlay);
     });
