@@ -31,7 +31,9 @@ are retained where they do not conflict with an action.
 
 Outside the menu:
 
-- Ctrl+h/j/k/l or Ctrl+arrows: focus left/down/up/right.
+- Ctrl+h/l: focus a pane left/right, or switch to the previous/next tab in
+  the same space if no pane is in that direction. Tab switching wraps.
+- Ctrl+j/k and Ctrl+arrows: focus panes without switching tabs.
 - Ctrl+i: move the current tab left, wrapping.
 
 These take Ctrl+Space, Ctrl+h/j/k/l, Ctrl+arrows and Ctrl+i away from terminal programs,
@@ -44,9 +46,9 @@ separate in Herdr. Existing Cmd shortcuts and other terminal keys are unchanged.
 - Move means **swap**, not Zellij's full pane relocation behavior.
 - Pane cycling uses Herdr's pane list order, not Zellij's focus history.
 - Ctrl+left/right and scroll-mode Alt+left/right do **not** cross tab edges.
-- Ctrl+h/j/k/l focus panes directly, including while a menu mode is open.
-  They override shell/Vim uses of these keys (backspace, newline, kill-line,
-  clear-screen). Zellij's process-aware normal/locked autolock is not reproduced.
+- Ctrl+h/j/k/l work while a menu mode is open too. They override shell/Vim
+  uses of these keys (backspace, newline, kill-line, clear-screen). Zellij's
+  process-aware normal/locked autolock is not reproduced.
 - Find uses Herdr's own bar: Enter/Shift+Enter navigate matches, Escape closes.
   Zellij's separate search-mode keys are not reproduced.
 - Spaces are only a session substitute. No session-ending Quit key is installed.
@@ -59,11 +61,12 @@ separate in Herdr. Existing Cmd shortcuts and other terminal keys are unchanged.
 ## Files and recovery
 
 - Bindings: `~/.config/herdr-app/keys.json`
-- Mod: `~/.config/herdr-app/mods/zellij-keys/`
+- Menu mod: `~/.config/herdr-app/mods/zellij-keys/`
+- Ctrl+h/l helpers: `~/.config/herdr-app/mods/pane-nav-{left,right}/`
 - Chezmoi source: `home/dot_config/herdr-app/`
 
 Edit the chezmoi source and apply it to sync changes. To remove the mod,
-remove its keybindings and folder from the source, then apply. A pre-install
+remove its keybindings and mod folders from the source, then apply. A pre-install
 keys backup may exist locally as `keys.json.before-zellij`; it is not synced.
 No shipped layout or mod was edited. No Zellij files were changed.
 This mod uses only local Herdr commands; it runs no helpers and uses no network.
@@ -75,3 +78,5 @@ Live keyboard tests in a disposable space covered prefix opening, right/down
 splits, repeated pane focus and cycle, tab creation/navigation/selection/rename,
 pane swapping, half-page scroll, native find input, Ctrl+arrow navigation,
 Ctrl+i tab movement, and pane close. Screenshots confirmed the menu and find bar.
+The Ctrl+h/l commands were also exercised in a disposable three-tab space:
+within-tab movement, edge fallback, remembered focus, and wrapping.

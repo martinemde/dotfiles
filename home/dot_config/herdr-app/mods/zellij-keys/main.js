@@ -161,7 +161,12 @@ export default class ZellijKeys extends View {
       return;
     }
     if (e.modifiers.control && DIRECTIONS[e.key]) {
-      run('pane.go', { direction: DIRECTIONS[e.key] });
+      const direction = DIRECTIONS[e.key];
+      if (e.key === 'h' || e.key === 'l') {
+        run('mod.open', { name: `pane-nav-${direction}` });
+      } else {
+        run('pane.go', { direction });
+      }
       this.handle.focus();
       return;
     }

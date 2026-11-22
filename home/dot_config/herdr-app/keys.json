@@ -69,10 +69,10 @@
         "by": -1
       }
     },
-    "ctrl-h": "pane.go:left",
+    "ctrl-h": "mod.open:pane-nav-left",
     "ctrl-j": "pane.go:down",
     "ctrl-k": "pane.go:up",
-    "ctrl-l": "pane.go:right"
+    "ctrl-l": "mod.open:pane-nav-right"
   },
   "terminal": {
     "cmd-f": "terminal.search",

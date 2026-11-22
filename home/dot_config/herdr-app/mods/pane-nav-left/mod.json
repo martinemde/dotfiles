@@ -1,0 +1,10 @@
+{
+  "place": "none",
+  "overlay": {
+    "kind": "window",
+    "frame": "none",
+    "props": {
+      "direction": "left"
+    }
+  }
+}
