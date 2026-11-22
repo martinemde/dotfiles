@@ -70,8 +70,8 @@
       }
     },
     "ctrl-h": "mod.open:pane-nav-left",
-    "ctrl-j": "pane.go:down",
-    "ctrl-k": "pane.go:up",
+    "ctrl-j": "mod.open:pane-nav-down",
+    "ctrl-k": "mod.open:pane-nav-up",
     "ctrl-l": "mod.open:pane-nav-right"
   },
   "terminal": {

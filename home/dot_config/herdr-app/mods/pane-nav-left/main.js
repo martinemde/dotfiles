@@ -47,7 +47,11 @@ export default class PaneNavigation extends View {
         before.pane === after?.pane &&
         before.tab === after.tab
       ) {
-        enterAdjacentTab(after, direction);
+        if (direction === 'up' || direction === 'down') {
+          run(direction === 'up' ? 'space.prev' : 'space.next');
+        } else {
+          enterAdjacentTab(after, direction);
+        }
       }
       closeOverlay(overlay);
     });

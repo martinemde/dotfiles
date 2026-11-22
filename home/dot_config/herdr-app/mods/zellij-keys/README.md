@@ -35,7 +35,9 @@ Outside the menu:
   the same space if no pane is in that direction. Enter the previous tab at
   its right edge and the next tab at its left edge, not at its last focus.
   Tab switching wraps and skips settled tabs.
-- Ctrl+j/k and Ctrl+arrows: focus panes without switching tabs.
+- Ctrl+j/k: focus a pane down/up, or switch to the next/previous space at
+  the bottom/top edge. Space switching wraps and restores the destination's focus.
+- Ctrl+arrows: focus panes without switching tabs or spaces.
 - Ctrl+i: move the current tab left, wrapping.
 
 These take Ctrl+Space, Ctrl+h/j/k/l, Ctrl+arrows and Ctrl+i away from terminal programs,
@@ -64,7 +66,7 @@ separate in Herdr. Existing Cmd shortcuts and other terminal keys are unchanged.
 
 - Bindings: `~/.config/herdr-app/keys.json`
 - Menu mod: `~/.config/herdr-app/mods/zellij-keys/`
-- Ctrl+h/l helpers: `~/.config/herdr-app/mods/pane-nav-{left,right}/`
+- Directional navigation mods: `~/.config/herdr-app/mods/pane-nav-{left,right,down,up}/`
 - Chezmoi source: `home/dot_config/herdr-app/`
 
 Edit the chezmoi source and apply it to sync changes. To remove the mod,
@@ -82,3 +84,5 @@ pane swapping, half-page scroll, native find input, Ctrl+arrow navigation,
 Ctrl+i tab movement, and pane close. Screenshots confirmed the menu and find bar.
 The Ctrl+h/l commands were also exercised in a disposable three-tab space:
 within-tab movement, edge entry regardless of remembered focus, and wrapping.
+The Ctrl+j/k commands were exercised across two disposable spaces, checking
+movement within a split and switching spaces only at the edge.
