@@ -4,7 +4,7 @@ min_version = "2026.10.25"
 
 [tools]
 "aqua:ajeetdsouza/zoxide" = "0.10.0"
-"aqua:ast-grep/ast-grep" = "0.51.2"
+"aqua:ast-grep/ast-grep" = "0.51.3"
 "aqua:atuinsh/atuin" = "18.24.8"
 "aqua:aws/aws-cli" = "2.40.3"
 "aqua:bootandy/dust" = "1.2.7"
