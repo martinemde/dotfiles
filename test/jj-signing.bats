@@ -40,9 +40,9 @@ render_signing_config() {
   [ "$status" -eq 0 ]
   [ "$output" = "none" ]
 
-  run signing_env jj config get git.sign-on-push
+  run signing_env jj config get revsets.git-sign-on-push
   [ "$status" -eq 0 ]
-  [ "$output" = "false" ]
+  [ "$output" = "none()" ]
 }
 
 @test "jj signs with the local private key only when pushing" {

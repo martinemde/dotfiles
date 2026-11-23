@@ -9,6 +9,6 @@ key = {{ $key | quote }}
 # Sign on push, not on every working-copy snapshot or rewrite.
 behavior = "drop"
 
-[git]
-sign-on-push = true
+[revsets]
+git-sign-on-push = "~signed() & mine()"
 {{ end -}}

@@ -2,13 +2,21 @@
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 image=$(bun --eval 'const w = Bun.YAML.parse(await Bun.file(".github/workflows/renovate.yml").text()); console.log(w.jobs.renovate.container.image)')
+if command -v docker >/dev/null 2>&1; then
+  engine=docker
+elif command -v podman >/dev/null 2>&1; then
+  engine=podman
+else
+  echo "ERROR: Docker or Podman is required for Renovate policy validation" >&2
+  exit 1
+fi
 output="${1:-}"
 if [[ -n "$output" ]]; then
   container="dotfiles-policy-$$"
-  trap 'docker rm -f "$container" >/dev/null' EXIT
-  docker run --name "$container" -v "$PWD:/repo:ro" -w /repo \
+  trap '"$engine" rm -f "$container" >/dev/null' EXIT
+  "$engine" run --name "$container" -v "$PWD:/repo:ro" -w /repo \
     -e GITHUB_COM_TOKEN -e OUTPUT_CONFIG=/tmp/resolved.json --entrypoint node "$image" test/renovate-policy.mjs
-  docker cp "$container:/tmp/resolved.json" "$output"
+  "$engine" cp "$container:/tmp/resolved.json" "$output"
 else
-  docker run --rm -v "$PWD:/repo:ro" -w /repo -e GITHUB_COM_TOKEN --entrypoint node "$image" test/renovate-policy.mjs
+  "$engine" run --rm -v "$PWD:/repo:ro" -w /repo -e GITHUB_COM_TOKEN --entrypoint node "$image" test/renovate-policy.mjs
 fi

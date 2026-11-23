@@ -24,7 +24,14 @@ jobs:
       fail-fast: false
       matrix:
         repository:
-          [dotfiles, martinemde.com, micropub-publisher, almanac, containers, beelink]
+          [
+            dotfiles,
+            martinemde.com,
+            micropub-publisher,
+            almanac,
+            containers,
+            beelink,
+          ]
     runs-on: ubuntu-latest
     container:
       # Actions command files are owned by the runner, not the image's default user.
