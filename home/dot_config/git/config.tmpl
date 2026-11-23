@@ -2,12 +2,32 @@
 name = "{{ .git.name }}"
 email = "{{ .git.email }}"
 
+{{ if and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria") -}}
+[credential "https://github.com"]
+helper =
+helper = /usr/local/bin/git-credential-gh-app
+[credential "https://github.com:443"]
+helper =
+helper = /usr/local/bin/git-credential-gh-app
+[credential "https://gist.github.com"]
+helper =
+helper = /usr/local/bin/git-credential-gh-app
+[credential "https://gist.github.com:443"]
+helper =
+helper = /usr/local/bin/git-credential-gh-app
+
+[url "https://github.com/"]
+insteadOf = git@github.com:
+insteadOf = ssh://git@github.com/
+insteadOf = ssh://git@github.com:22/
+{{- else -}}
 [credential "https://github.com"]
 helper =
 helper = !/opt/homebrew/bin/gh auth git-credential
 [credential "https://gist.github.com"]
 helper =
 helper = !/opt/homebrew/bin/gh auth git-credential
+{{- end }}
 
 [commit]
 template = ~/.config/git/message

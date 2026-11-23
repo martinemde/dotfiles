@@ -4,6 +4,9 @@
 .chezmoiscripts/darwin_*
 Library/**
 {{ end }}
+{{ if not (and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria")) }}
+.local/bin/mise
+{{ end }}
 {{ if ne .chezmoi.os "linux" }}
 .chezmoiscripts/linux_*
 {{ end }}

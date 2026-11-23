@@ -54,6 +54,10 @@ fi
 # The environment setting also prevents project config from re-enabling this.
 export MISE_AUTO_INSTALL=0
 [[ -d "$XDG_DATA_HOME/mise/shims" ]] && path=("$XDG_DATA_HOME/mise/shims" $path)
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria") }}
+# Keep broker wrappers ahead of mise shims on Thria.
+[[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
+{{- end }}
 
 # Editor configuration
 export EDITOR="nvim"

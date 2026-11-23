@@ -1,0 +1,6 @@
+#!/bin/bash
+# Thria uses broker-issued credentials for all default mise invocations.
+set -o errexit -o nounset
+# mise chooses its shim target from PATH, not from the invoked executable.
+export PATH="/usr/bin:$PATH"
+exec /usr/local/bin/gh-app-run /usr/bin/mise "$@"

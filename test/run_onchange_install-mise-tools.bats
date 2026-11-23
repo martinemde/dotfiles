@@ -16,7 +16,9 @@ load test_helper
 
 @test "installs global tools outside the checkout using configured release-age policy" {
     local script="$TEST_TMPDIR/install-mise.sh"
-    chezmoi --config /dev/null --config-format toml --source "$BATS_TEST_DIRNAME/../home" execute-template --file home/.chezmoiscripts/run_onchange_after_00-install-mise-tools.sh.tmpl >"$script"
+    chezmoi --config /dev/null --config-format toml --source "$BATS_TEST_DIRNAME/../home" \
+        --override-data '{"chezmoi":{"os":"linux","hostname":"other"}}' \
+        execute-template --file home/.chezmoiscripts/run_onchange_after_00-install-mise-tools.sh.tmpl >"$script"
     mkdir -p "$TEST_TMPDIR/bin"
     cat >"$TEST_TMPDIR/bin/mise" <<'EOF'
 #!/bin/bash

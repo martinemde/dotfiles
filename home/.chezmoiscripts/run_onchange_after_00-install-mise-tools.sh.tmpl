@@ -4,10 +4,22 @@
 
 # mise config hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
 
+{{ if not (and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria")) -}}
 [ -n "${DEBUG:-}" ] && set -o xtrace
+{{- end }}
 set -o errexit
 set -o nounset
 
+{{ if and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria") -}}
+# Do not discover credentials through gh, inherited tokens, or anonymous mode.
+# The root-owned client acquires and isolates broker credentials before mise runs.
+# Keep generated tool shims pointed at native mise, not the broker wrapper.
+export PATH="/usr/bin:$PATH"
+if [ ! -x /usr/bin/mise ] || [ ! -x /usr/local/bin/gh-app-run ]; then
+    echo "ERROR: Thria requires /usr/bin/mise and /usr/local/bin/gh-app-run" >&2
+    exit 1
+fi
+{{- else -}}
 # Only run if mise is available
 if ! command -v mise >/dev/null 2>&1; then
     echo "WARNING: mise not found, skipping tool installation" >&2
@@ -39,18 +51,27 @@ Fix one of:
 EOF
     exit 1
 fi
+{{- end }}
 
 echo "Installing global mise tools..."
 
 # Run outside the checkout so project tools/locks do not shadow the global config.
 # The managed config sets the default delay and verified-tool exceptions.
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria") }}
+/usr/local/bin/gh-app-run /usr/bin/mise --cd "$HOME" install --yes
+{{- else }}
 mise --cd "$HOME" install --yes
+{{- end }}
 
 # Generate bun completions (installed to site-functions, loaded by compinit).
 # The bootstrap shell has not activated mise shims yet, so use the resolved
 # binary directly.
 BUN=""
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria") }}
+if BUN="$(/usr/local/bin/gh-app-run /usr/bin/mise which bun 2>/dev/null)"; then
+{{- else }}
 if BUN="$(mise which bun 2>/dev/null)"; then
+{{- end }}
     ZSH_SITE="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/site-functions"
     mkdir -p "$ZSH_SITE"
     "$BUN" completions > "$ZSH_SITE/_bun"
