@@ -60,3 +60,17 @@ assert_script_structure() {
   echo "$script" >"$TEST_TMPDIR/temp.sh"
   bash -n "$TEST_TMPDIR/temp.sh"
 }
+
+# Keep broker installation detection isolated from the machine running the tests.
+prepare_gh_app_source() {
+  mkdir -p "$TEST_SOURCE_DIR/.chezmoitemplates" "$TEST_SOURCE_DIR/dot_config/mise"
+  sed "s|/usr/local/lib/gh-app-broker|$TEST_TMPDIR/broker-install|" \
+    "$BATS_TEST_DIRNAME/../home/.chezmoitemplates/github-app-installed" \
+    >"$TEST_SOURCE_DIR/.chezmoitemplates/github-app-installed"
+  cp "$BATS_TEST_DIRNAME/../home/dot_config/mise/config.toml" "$TEST_SOURCE_DIR/dot_config/mise/config.toml"
+  if [ "${1:-1}" = 1 ]; then
+    mkdir -p "$TEST_TMPDIR/broker-install"
+  else
+    rmdir "$TEST_TMPDIR/broker-install" 2>/dev/null || true
+  fi
+}

@@ -1,10 +1,12 @@
 #!/usr/bin/env bats
 
 load test_helper
+bats_require_minimum_version 1.5.0
 
 render_canary() {
-    local source="$1" os="${2:-linux}" host="${3:-thria}"
-    "${CHEZMOI_BIN:-chezmoi}" --config /dev/null --config-format toml --source "$BATS_TEST_DIRNAME/../home" \
+    local source="$1" os="${2:-linux}" host="${3:-fixture}" installed="${4:-1}"
+    prepare_gh_app_source "$installed"
+    "${CHEZMOI_BIN:-chezmoi}" --config /dev/null --config-format toml --source "$TEST_SOURCE_DIR" \
         --override-data "{\"chezmoi\":{\"os\":\"$os\",\"hostname\":\"$host\",\"arch\":\"arm64\"},\"git\":{\"name\":\"Fixture\",\"email\":\"fixture@example.invalid\"}}" \
         execute-template --file "$BATS_TEST_DIRNAME/../$source"
 }
@@ -52,20 +54,22 @@ SH
     export PATH="$TEST_HOME_DIR/.local/bin:/usr/bin:/bin"
 }
 
-@test "only Linux Thria uses the app gh and installs the mise wrapper" {
-    local os host
+@test "installed broker integration selects routing independently of hostname or service health" {
+    local os host installed
     for os in linux darwin; do
         for host in thria other; do
-            render_canary home/dot_local/bin/executable_gh.tmpl "$os" "$host" >"$TEST_TMPDIR/gh"
-            render_canary home/.chezmoiignore "$os" "$host" >"$TEST_TMPDIR/ignore"
-            bash -n "$TEST_TMPDIR/gh"
-            if [ "$os/$host" = linux/thria ]; then
-                grep -q '^exec /usr/local/bin/gh-app-gh ' "$TEST_TMPDIR/gh"
-                ! grep -q '^.local/bin/mise$' "$TEST_TMPDIR/ignore"
-            else
-                ! grep -q gh-app "$TEST_TMPDIR/gh"
-                grep -q '^.local/bin/mise$' "$TEST_TMPDIR/ignore"
-            fi
+            for installed in 0 1; do
+                render_canary home/dot_local/bin/executable_gh.tmpl "$os" "$host" "$installed" >"$TEST_TMPDIR/gh"
+                render_canary home/.chezmoiignore "$os" "$host" "$installed" >"$TEST_TMPDIR/ignore"
+                bash -n "$TEST_TMPDIR/gh"
+                if [ "$installed" = 1 ]; then
+                    grep -q '^exec /usr/local/bin/gh-app-gh ' "$TEST_TMPDIR/gh"
+                    ! grep -q '^.local/bin/mise$' "$TEST_TMPDIR/ignore"
+                else
+                    ! grep -q gh-app "$TEST_TMPDIR/gh"
+                    grep -q '^.local/bin/mise$' "$TEST_TMPDIR/ignore"
+                fi
+            done
         done
     done
 }
@@ -96,7 +100,7 @@ SH
     [ "$(cat "$CALLS")" = app-run ]
 }
 
-@test "Thria installer uses absolute app routes and ignores inherited anonymous or token bypass" {
+@test "broker installer uses absolute app routes and ignores inherited anonymous or token bypass" {
     prepare_commands
     render_canary home/.chezmoiscripts/run_onchange_after_00-install-mise-tools.sh.tmpl |
         sed -e "s|/usr/local/bin/gh-app-run|$TEST_TMPDIR/root/gh-app-run|g" \
@@ -115,7 +119,7 @@ SH
     grep -q '^mise which bun$' "$CALLS"
 }
 
-@test "fresh and interactive Thria shell paths prioritize local wrappers and remove only gh alias" {
+@test "fresh and interactive broker-enabled shell paths prioritize local wrappers and remove only gh alias" {
     command -v zsh >/dev/null || skip 'zsh is not installed'
     mkdir -p "$TEST_HOME_DIR/.local/bin" "$TEST_HOME_DIR/.local/share/mise/shims" "$TEST_HOME_DIR/.config/op"
     render_canary home/dot_zshenv.tmpl >"$TEST_HOME_DIR/.zshenv"
@@ -153,10 +157,6 @@ SH
         [ ! -e "$ASKPASS_MARKER" ]
         [ ! -e "$LEGACY_MARKER" ]
     done
-    # Inspect the effective helper ordering without invoking a real helper.
-    run git config --get-all credential.https://github.com.helper
-    [ "$status" -eq 0 ]
-    [ "$output" = $'\n'"$TEST_TMPDIR/helper" ]
     local source
     for source in git@github.com: ssh://git@github.com/ ssh://git@github.com:22/; do
         run git ls-remote --get-url "${source}owner/repo.git"
@@ -166,4 +166,51 @@ SH
     run git ls-remote --get-url git@example.invalid:owner/repo.git
     [ "$status" -eq 0 ]
     [ "$output" = git@example.invalid:owner/repo.git ]
+}
+
+@test "installed marker with a missing Git helper must not reach askpass" {
+    render_canary home/dot_config/git/config.tmpl >"$TEST_TMPDIR/gitconfig"
+    export GIT_CONFIG_GLOBAL="$TEST_TMPDIR/gitconfig" GIT_CONFIG_NOSYSTEM=1
+    export HOME="$TEST_HOME_DIR" GIT_ASKPASS="$TEST_TMPDIR/askpass"
+    export ASKPASS_MARKER="$TEST_TMPDIR/asked" LEGACY_MARKER="$TEST_TMPDIR/legacy"
+    printf '#!/bin/sh\ntouch "$ASKPASS_MARKER"\nexit 1\n' >"$GIT_ASKPASS"
+    chmod +x "$GIT_ASKPASS"
+    sed -i "s|/usr/local/bin/git-credential-gh-app|$TEST_TMPDIR/missing-helper|g" "$GIT_CONFIG_GLOBAL"
+    run bash -c 'printf "protocol=https\nhost=github.com\n\n" | git -c credential.helper="!touch \"\$LEGACY_MARKER\"" credential fill'
+    [ "$status" -ne 0 ]
+    [ ! -e "$ASKPASS_MARKER" ]
+    [ ! -e "$LEGACY_MARKER" ]
+    run bash -c 'printf "protocol=https\nhost=github.com\nusername=fixture\npassword=fixture\n\n" | git credential approve'
+    [ "$status" -eq 0 ]
+    run bash -c 'printf "protocol=https\nhost=github.com\n\n" | git credential reject'
+    [ "$status" -eq 0 ]
+}
+
+@test "installed broker helper returns credentials without legacy helpers or askpass" {
+    render_canary home/dot_config/git/config.tmpl >"$TEST_TMPDIR/gitconfig"
+    export GIT_CONFIG_GLOBAL="$TEST_TMPDIR/gitconfig" GIT_CONFIG_NOSYSTEM=1
+    export HOME="$TEST_HOME_DIR" GIT_ASKPASS="$TEST_TMPDIR/askpass"
+    export ASKPASS_MARKER="$TEST_TMPDIR/asked" LEGACY_MARKER="$TEST_TMPDIR/legacy"
+    printf '#!/bin/sh\ntouch "$ASKPASS_MARKER"\nexit 1\n' >"$GIT_ASKPASS"
+    printf '#!/bin/sh\n[ "$1" != get ] || printf "username=fixture\\npassword=fixture\\n\\n"\n' >"$TEST_TMPDIR/helper"
+    chmod +x "$GIT_ASKPASS" "$TEST_TMPDIR/helper"
+    sed -i "s|/usr/local/bin/git-credential-gh-app|$TEST_TMPDIR/helper|g" "$GIT_CONFIG_GLOBAL"
+    run bash -c 'printf "protocol=https\nhost=github.com\n\n" | git -c credential.helper="!touch \"\$LEGACY_MARKER\"" credential fill'
+    [ "$status" -eq 0 ]
+    [[ "$output" == *username=fixture* ]]
+    [[ "$output" == *password=fixture* ]]
+    [ ! -e "$ASKPASS_MARKER" ]
+    [ ! -e "$LEGACY_MARKER" ]
+}
+
+@test "installed marker keeps missing gh and mise clients from falling back" {
+    prepare_commands
+    rm "$TEST_TMPDIR/root/gh-app-gh"
+    run -127 gh api user
+    [ "$status" -eq 127 ]
+    [ ! -e "$CALLS" ]
+    rm "$TEST_TMPDIR/root/gh-app-run"
+    run -127 mise install
+    [ "$status" -eq 127 ]
+    [ ! -e "$CALLS" ]
 }

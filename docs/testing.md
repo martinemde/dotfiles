@@ -4,7 +4,7 @@ Run the Bats suite without applying personal dotfiles. CI installs only the
 project tools and distribution test dependencies; it must not provision the
 runner's home or install global Node packages just to obtain Bats.
 
-On Thria, run with `PATH="/usr/bin:$PATH" bats test/`
+On a Linux host with broker wrappers, run with `PATH="/usr/bin:$PATH" bats test/`
 to use the distribution Python dependencies and the native mise multicall binary.
 The broker wrapper cannot stand in for a native shim in the offline mise fixture.
 

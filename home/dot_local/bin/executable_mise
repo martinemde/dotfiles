@@ -1,5 +1,5 @@
 #!/bin/bash
-# Thria uses broker-issued credentials for all default mise invocations.
+# The GitHub App integration uses broker-issued credentials for all default mise invocations.
 set -o errexit -o nounset
 # mise chooses its shim target from PATH, not from the invoked executable.
 export PATH="/usr/bin:$PATH"

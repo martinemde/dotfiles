@@ -2,19 +2,20 @@
 name = "{{ .git.name }}"
 email = "{{ .git.email }}"
 
-{{ if and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria") -}}
+{{ if includeTemplate "github-app-installed" . -}}
+{{- $helper := `!f() { if [ -x /usr/local/bin/git-credential-gh-app ]; then /usr/local/bin/git-credential-gh-app "$@"; elif [ "$1" = get ]; then printf 'quit=true\n\n'; fi; }; f` -}}
 [credential "https://github.com"]
 helper =
-helper = /usr/local/bin/git-credential-gh-app
+helper = {{ $helper | quote }}
 [credential "https://github.com:443"]
 helper =
-helper = /usr/local/bin/git-credential-gh-app
+helper = {{ $helper | quote }}
 [credential "https://gist.github.com"]
 helper =
-helper = /usr/local/bin/git-credential-gh-app
+helper = {{ $helper | quote }}
 [credential "https://gist.github.com:443"]
 helper =
-helper = /usr/local/bin/git-credential-gh-app
+helper = {{ $helper | quote }}
 
 [url "https://github.com/"]
 insteadOf = git@github.com:

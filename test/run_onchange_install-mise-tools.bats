@@ -3,11 +3,12 @@
 load test_helper
 
 @test "renders correctly and produces valid shell syntax" {
+    prepare_gh_app_source 0
     # Test our ACTUAL script renders to valid shell syntax
     local script_file="home/.chezmoiscripts/run_onchange_after_00-install-mise-tools.sh.tmpl"
 
     # Render our actual script (no template variables needed for this script)
-    run chezmoi --config /dev/null --config-format toml --source "$BATS_TEST_DIRNAME/../home" execute-template --file "$script_file"
+    run chezmoi --config /dev/null --config-format toml --source "$TEST_SOURCE_DIR" execute-template --file "$script_file"
     [ "$status" -eq 0 ]
 
     assert_script_structure "$output"
@@ -15,9 +16,9 @@ load test_helper
 
 
 @test "installs global tools outside the checkout using configured release-age policy" {
+    prepare_gh_app_source 0
     local script="$TEST_TMPDIR/install-mise.sh"
-    chezmoi --config /dev/null --config-format toml --source "$BATS_TEST_DIRNAME/../home" \
-        --override-data '{"chezmoi":{"os":"linux","hostname":"other"}}' \
+    chezmoi --config /dev/null --config-format toml --source "$TEST_SOURCE_DIR" \
         execute-template --file home/.chezmoiscripts/run_onchange_after_00-install-mise-tools.sh.tmpl >"$script"
     mkdir -p "$TEST_TMPDIR/bin"
     cat >"$TEST_TMPDIR/bin/mise" <<'EOF'

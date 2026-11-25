@@ -4,7 +4,7 @@
 .chezmoiscripts/darwin_*
 Library/**
 {{ end }}
-{{ if not (and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria")) }}
+{{ if not (includeTemplate "github-app-installed" .) }}
 .local/bin/mise
 {{ end }}
 {{ if ne .chezmoi.os "linux" }}

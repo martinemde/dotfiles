@@ -14,8 +14,8 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # through mise in subprocesses and non-interactive shells. Gusto's scope doctor
 # (bundler-shims check) requires this; plain hook mode doesn't expose the shims dir.
 eval "$(mise activate zsh --shims)"
-{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria") }}
-# The op plugin may alias gh; only the broker owns GitHub auth on Thria.
+{{- if includeTemplate "github-app-installed" . }}
+# The op plugin may alias gh; only the broker owns GitHub auth with the GitHub App integration.
 unalias gh 2>/dev/null || true
 [[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
 {{- end }}

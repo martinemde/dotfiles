@@ -17,7 +17,7 @@ if [ -z "${GIT_DIR:-}" ] && command -v jj >/dev/null 2>&1; then
   fi
 fi
 
-{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.hostname "thria") }}
+{{- if includeTemplate "github-app-installed" . }}
 exec /usr/local/bin/gh-app-gh "$@"
 {{- else if eq .chezmoi.os "darwin" }}
 {{-   if eq .chezmoi.arch "arm64" }}
