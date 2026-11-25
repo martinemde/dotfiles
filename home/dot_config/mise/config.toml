@@ -10,7 +10,7 @@ min_version = "2026.10.25"
 "aqua:bootandy/dust" = "1.2.7"
 "aqua:BurntSushi/ripgrep" = "15.2.0"
 "aqua:charmbracelet/glow" = "3.0.0"
-"aqua:cli/cli" = "2.104.0"
+"aqua:cli/cli" = "2.105.0"
 "aqua:neovim/neovim" = "0.12.6"
 "aqua:eza-community/eza" = { version = "0.23.5", os = ["linux"] }
 "aqua:Kitware/CMake" = "4.5.0"
