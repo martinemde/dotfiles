@@ -1,9 +1,8 @@
-# GitHub App canary
+# Thria GitHub App cutover
 
-Installed broker integrations route ordinary gh/Git/jj/mise through the local user-token
-broker. This keeps martinemde attribution without making the broad personal OAuth grant
-the default. Only
-hosts with the installed `/usr/local/lib/gh-app-broker` marker use this routing;
+Thria now uses the local GitHub App user-token broker for ordinary gh/Git/jj/mise.
+This keeps martinemde attribution without relying on the broad GitHub CLI OAuth grant.
+Only hosts with the installed `/usr/local/lib/gh-app-broker` marker use this routing;
 hostnames do not select authentication. Hosts without that marker keep their existing
 routing. Selection happens when Chezmoi renders: install the broker, then apply the
 managed targets. Socket presence and service health never select a fallback.
@@ -28,13 +27,20 @@ HTTPS is intentionally unsupported/fail-closed. Only the three exact GitHub SSH 
 rewrite to HTTPS; other SSH hosts are unchanged. Explicit per-repo overrides/native binary
 paths are cooperative-routing exceptions, not a security sandbox.
 
-This is an authorized canary, not full acceptance. Genuine token-expiry and real
-Git/jj evidence are recorded in Skift; installer fixtures are separate from a real
-managed installer run.
-OAuth credentials remain untouched only for explicit rollback; no upstream revocation.
-Fresh login/group membership is required; restarting zsh inside an old terminal/agent
-process does not acquire gh-app-clients. Restart long-running processes from a fresh login.
+The rollout began as a Thria-only canary (#10). Live evidence includes genuine token
+expiry and unattended renewal, private Git/jj operations, and a checksum-verified
+private mise download (#7). The dotfiles integration was published and applied only
+on Thria (#12), with scripts excluded. Installer fixtures do not establish that the
+managed installer ran live.
 
-Evidence/rollback: local broker checkout docs/canary-cutover.md and Skift gh-app-broker#10.
-Full acceptance/local logout and upstream-grant assessment remain #7/#8/#9 work. Source
-publication follows passing full-suite and formatting checks and explicit approval.
+On 2026-11-26, native `gh` logout removed the old local GitHub CLI OAuth credential
+on Thria (#8). After logout, a fresh login verified App-backed gh, Git, jj, and mise;
+all four failed closed without askpass while the broker was stopped and recovered
+after restart. No other hosts were changed. The upstream OAuth grant has not been
+revoked; identifying and revoking that exact grant is separate work (#9).
+
+For recovery, reauthorize the App. The nonsecret rollback snapshot only restores the
+old configuration files, not the removed login. Historical canary evidence and
+rollback details are in the broker checkout's `docs/canary-cutover.md` and Skift #10.
+A fresh login is required to pick up `gh-app-clients` membership: restart long-running
+terminal or agent processes from that login rather than just restarting zsh.
