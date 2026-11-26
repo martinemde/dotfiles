@@ -8,6 +8,8 @@ load test_helper
     # Test that the template renders correctly on different platforms
     # Copy the .chezmoiignore to test directory
     cp "$ignore_file" "$TEST_SOURCE_DIR/.chezmoiignore"
+    # .chezmoiignore includes the github-app-installed template
+    prepare_gh_app_source
 
     # Test on darwin - should NOT exclude the files
     cat >"$TEST_TMPDIR/darwin-config.toml" <<EOF

@@ -24,7 +24,14 @@ printf '%s\n' 'function initialized_{tool}() {{ print -r -- {tool}-ready; }}'
 env = {"PATH": str(bin_dir) + os.pathsep + os.environ["PATH"], "HOME": str(home),
        "XDG_CACHE_HOME": str(home / "cache"), "XDG_CONFIG_HOME": str(home / "config"),
        "TERM": "xterm-256color"}
-rendered = subprocess.run([chezmoi, "--config", "/dev/null", "--config-format", "toml", "--source", str(home), "execute-template",
+# The template includes github-app-installed; render it against an isolated source
+# whose broker path does not exist, so the host's /usr/local/lib/gh-app-broker is ignored.
+source = home / "chezmoi-source"
+(source / ".chezmoitemplates").mkdir(parents=True)
+(source / ".chezmoitemplates/github-app-installed").write_text(
+    (ROOT / "home/.chezmoitemplates/github-app-installed").read_text()
+    .replace("/usr/local/lib/gh-app-broker", str(home / "broker-install")))
+rendered = subprocess.run([chezmoi, "--config", "/dev/null", "--config-format", "toml", "--source", str(source), "execute-template",
                            "--override-data", '{"chezmoi":{"os":"linux"}}'],
                           input=(ROOT / "home/dot_config/zsh/tools.zsh.tmpl").read_text(),
                           text=True, capture_output=True, check=True, env=env).stdout
