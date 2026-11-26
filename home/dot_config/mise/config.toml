@@ -13,7 +13,7 @@ min_version = "2026.10.25"
 "aqua:cli/cli" = "2.105.0"
 "aqua:neovim/neovim" = "0.12.6"
 "aqua:eza-community/eza" = { version = "0.23.5", os = ["linux"] }
-"aqua:Kitware/CMake" = "4.5.0"
+"aqua:Kitware/CMake" = "4.5.1"
 "aqua:jgm/pandoc" = "3.14"
 "aqua:dandavison/delta" = "0.21.1"
 "aqua:eth-p/bat-extras" = "2024.08.24"
