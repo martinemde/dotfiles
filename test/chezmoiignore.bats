@@ -17,7 +17,7 @@ load test_helper
     chezmoi = { os = "darwin", homeDir = "$TEST_HOME_DIR", sourceDir = "$TEST_SOURCE_DIR" }
 EOF
 
-    run chezmoi execute-template --config "$TEST_TMPDIR/darwin-config.toml" --file "$TEST_SOURCE_DIR/.chezmoiignore"
+    run chezmoi execute-template --source "$TEST_SOURCE_DIR" --config "$TEST_TMPDIR/darwin-config.toml" --file "$TEST_SOURCE_DIR/.chezmoiignore"
     [ "$status" -eq 0 ]
     [[ "$output" != *"Library/**"* ]]
 
@@ -27,7 +27,7 @@ EOF
     chezmoi = { os = "linux", homeDir = "$TEST_HOME_DIR", sourceDir = "$TEST_SOURCE_DIR" }
 EOF
 
-    run chezmoi execute-template --config "$TEST_TMPDIR/linux-config.toml" --file "$TEST_SOURCE_DIR/.chezmoiignore"
+    run chezmoi execute-template --source "$TEST_SOURCE_DIR" --config "$TEST_TMPDIR/linux-config.toml" --file "$TEST_SOURCE_DIR/.chezmoiignore"
     [ "$status" -eq 0 ]
     [[ "$output" == *"Library/**"* ]]
 }
