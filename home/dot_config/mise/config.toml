@@ -15,7 +15,7 @@ min_version = "2026.10.25"
 "aqua:eza-community/eza" = { version = "0.23.5", os = ["linux"] }
 "aqua:Kitware/CMake" = "4.5.1"
 "aqua:jgm/pandoc" = "3.14"
-"aqua:dandavison/delta" = "0.21.1"
+"aqua:dandavison/delta" = "0.21.2"
 "aqua:eth-p/bat-extras" = "2024.08.24"
 "aqua:evilmartians/lefthook" = "2.2.2"
 "aqua:FiloSottile/mkcert" = "1.4.4"
@@ -34,7 +34,7 @@ min_version = "2026.10.25"
 "aqua:sharkdp/fd" = "10.5.2"
 "aqua:sigstore/cosign" = "3.1.4"
 "aqua:starship/starship" = "1.27.0"
-"aqua:superfly/flyctl" = "0.5.13"
+"aqua:superfly/flyctl" = "0.5.14"
 # Agent/env detection, used by zsh/aliases.zsh to skip agent-hostile aliases.
 # Pinned: the alias guard depends on `envsense check agent` exit-code semantics.
 "aqua:technicalpickles/envsense" = "0.6.0"
